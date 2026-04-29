@@ -58,9 +58,9 @@ void main() {
     test('dayEnd', () {
       final dayEnd = now.dayEnd;
       expect(dayEnd, isA<DateTime>());
-      expect(dayEnd.year, now.year);
-      expect(dayEnd.month, now.month);
-      expect(dayEnd.day, now.day + 1);
+      expect(dayEnd.year, now.tomorrow.year);
+      expect(dayEnd.month, now.tomorrow.month);
+      expect(dayEnd.day, now.tomorrow.day);
       expect(dayEnd.hour, 0);
       expect(dayEnd.minute, 0);
     });
