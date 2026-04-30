@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:calendar/src/data/event.dart';
 import 'package:calendar/src/data/pattern.dart';
 import 'package:calendar/src/utils/datetime.dart';
@@ -8,10 +8,10 @@ import 'package:calendar/src/utils/datetime.dart';
 
 void main() {
 
+  final id = "eventId";
   final start = DateTime.now();
   final stop = start.add(Duration(hours: 1));
   final color = Color(0x00000000);
-  final eventId = "eventId";
   final subject = "event";
   final location = "location";
   final parentId = "parentId";
@@ -103,7 +103,7 @@ void main() {
 
     test('Event constructor ', () {
       final event = Event(
-        id: eventId,
+        id: id,
         subject: subject,
         start: start,
         stop: stop,
@@ -112,7 +112,7 @@ void main() {
         parentId: parentId,
         pattern: pattern,
       );
-      expect(event.id, eventId);
+      expect(event.id, id);
       expect(event.subject, subject);
       expect(event.start, start);
       expect(event.stop, stop);
@@ -135,8 +135,8 @@ void main() {
     });
 
     test('Event make with id', () {
-      final event = Event.make(id: eventId, data: data);
-      expect(event.id, eventId);
+      final event = Event.make(id: id, data: data);
+      expect(event.id, id);
       expect(event.subject, subject);
       expect(event.start, start);
       expect(event.stop, stop);
@@ -180,13 +180,13 @@ void main() {
 
     test('hashCode', () {
       final event = Event.make(data: data);
-      final eventWithId = Event.make(id: eventId, data: data);
+      final eventWithId = Event.make(id: id, data: data);
       expect(event.hashCode, equals(eventWithId.hashCode));
     });
 
     test('operator ==', () {
       final event = Event.make(data: data);
-      final eventWithId = Event.make(id: eventId, data: data);
+      final eventWithId = Event.make(id: id, data: data);
       expect(event, equals(eventWithId));
     });
 
@@ -220,7 +220,7 @@ void main() {
   });
 
 
-  group('Event Type', () {
+  group('Event Types', () {
 
     test('Event type', () {
       expect(occurrence.type, EventType.occurrence);
@@ -290,7 +290,7 @@ void main() {
   group('Debug Properties', () {
     test('debugFillProperties', () {
       final event = Event(
-        id: eventId,
+        id: id,
         subject: subject,
         start: start,
         stop: stop,
@@ -304,4 +304,5 @@ void main() {
       expect(builder.properties, isNotEmpty);
     });
   });
+
 }
