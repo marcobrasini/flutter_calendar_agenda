@@ -9,6 +9,17 @@ class Fixture with Diagnosticable {
     DateTime? stop,
   }) : stop = stop ?? start.dayEnd;
 
+  Map<String, dynamic> get() => {
+    "start": start,
+    "stop": stop,
+  };
+
+  Fixture set(Map<String, dynamic> data) {
+    if (data.containsKey("start")) start = data["start"] as DateTime;
+    if (data.containsKey("stop")) stop = data["stop"] as DateTime;
+    return this;
+  }
+
   DateTime start;
   DateTime stop;
   Duration get duration => stop.difference(start);
@@ -17,9 +28,7 @@ class Fixture with Diagnosticable {
 
 
   @override
-  int get hashCode {
-    return Object.hash(start, stop);
-  }
+  int get hashCode => Object.hash(start, stop);
 
   @override
   bool operator ==(Object other) {

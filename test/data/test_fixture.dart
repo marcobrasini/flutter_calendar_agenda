@@ -36,6 +36,69 @@ void main() {
       expect(fixAllDay.stop, start.dayEnd);
     });
 
+    test('get', () {
+      dynamic data;
+      data = fixTillDay.get();
+      expect(data, isA<Map<String, dynamic>>());
+      expect(data["start"], start);
+      expect(data["stop"], start.dayEnd);
+      data = fixAllDay.get();
+      expect(data, isA<Map<String, dynamic>>());
+      expect(data["start"], start.dayBeg);
+      expect(data["stop"], start.dayEnd);
+      data = fixMinute.get();
+      expect(data, isA<Map<String, dynamic>>());
+      expect(data["start"], start);
+      expect(data["stop"], afterMinute);
+      data = fixHour.get();
+      expect(data, isA<Map<String, dynamic>>());
+      expect(data["start"], start);
+      expect(data["stop"], afterHour);
+      data = fixDay.get();
+      expect(data, isA<Map<String, dynamic>>());
+      expect(data["start"], start);
+      expect(data["stop"], afterDay);
+      data = fixWeek.get();
+      expect(data, isA<Map<String, dynamic>>());
+      expect(data["start"], start);
+      expect(data["stop"], afterWeek);
+    });
+
+    test('set', () {
+      final fixture = Fixture(start: DateTime(1));
+      dynamic result;
+      //
+      result = fixture.set(fixTillDay.get());
+      expect(result, isA<Fixture>());
+      expect(result.start, start);
+      expect(result.stop, start.dayEnd);
+      //
+      result = fixture.set(fixAllDay.get());
+      expect(result, isA<Fixture>());
+      expect(result.start, start.dayBeg);
+      expect(result.stop, start.dayEnd);
+      //
+      result = fixture.set(fixMinute.get());
+      expect(result, isA<Fixture>());
+      expect(result.start, start);
+      expect(result.stop, afterMinute);
+      //
+      result = fixture.set(fixHour.get());
+      expect(result, isA<Fixture>());
+      expect(result.start, start);
+      expect(result.stop, afterHour);
+      //
+      result = fixture.set(fixDay.get());
+      expect(result, isA<Fixture>());
+      expect(result.start, start);
+      expect(result.stop, afterDay);
+      //
+      result = fixture.set(fixWeek.get());
+      expect(result, isA<Fixture>());
+      expect(result.start, start);
+      expect(result.stop, afterWeek);
+    });
+
     test('duration', () {
       expect(fixMinute.duration, Duration(minutes: 1));
       expect(fixHour.duration, Duration(hours: 1));
