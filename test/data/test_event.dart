@@ -10,7 +10,7 @@ void main() {
 
   final start = DateTime.now();
   final stop = start.add(Duration(hours: 1));
-  final color = Colors.blue;
+  final color = Color(0x00000000);
   final eventId = "eventId";
   final subject = "event";
   final location = "location";
@@ -146,7 +146,51 @@ void main() {
       expect(event.pattern, pattern);
     });
 
-    test('extension from Fixture (isAllDay)', () {
+    test('Event get', () {
+      final event = Event.make(data: data);
+      final result = event.get();
+      expect(result, isA<Map<String, dynamic>>());
+      expect(result["id"], event.id);
+      expect(result["subject"], event.subject);
+      expect(result["start"], event.start);
+      expect(result["stop"], event.stop);
+      expect(result["color"], event.color);
+      expect(result["location"], event.location);
+      expect(result["parentId"], event.parentId);
+      expect(result["pattern"], event.pattern);
+    });
+
+    test('Event set', () {
+      final event = Event(
+        subject: "",
+        start: DateTime(1),
+        color: Color(0xFFFFFFFF),
+      );
+      final result = event.set(data);
+      expect(result, isA<Event>());
+      expect(result.id, isNull);
+      expect(result.subject, data["subject"]);
+      expect(result.start, data["start"]);
+      expect(result.stop, data["stop"]);
+      expect(result.color, data["color"]);
+      expect(result.location, data["location"]);
+      expect(result.parentId, isNull);
+      expect(result.pattern, isNull);
+    });
+
+    test('hashCode', () {
+      final event = Event.make(data: data);
+      final eventWithId = Event.make(id: eventId, data: data);
+      expect(event.hashCode, equals(eventWithId.hashCode));
+    });
+
+    test('operator ==', () {
+      final event = Event.make(data: data);
+      final eventWithId = Event.make(id: eventId, data: data);
+      expect(event, equals(eventWithId));
+    });
+
+    test('extend Fixture (isAllDay)', () {
       final allDay = Event(
         subject: subject,
         start: start.dayBeg,
@@ -159,7 +203,7 @@ void main() {
       expect(allDay.isSpanned, false);
     });
 
-    test('extension from Fixture (isSpanned)', () {
+    test('extend Fixture (isSpanned)', () {
       final days = 3;
       final spanDay = Event(
         subject: subject,
