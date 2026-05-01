@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 class Time extends DateTime {
   Time(int hour, int minute) : super(1, 1, 1, hour, minute);
 
-  static Time now() => DateTime.now().toTime;
+  static Time now() => DateTime.now().time;
 
   @override
   String toString() {
@@ -20,7 +20,7 @@ class Time extends DateTime {
     return Time(hour, minute);
   }
 
-  factory Time.fromISOFormat(String dateString) => DateTime.parse(dateString).toTime;
+  factory Time.fromISOFormat(String dateString) => DateTime.parse(dateString).time;
 
   @override
   int get hashCode => Object.hash(hour, minute);
@@ -32,9 +32,9 @@ class Time extends DateTime {
     return hour == other.hour && minute == other.minute;
   }
 
-  bool operator <(DateTime dateTime) => isBefore(dateTime.toTime);
+  bool operator <(DateTime dateTime) => isBefore(dateTime.time);
 
-  bool operator >(DateTime dateTime) => isAfter(dateTime.toTime);
+  bool operator >(DateTime dateTime) => isAfter(dateTime.time);
 
   bool operator <=(DateTime dateTime) => this < dateTime || this == dateTime;
 
@@ -45,7 +45,7 @@ class Time extends DateTime {
   Time operator -(int minutes) => Time(hour, minute - minutes);
 
   int operator %(DateTime dateTime) => toUtc().difference(
-      dateTime.toTime.toUtc()
+      dateTime.time.toUtc()
   ).inMinutes;
 
   Time round(int step) {
@@ -60,7 +60,7 @@ class Time extends DateTime {
 class Date extends DateTime {
   Date(super.year, super.month, super.day);
 
-  static Date now() => DateTime.now().toDate;
+  static Date now() => DateTime.now().date;
 
   @override
   String toString() {
@@ -71,14 +71,14 @@ class Date extends DateTime {
   }
 
   factory Date.fromString(String dateString) {
-    List<String> date = dateString.split("-");
-    final int year = int.parse(date[0]);
-    final int month = int.parse(date[1]);
-    final int day = int.parse(date[2]);
+    List<String> list = dateString.split("-");
+    final int year = int.parse(list[0]);
+    final int month = int.parse(list[1]);
+    final int day = int.parse(list[2]);
     return Date(year, month, day);
   }
 
-  factory Date.fromISOFormat(String dateString) => DateTime.parse(dateString).toDate;
+  factory Date.fromISOFormat(String dateString) => DateTime.parse(dateString).date;
 
   @override
   int get hashCode => Object.hash(year, month, day);
@@ -90,9 +90,9 @@ class Date extends DateTime {
     return year == other.year && month == other.month && day == other.day;
   }
 
-  bool operator <(DateTime dateTime) => isBefore(dateTime.toDate);
+  bool operator <(DateTime dateTime) => isBefore(dateTime.date);
 
-  bool operator >(DateTime dateTime) => isAfter(dateTime.toDate);
+  bool operator >(DateTime dateTime) => isAfter(dateTime.date);
 
   bool operator <=(DateTime dateTime) => this < dateTime || this == dateTime;
 
@@ -103,7 +103,7 @@ class Date extends DateTime {
   Date operator -(int days) => Date(year, month, day - days);
 
   int operator %(DateTime dateTime) => toUtc().difference(
-      dateTime.toDate.toUtc()
+      dateTime.date.toUtc()
   ).inDays;
 
   DateTime get end => DateTime(year, month, day + 1);
@@ -114,7 +114,7 @@ class Week extends DateTime {
   Week._(super.year, super.month, super.day, this.week);
 
   factory Week(int year, int week) {
-    final date = DateTime(year).weekBeg.toDate + week*7;
+    final date = DateTime(year).weekStart.date + week*7;
     return Week._(date.year, date.month, date.day, week % 53);
   }
 
@@ -139,22 +139,28 @@ class Week extends DateTime {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! DateTime) return false;
+    other = other.toWeek;
     return year == other.year && month == other.month && day == other.day;
   }
 
-  bool operator <(DateTime dateTime) => sun < dateTime.toDate;
+  bool operator <(DateTime dateTime) => sun < dateTime.date;
 
-  bool operator >(DateTime dateTime) => mon > dateTime.toDate;
+  bool operator >(DateTime dateTime) => mon > dateTime.date;
 
-  bool operator <=(DateTime dateTime) => sun <= dateTime.toDate;
+  bool operator <=(DateTime dateTime) => mon <= dateTime.date;
 
-  bool operator >=(DateTime dateTime) => mon >= dateTime.toDate;
+  bool operator >=(DateTime dateTime) => sun >= dateTime.date;
 
   Week operator +(int weeks) => Week(year, week + weeks);
 
   Week operator -(int weeks) => Week(year, week - weeks);
-
-  bool contains(DateTime datetime) => mon <= datetime && sun >= datetime;
+  
+  DateTime newMonth(int month) => this;
+  DateTime endMonth(int month) => this;
+  
+  DateTime newYear() => DateTime(year).weekStart;
+  DateTime endYear() => DateTime(year+1, 1, 0).weekEnd.add(Duration(days:7));
+  
 }
 
 
@@ -167,7 +173,14 @@ class Month extends DateTime {
   }
 
   @override
-  String toString([String fmt = "yyyy MMMM"]) => format(fmt);
+  String toString([String fmt = "yyyy-MM"]) => format(fmt);
+
+  factory Month.fromString(String dateString) {
+    List<String> list = dateString.split("-");
+    final int year = int.parse(list[0]);
+    final int month = int.parse(list[1]);
+    return Month(year, month);
+  }
 
   @override
   int get hashCode => Object.hash(year, month);
@@ -179,31 +192,73 @@ class Month extends DateTime {
     return year == other.year && month == other.month;
   }
 
-  bool operator <(DateTime dateTime) => isBefore(dateTime.toDate);
+  bool operator <(DateTime dateTime) => isBefore(dateTime.toMonth);
 
-  bool operator >(DateTime dateTime) => isAfter(dateTime.toDate);
+  bool operator >(DateTime dateTime) => isAfter(dateTime.toMonth);
+
+  bool operator <=(DateTime dateTime) => this == dateTime || this < dateTime;
+
+  bool operator >=(DateTime dateTime) => this == dateTime || this > dateTime;
 
   Month operator +(int months) => Month(year, month + months);
 
   Month operator -(int months) => Month(year, month - months);
 
-  int operator %(DateTime dateTime) => toUtc().difference(
-      dateTime.toMonth.toUtc()
-  ).inDays;
+  int operator %(DateTime dateTime) => (year - dateTime.year)*12 + (month - dateTime.month);
 
-  int get days => DateTime(year, month + 1, 0).day;
+  int get days => monthLast.day;
+}
+
+
+class Year extends DateTime {
+  Year(super.year);
+
+  static Year now() {
+    final now = DateTime.now();
+    return Year(now.year);
+  }
+
+  @override
+  String toString([String fmt = "yyyy"]) => format(fmt);
+
+  @override
+  int get hashCode => year;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! DateTime) return false;
+    return year == other.year;
+  }
+
+  bool operator <(DateTime dateTime) => isBefore(dateTime.toYear);
+
+  bool operator >(DateTime dateTime) => isAfter(dateTime.toYear);
+
+  bool operator <=(DateTime dateTime) => this == dateTime || this < dateTime;
+
+  bool operator >=(DateTime dateTime) => this == dateTime || this > dateTime;
+
+  Year operator +(int years) => Year(year + years);
+
+  Year operator -(int years) => Year(year - years);
+
+  int operator %(DateTime dateTime) => year - dateTime.year;
+
+  int get days => isLeapYear ? 366 : 365;
 }
 
 
 extension DateAndTime on DateTime {
 
-  Time get toTime => Time(hour, minute);
-  Date get toDate => Date(year, month, day);
+  Time get time => Time(hour, minute);
+  Date get date => Date(year, month, day);
   Week get toWeek {
-    final days = weekBeg.toDate % DateTime(year);
+    final days = weekStart.date % DateTime(year);
     return Week(year, (days < 0) ? 0 : days ~/ 7 + 1);
   }
   Month get toMonth => Month(year, month);
+  Year get toYear => Year(year);
 
   String toISOCompact() => ''
       '${year.toString().padLeft(4, '0')}'
@@ -215,15 +270,17 @@ extension DateAndTime on DateTime {
 
   String format(String fmt) => DateFormat(fmt).format(this);
 
-  Date get tomorrow => toDate + 1;
-  Date get yesterday => toDate - 1;
+  Date get tomorrow => date + 1;
+  Date get yesterday => date - 1;
+  bool get isLeapYear => (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
 
-  DateTime get dayBeg => DateTime(year, month, day);
-  DateTime get dayEnd => DateTime(year, month, day + 1);
-  DateTime get weekBeg => DateTime(year, month, day - (weekday - 1));
+  DateTime get weekStart => DateTime(year, month, day - (weekday - 1));
+  DateTime get weekLast => DateTime(year, month, day + (7 - weekday));
   DateTime get weekEnd => DateTime(year, month, day + (8 - weekday));
-  DateTime get monthBeg => DateTime(year, month);
+  DateTime get monthStart => DateTime(year, month);
+  DateTime get monthLast => DateTime(year, month + 1, 0);
   DateTime get monthEnd => DateTime(year, month + 1);
-  DateTime get yearBeg => DateTime(year);
+  DateTime get yearStart => DateTime(year);
+  DateTime get yearLast => DateTime(year + 1, 1, 0);
   DateTime get yearEnd => DateTime(year + 1, 1);
 }

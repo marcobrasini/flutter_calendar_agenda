@@ -30,7 +30,7 @@ void main() {
     });
 
     test('Time from DateTime constructor', () {
-      final time = now.toTime;
+      final time = now.time;
       expect(time, isA<Time>());
       expect(time.year, 1);
       expect(time.month, 1);
