@@ -67,6 +67,7 @@ class PatternIterator implements Iterator<DateTime> {
   final Pattern pattern;
   DateTime current;
   int index;
+  int _i = 0;
 
   DateTime initDateTime() => pattern.since.round();
 
@@ -89,6 +90,7 @@ class PatternIterator implements Iterator<DateTime> {
   }
 }
 
+
 class PatternDaily extends PatternIterator {
   PatternDaily(super.pattern) {
     pattern.recurrences = [];
@@ -103,6 +105,7 @@ class PatternDaily extends PatternIterator {
   }
 }
 
+
 class PatternWeekly extends PatternIterator {
   PatternWeekly(super.pattern);
 
@@ -114,7 +117,7 @@ class PatternWeekly extends PatternIterator {
   DateTime nextDateTime() {
     final time = current.time;
     Week week = current.toWeek;
-    Date date;
+    Date date, item;
     if (index == 0) {
       if (pattern.recurrences.isEmpty) return initDateTime();
       if (isRecurrence(pattern.since)) return initDateTime();
@@ -123,16 +126,20 @@ class PatternWeekly extends PatternIterator {
         ? pattern.recurrences
         : [pattern.since.date];
     while (true) {
-      for (var item in recurrences) {
+      for (var i = 0; i < recurrences.length - _i; i++) {
+        item = recurrences[_i + i];
         date = week.date + (item.weekday - 1);
         if (date % current > 0) {
+          _i = (_i + i) % recurrences.length;
           return date & time;
         }
       }
+      _i = 0;
       week += pattern.step;
     }
   }
 }
+
 
 class PatternMonthly extends PatternIterator {
   PatternMonthly(super.pattern);
@@ -145,7 +152,7 @@ class PatternMonthly extends PatternIterator {
   DateTime nextDateTime() {
     final time = current.time;
     Month month = current.toMonth;
-    Date date;
+    Date date, item;
     if (index == 0) {
       if (pattern.recurrences.isEmpty) return initDateTime();
       if (isRecurrence(pattern.since)) return initDateTime();
@@ -154,19 +161,23 @@ class PatternMonthly extends PatternIterator {
         ? pattern.recurrences
         : [pattern.since.date];
     while (true) {
-      for (var item in recurrences) {
+      for (var i = 0; i < recurrences.length - _i; i++) {
+        item = recurrences[_i + i];
         date = Date(month.year, month.month, item.day);
         if (date % current > 0) {
           if (date.day == item.day) {
+            _i = (_i + i) % recurrences.length;
             return date & time;
           }
           index += 1;
         }
       }
+      _i = 0;
       month += pattern.step;
     }
   }
 }
+
 
 class PatternYearly extends PatternIterator {
   PatternYearly(super.pattern);
@@ -179,7 +190,7 @@ class PatternYearly extends PatternIterator {
   DateTime nextDateTime() {
     final time = current.time;
     Year year = current.toYear;
-    Date date;
+    Date date, item;
     if (index == 0) {
       if (pattern.recurrences.isEmpty) return initDateTime();
       if (isRecurrence(pattern.since)) return initDateTime();
@@ -188,15 +199,18 @@ class PatternYearly extends PatternIterator {
         ? pattern.recurrences
         : [pattern.since.date];
     while (true) {
-      for (var item in recurrences) {
+      for (var i = 0; i < recurrences.length - _i; i++) {
+        item = recurrences[_i + i];
         date = Date(year.year, item.month, item.day);
         if (date % current > 0) {
           if (date.month == item.month && date.day == item.day) {
+            _i = (_i + i) % recurrences.length;
             return date & time;
           }
           index += 1;
         }
       }
+      _i = 0;
       year += pattern.step;
     }
   }
