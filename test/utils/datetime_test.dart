@@ -51,6 +51,56 @@ void main() {
           "${isoString[1].replaceAll(':', '')}Z");
     });
 
+    test('isLeapYear', () {
+      expect(DateTime(1600).isLeapYear, isTrue);
+      expect(DateTime(1700).isLeapYear, isFalse);
+      expect(DateTime(1800).isLeapYear, isFalse);
+      expect(DateTime(1900).isLeapYear, isFalse);
+      expect(DateTime(2000).isLeapYear, isTrue);
+      expect(DateTime(2020).isLeapYear, isTrue);
+      expect(DateTime(2021).isLeapYear, isFalse);
+      expect(DateTime(2022).isLeapYear, isFalse);
+      expect(DateTime(2023).isLeapYear, isFalse);
+      expect(DateTime(2024).isLeapYear, isTrue);
+      expect(DateTime(2025).isLeapYear, isFalse);
+      expect(DateTime(2026).isLeapYear, isFalse);
+      expect(DateTime(2027).isLeapYear, isFalse);
+      expect(DateTime(2028).isLeapYear, isTrue);
+      expect(DateTime(2029).isLeapYear, isFalse);
+      expect(DateTime(2030).isLeapYear, isFalse);
+      expect(DateTime(2031).isLeapYear, isFalse);
+      expect(DateTime(2032).isLeapYear, isTrue);
+      expect(DateTime(2100).isLeapYear, isFalse);
+    });
+
+    test('dayNumber', () {
+      expect(DateTime(2000,  1,  1).dayNumber, 0);
+      expect(DateTime(2000,  1, 31).dayNumber, 31-1);
+      expect(DateTime(2000,  2,  1).dayNumber, 31+0);
+      expect(DateTime(2000,  2, 28).dayNumber, 31+28-1);
+      expect(DateTime(2000,  2, 29).dayNumber, 31+28);
+      expect(DateTime(2000,  3,  1).dayNumber, 31+28+1+0);
+      expect(DateTime(2000,  3, 31).dayNumber, 31+28+1+31-1);
+      expect(DateTime(2000,  4,  1).dayNumber, 31+28+1+31+0);
+      expect(DateTime(2000,  4, 30).dayNumber, 31+28+1+31+30-1);
+      expect(DateTime(2000,  5,  1).dayNumber, 31+28+1+31+30+0);
+      expect(DateTime(2000,  5, 31).dayNumber, 31+28+1+31+30+31-1);
+      expect(DateTime(2000,  6,  1).dayNumber, 31+28+1+31+30+31+0);
+      expect(DateTime(2000, 12, 31).dayNumber, 366-1);
+      expect(DateTime(2001,  1,  1).dayNumber, 0);
+      expect(DateTime(2001,  1, 31).dayNumber, 31-1);
+      expect(DateTime(2001,  2,  1).dayNumber, 31+0);
+      expect(DateTime(2001,  2, 28).dayNumber, 31+28-1);
+      expect(DateTime(2001,  3,  1).dayNumber, 31+28+0);
+      expect(DateTime(2001,  3, 31).dayNumber, 31+28+31-1);
+      expect(DateTime(2001,  4,  1).dayNumber, 31+28+31+0);
+      expect(DateTime(2001,  4, 30).dayNumber, 31+28+31+30-1);
+      expect(DateTime(2001,  5,  1).dayNumber, 31+28+31+30+0);
+      expect(DateTime(2001,  5, 31).dayNumber, 31+28+31+30+31-1);
+      expect(DateTime(2001,  6,  1).dayNumber, 31+28+31+30+31+0);
+      expect(DateTime(2001, 12, 31).dayNumber, 365-1);
+    });
+
     test('weekStart', () {
       final weekStart = now.weekStart;
       expect(weekStart, isA<DateTime>());

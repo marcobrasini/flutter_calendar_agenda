@@ -9,7 +9,7 @@ void main() {
   bool isFirst(DateTime datetime) => datetime.date == datetime.weekStart;
   bool isLast(DateTime datetime) => datetime.date == datetime.weekLast;
 
-  void isWeek(Week week) {
+  void expectIsWeek(Week week) {
     expect(current, isA<Week>());
     expect(week.mon.weekday, DateTime.monday);
     expect(week.tue.weekday, DateTime.tuesday);
@@ -21,9 +21,9 @@ void main() {
   }
 
   void expectWeek(Week week, DateTime datetime) {
-    final days = datetime.weekStart.date % DateTime(datetime.year);
-    final weeks = (days < 0) ? 0 : days ~/ 7 + 1;
-    expect(week.week, weeks);
+    final first = DateTime(datetime.year);
+    final days = datetime.weekStart.date % first + (7 - first.weekday);
+    expect(week.week, days ~/ 7);
   }
 
   void expectExact(Week week, int year) {
@@ -76,7 +76,7 @@ void main() {
       // leap year
       int year = 2024;
       Week week = Week(year, 0);
-      isWeek(week);
+      expectIsWeek(week);
       if (week <= Date(year, 1, 7)) {
         expect(DateTime(year, 1, 1).weekday, DateTime.monday);
         expect(DateTime(year, 1, 7).weekday, DateTime.sunday);
@@ -86,7 +86,7 @@ void main() {
       // normal year
       year = 2018;
       week = Week(year, 0);
-      isWeek(week);
+      expectIsWeek(week);
       if (week <= Date(year, 1, 7)) {
         expect(DateTime(year, 1, 1).weekday, DateTime.monday);
         expect(DateTime(year, 1, 7).weekday, DateTime.sunday);
@@ -99,7 +99,7 @@ void main() {
       // leap year
       int year = 2023;
       Week week = Week(year, 52);
-      isWeek(week);
+      expectIsWeek(week);
       if (week >= Date(year, 12, 25)) {
         expect(DateTime(year, 12, 25).weekday, DateTime.monday);
         expect(DateTime(year, 12, 31).weekday, DateTime.sunday);
@@ -109,7 +109,7 @@ void main() {
       // normal year
       year = 2017;
       week = Week(year, 52);
-      isWeek(week);
+      expectIsWeek(week);
       if (week >= Date(year, 12, 25)) {
         expect(DateTime(year, 12, 25).weekday, DateTime.monday);
         expect(DateTime(year, 12, 31).weekday, DateTime.sunday);
@@ -121,7 +121,7 @@ void main() {
     test('first Week', () {
       final year = now.year;
       final week = Week(year, 0);
-      expect(week, isA<Week>());
+      expectIsWeek(week);
       if (week <= Date(year, 1, 7)) {
         (DateTime(year, 1, 1).weekday == DateTime.monday)
           ? expectExact(week, year)
@@ -129,13 +129,13 @@ void main() {
         expectWeek(week, DateTime(year));
         expect(week.week, 0);
       }
-      isWeek(week);
+      expectIsWeek(week);
     });
 
     test('last Week', () {
       final year = now.year;
       final week = Week(year, 52);
-      expect(week, isA<Week>());
+      expectIsWeek(week);
       if (week >= Date(year, 12, 25)) {
         (DateTime(year, 12, 31).weekday == DateTime.sunday)
           ? expectExact(week, year)
@@ -143,11 +143,11 @@ void main() {
         expectWeek(week, DateTime(year, 12, 31));
         expect(week.week, 52);
       }
-      isWeek(week);
+      expectIsWeek(week);
     });
 
     test('now', () {
-      isWeek(current);
+      expectIsWeek(current);
       expectYear(current, now.year);
       expectWeek(current, now);
       expectDay(current, now);
@@ -155,7 +155,7 @@ void main() {
 
     test('Week from DateTime', () {
       final week = now.toWeek;
-      isWeek(week);
+      expectIsWeek(week);
       expectYear(week, now.year);
       expectWeek(week, now);
       expectDay(week, now);
@@ -172,11 +172,42 @@ void main() {
       expect(datetime.second, 0);
     });
 
+    test('Week constructor new year', () {
+      final week = Week(current.year);
+      final year = current.year - ((week.month == 12) ? 1 : 0);
+      expectIsWeek(week);
+      expect(week.weekYear, current.year);
+      expect(week.week, 0);
+      expect(week.year, year);
+      expect(week.date, Date(current.year, 1, 1).weekStart);
+    });
+
+    test('Week constructor end year', () {
+      final week = Week(current.year, 53);
+      final year = current.year + ((week.month == 12) ? 0 : 1);
+      expectIsWeek(week);
+      expect(week.weekYear, current.year+1);
+      expect(week.week, 0);
+      expect(week.year, year);
+      expect(week.date, Date(current.year+1, 1, 1).weekStart);
+    });
+
     test('Week constructor', () {
       final week = Week(current.year, current.week);
-      expect(week, isA<Week>());
-      expect(week.year, current.year);
+      expectIsWeek(week);
+      expect(week.weekYear, current.year);
       expect(week.week, current.week);
+      expect(week.year, current.year);
+      expect(week.date, current.weekStart);
+    });
+
+    test('Week weekYear', () {
+      Week week = Week(2023, 0);
+      expect(week.year, 2022);
+      expect(week.weekYear, 2023);
+      week = Week(2024, 0);
+      expect(week.year, 2024);
+      expect(week.weekYear, 2024);
     });
 
     test('Week toString', () {

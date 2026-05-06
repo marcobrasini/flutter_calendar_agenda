@@ -162,8 +162,8 @@ void main() {
     });
 
     test('Month operator %', () {
-      final previousYear = DateTime(now.year-1);
-      final followingYear = DateTime(now.year+1);
+      final previousYear = DateTime(now.year-1, now.month);
+      final followingYear = DateTime(now.year+1, now.month);
       expect(current % previousYear, 12);
       expect(current % followingYear, -12);
       final previousMonth = DateTime(now.year, now.month-1);

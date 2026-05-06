@@ -63,6 +63,9 @@ class Date extends DateTime {
   static Date now() => DateTime.now().date;
 
   @override
+  DateTime toUtc() => DateTime.utc(year, month, day);
+
+  @override
   String toString() {
     String y = year.toString().padLeft(4, '0');
     String m = month.toString().padLeft(2, '0');
@@ -111,14 +114,16 @@ class Date extends DateTime {
 
 
 class Week extends DateTime {
-  Week._(super.year, super.month, super.day, this.week);
+  Week._(super.year, super.month, super.day, this.week, this.weekYear);
 
-  factory Week(int year, int week) {
-    final date = DateTime(year).weekStart.date + week*7;
-    return Week._(date.year, date.month, date.day, week % 53);
+  factory Week(int year, [int week = 0]) {
+    final weekYear = year + (week ~/ 53);
+    final date = DateTime(weekYear).weekStart.date + (week % 53) * 7;
+    return Week._(date.year, date.month, date.day, week % 53, weekYear);
   }
 
   final int week;
+  final int weekYear;
   Date get mon => Date(year, month, day + 0);
   Date get tue => Date(year, month, day + 1);
   Date get wed => Date(year, month, day + 2);
@@ -133,7 +138,7 @@ class Week extends DateTime {
   String toString() => "$mon,$sun";
 
   @override
-  int get hashCode => Object.hash(year, month, day, week);
+  int get hashCode => Object.hash(year, month, day, week, weekYear);
 
   @override
   bool operator ==(Object other) {
@@ -151,9 +156,11 @@ class Week extends DateTime {
 
   bool operator >=(DateTime dateTime) => sun >= dateTime.date;
 
-  Week operator +(int weeks) => Week(year, week + weeks);
+  Week operator +(int weeks) => (date + (7 * weeks)).toWeek;
 
-  Week operator -(int weeks) => Week(year, week - weeks);
+  Week operator -(int weeks) => (date - (7 * weeks)).toWeek;
+
+  int operator %(DateTime dateTime) => (date % dateTime) ~/ 7;
   
   DateTime newMonth(int month) => this;
   DateTime endMonth(int month) => this;
@@ -254,8 +261,8 @@ extension DateAndTime on DateTime {
   Time get time => Time(hour, minute);
   Date get date => Date(year, month, day);
   Week get toWeek {
-    final days = weekStart.date % DateTime(year);
-    return Week(year, (days < 0) ? 0 : days ~/ 7 + 1);
+    final days = weekStart.date % DateTime(year).weekStart.date;
+    return Week(year, days ~/ 7);
   }
   Month get toMonth => Month(year, month);
   Year get toYear => Year(year);
@@ -269,10 +276,12 @@ extension DateAndTime on DateTime {
       '${second.toString().padLeft(2, '0')}Z';
 
   String format(String fmt) => DateFormat(fmt).format(this);
+  DateTime round() => date & time;
 
   Date get tomorrow => date + 1;
   Date get yesterday => date - 1;
   bool get isLeapYear => (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
+  int get dayNumber => date % Year(year);
 
   DateTime get weekStart => DateTime(year, month, day - (weekday - 1));
   DateTime get weekLast => DateTime(year, month, day + (7 - weekday));
@@ -283,4 +292,9 @@ extension DateAndTime on DateTime {
   DateTime get yearStart => DateTime(year);
   DateTime get yearLast => DateTime(year + 1, 1, 0);
   DateTime get yearEnd => DateTime(year + 1, 1);
+
+  DateTime operator &(DateTime datetime) => DateTime(
+      year, month, day,
+      datetime.hour, datetime.minute, datetime.second
+  );
 }
