@@ -11,7 +11,7 @@ void main() {
   final afterWeek = start.add(Duration(days: 7));
 
   final fixTillDay = Fixture(start: start);
-  final fixAllDay = Fixture(start: start.dayBeg);
+  final fixAllDay = Fixture(start: start.date);
   final fixMinute = Fixture(start: start, stop: afterMinute);
   final fixHour = Fixture(start: start, stop: afterHour);
   final fixDay = Fixture(start: start, stop: afterDay);
@@ -31,9 +31,9 @@ void main() {
 
     test('constructor allDay', () {
       expect(fixTillDay.start, start);
-      expect(fixTillDay.stop, start.dayEnd);
-      expect(fixAllDay.start, start.dayBeg);
-      expect(fixAllDay.stop, start.dayEnd);
+      expect(fixTillDay.stop, start.tomorrow);
+      expect(fixAllDay.start, start.date);
+      expect(fixAllDay.stop, start.tomorrow);
     });
 
     test('get', () {
@@ -41,11 +41,11 @@ void main() {
       data = fixTillDay.get();
       expect(data, isA<Map<String, dynamic>>());
       expect(data["start"], start);
-      expect(data["stop"], start.dayEnd);
+      expect(data["stop"], start.tomorrow);
       data = fixAllDay.get();
       expect(data, isA<Map<String, dynamic>>());
-      expect(data["start"], start.dayBeg);
-      expect(data["stop"], start.dayEnd);
+      expect(data["start"], start.date);
+      expect(data["stop"], start.tomorrow);
       data = fixMinute.get();
       expect(data, isA<Map<String, dynamic>>());
       expect(data["start"], start);
@@ -71,12 +71,12 @@ void main() {
       result = fixture.set(fixTillDay.get());
       expect(result, isA<Fixture>());
       expect(result.start, start);
-      expect(result.stop, start.dayEnd);
+      expect(result.stop, start.tomorrow);
       //
       result = fixture.set(fixAllDay.get());
       expect(result, isA<Fixture>());
-      expect(result.start, start.dayBeg);
-      expect(result.stop, start.dayEnd);
+      expect(result.start, start.date);
+      expect(result.stop, start.tomorrow);
       //
       result = fixture.set(fixMinute.get());
       expect(result, isA<Fixture>());
@@ -122,10 +122,10 @@ void main() {
     });
 
     test('isAllDay true', () {
-      expect(Fixture(start: start.dayBeg, stop: afterMinute.dayEnd).isAllDay, true);
-      expect(Fixture(start: start.dayBeg, stop: afterHour.dayEnd).isAllDay, true);
-      expect(Fixture(start: start.dayBeg, stop: afterDay.dayEnd).isAllDay, true);
-      expect(Fixture(start: start.dayBeg, stop: afterWeek.dayEnd).isAllDay, true);
+      expect(Fixture(start: start.date, stop: afterMinute.tomorrow).isAllDay, true);
+      expect(Fixture(start: start.date, stop: afterHour.tomorrow).isAllDay, true);
+      expect(Fixture(start: start.date, stop: afterDay.tomorrow).isAllDay, true);
+      expect(Fixture(start: start.date, stop: afterWeek.tomorrow).isAllDay, true);
     });
 
     test('hashCode', () {

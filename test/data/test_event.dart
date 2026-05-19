@@ -193,11 +193,11 @@ void main() {
     test('extend Fixture (isAllDay)', () {
       final allDay = Event(
         subject: subject,
-        start: start.dayBeg,
+        start: start.date,
         color: color,
       );
-      expect(allDay.start, start.dayBeg);
-      expect(allDay.stop, start.dayEnd);
+      expect(allDay.start, start.date);
+      expect(allDay.stop, start.tomorrow);
       expect(allDay.duration, Duration(days: 1));
       expect(allDay.isAllDay, true);
       expect(allDay.isSpanned, false);
@@ -207,12 +207,12 @@ void main() {
       final days = 3;
       final spanDay = Event(
         subject: subject,
-        start: start.dayBeg,
-        stop: start.toDate + days,
+        start: start.date,
+        stop: start.date + days,
         color: color,
       );
-      expect(spanDay.start, start.dayBeg);
-      expect(spanDay.stop, start.toDate + days);
+      expect(spanDay.start, start.date);
+      expect(spanDay.stop, start.date + days);
       expect(spanDay.duration, Duration(days: days));
       expect(spanDay.isAllDay, true);
       expect(spanDay.isSpanned, true);

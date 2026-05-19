@@ -7,7 +7,7 @@ class Fixture with Diagnosticable {
   Fixture({
     required this.start,
     DateTime? stop,
-  }) : stop = stop ?? start.dayEnd;
+  }) : stop = stop ?? start.date + 1;
 
   Map<String, dynamic> get() => {
     "start": start,
@@ -23,8 +23,8 @@ class Fixture with Diagnosticable {
   DateTime start;
   DateTime stop;
   Duration get duration => stop.difference(start);
-  bool get isAllDay => start == start.dayBeg && stop == stop.dayBeg;
-  bool get isSpanned => duration.inDays >= 1 && stop != start.dayEnd;
+  bool get isAllDay => start == start.date && stop == stop.date;
+  bool get isSpanned => duration.inDays >= 1 && stop != start.date + 1;
 
 
   @override
