@@ -19,6 +19,26 @@ void main() {
       expect(clock.minute, minute);
     });
 
+    test('Time beg', () {
+      final beg = Time.beg;
+      expect(beg, isA<Time>());
+      expect(beg.year, 1);
+      expect(beg.month, 1);
+      expect(beg.day, 1);
+      expect(beg.hour, 0);
+      expect(beg.minute, 0);
+    });
+
+    test('Time end', () {
+      final end = Time.end;
+      expect(end, isA<Time>());
+      expect(end.year, 1);
+      expect(end.month, 1);
+      expect(end.day, 2);
+      expect(end.hour, 0);
+      expect(end.minute, 0);
+    });
+
     test('Time constructor', () {
       final time = Time(hour, minute);
       expect(time, isA<Time>());
@@ -53,6 +73,10 @@ void main() {
       final time = Time(hour, minute);
       final string = DateFormat("HH:mm").format(now);
       expect(time.toString(), string);
+      final beg = Time.beg;
+      expect(beg.toString(), "00:00");
+      final end = Time.end;
+      expect(end.toString(), "00:00");
     });
 
     test('Time fromString', () {
@@ -68,6 +92,22 @@ void main() {
       expect(clock == now, true);
       expect(clock == after, false);
       expect(clock == before, false);
+      final first = Time(0, 0);
+      expect(first == Time.beg, false);
+      expect(first == Time.end, false);
+      expect(Time.beg == first, false);
+      expect(Time.end == first, false);
+      final last = Time(23, 59);
+      expect(last == Time.beg, false);
+      expect(last == Time.end, false);
+      expect(Time.beg == last, false);
+      expect(Time.end == last, false);
+      final beg = Time.beg;
+      expect(beg == Time.beg, true);
+      expect(beg == Time.end, false);
+      final end = Time.end;
+      expect(end == Time.beg, false);
+      expect(end == Time.end, true);
     });
 
     test('Time operator <', () {
@@ -84,6 +124,8 @@ void main() {
       final before = now.add(Duration(hours: -1, minutes: 1));
       expect(clock < after, true);
       expect(clock < before, false);
+      expect(clock < Time.end, true);
+      expect(clock < Time.beg, false);
     });
 
     test('Time operator >', () {
@@ -100,6 +142,8 @@ void main() {
       final before = now.add(Duration(hours: -1, minutes: 1));
       expect(clock > after, false);
       expect(clock > before, true);
+      expect(clock > Time.end, false);
+      expect(clock > Time.beg, true);
     });
 
     test('Time operator <=', () {
@@ -116,6 +160,8 @@ void main() {
       final before = now.add(Duration(hours: -1, minutes: 1));
       expect(clock <= after, true);
       expect(clock <= before, false);
+      expect(clock <= Time.end, true);
+      expect(clock <= Time.beg, false);
     });
 
     test('Time operator >=', () {
@@ -132,6 +178,8 @@ void main() {
       final before = now.add(Duration(hours: -1, minutes: 1));
       expect(clock >= after, false);
       expect(clock >= before, true);
+      expect(clock >= Time.end, false);
+      expect(clock >= Time.beg, true);
     });
 
     test('Date operator +', () {
@@ -151,6 +199,8 @@ void main() {
       final before = now.add(Duration(days: -1, hours: -1, minutes: -1));
       expect(clock + (60*24 + 60 + 1) == after, true);
       expect(clock + (-60*24 - 60 - 1) == before, true);
+      expect(Time.beg + 1, Time(0, 1));
+      expect(Time.end + 1, Time(0, 1));
     });
 
     test('Date operator -', () {
@@ -170,6 +220,8 @@ void main() {
       final before = now.add(Duration(days: -1, hours: -1, minutes: -1));
       expect(clock - (-60*24 - 60 - 1) == after, true);
       expect(clock - (60*24 + 60 + 1) == before, true);
+      expect(Time.beg - 1, Time(23, 59));
+      expect(Time.end - 1, Time(23, 59));
     });
 
     test('Time operator %', () {
@@ -186,6 +238,15 @@ void main() {
       final before = now.add(Duration(hours: -1, minutes: 1));
       expect(clock % after, -59);
       expect(clock % before, 59);
+      expect(Time.end % Time(0, 0), 24*60);
+      expect(Time.end % Time.beg, 24*60);
+      expect(Time.end % Time.end, 0);
+      expect(Time.beg % Time(0, 0), 0);
+      expect(Time.beg % Time.beg, 0);
+      expect(Time.beg % Time.end, -24*60);
+      expect(Time(0, 0) % Time(0, 0), 0);
+      expect(Time(0, 0) % Time.beg, 0);
+      expect(Time(0, 0) % Time.end, -24*60);
     });
   });
 }

@@ -2,8 +2,13 @@ import 'package:intl/intl.dart';
 
 
 class Time extends DateTime {
-  Time(int hour, int minute) : super(1, 1, 1, hour, minute);
+  Time._(int year, int month, int day, int hour, int minute)
+      : super(year, month, day, hour, minute);
 
+  factory Time(int hour, int minute) => Time._(1, 1, 1, hour, minute);
+
+  static final TimeBeg beg = TimeBeg();
+  static final TimeEnd end = TimeEnd();
   static Time now() => DateTime.now().time;
 
   @override
@@ -29,12 +34,21 @@ class Time extends DateTime {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! DateTime) return false;
+    if (other is TimeBeg || other is TimeEnd) return false;
     return hour == other.hour && minute == other.minute;
   }
 
-  bool operator <(DateTime dateTime) => isBefore(dateTime.time);
+  bool operator <(DateTime dateTime) {
+    if (dateTime is TimeBeg) return false;
+    if (dateTime is TimeEnd) return true;
+    return isBefore(dateTime.time);
+  }
 
-  bool operator >(DateTime dateTime) => isAfter(dateTime.time);
+  bool operator >(DateTime dateTime) {
+    if (dateTime is TimeBeg) return true;
+    if (dateTime is TimeEnd) return false;
+    return isAfter(dateTime.time);
+  }
 
   bool operator <=(DateTime dateTime) => this < dateTime || this == dateTime;
 
@@ -45,7 +59,7 @@ class Time extends DateTime {
   Time operator -(int minutes) => Time(hour, minute - minutes);
 
   int operator %(DateTime dateTime) => toUtc().difference(
-      dateTime.time.toUtc()
+      ((dateTime is TimeEnd) ? Time.end : dateTime.time).toUtc()
   ).inMinutes;
 
   Time round(int step) {
@@ -56,6 +70,31 @@ class Time extends DateTime {
   }
 }
 
+class TimeEnd extends Time {
+  TimeEnd._() : super._(1, 1, 2, 0, 0);
+
+  static final TimeEnd _instance = TimeEnd._();
+  factory TimeEnd() => _instance;
+
+  @override
+  bool operator ==(Object other) => identical(this, other);
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, 'TimeEnd');
+}
+
+class TimeBeg extends Time {
+  TimeBeg._() : super._(1, 1, 1, 0, 0);
+
+  static final TimeBeg _instance = TimeBeg._();
+  factory TimeBeg() => _instance;
+
+  @override
+  bool operator ==(Object other) => identical(this, other);
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, 'TimeBeg');
+}
 
 class Date extends DateTime {
   Date(super.year, super.month, super.day);
@@ -82,6 +121,8 @@ class Date extends DateTime {
   }
 
   factory Date.fromISOFormat(String dateString) => DateTime.parse(dateString).date;
+
+  String format(String fmt) => DateFormat(fmt).format(this);
 
   @override
   int get hashCode => Object.hash(year, month, day);
@@ -137,6 +178,8 @@ class Week extends DateTime {
   @override
   String toString() => "$mon,$sun";
 
+  String format(String fmt) => DateFormat(fmt).format(this);
+
   @override
   int get hashCode => Object.hash(year, month, day, week, weekYear);
 
@@ -181,6 +224,8 @@ class Month extends DateTime {
 
   @override
   String toString([String fmt = "yyyy-MM"]) => format(fmt);
+
+  String format(String fmt) => DateFormat(fmt).format(this);
 
   factory Month.fromString(String dateString) {
     List<String> list = dateString.split("-");
@@ -227,6 +272,8 @@ class Year extends DateTime {
 
   @override
   String toString([String fmt = "yyyy"]) => format(fmt);
+
+  String format(String fmt) => DateFormat(fmt).format(this);
 
   @override
   int get hashCode => year;

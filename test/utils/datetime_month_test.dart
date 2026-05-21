@@ -46,6 +46,12 @@ void main() {
       expect(month.month, current.month);
     });
 
+    test('Month format', () {
+      final fmt = "MMMM yyyy";
+      final string = DateFormat(fmt).format(now);
+      expect(current.format(fmt), string);
+    });
+
     test('Month toString', () {
       final string = DateFormat("yyyy-MM").format(now);
       expect(current.toString(), string);

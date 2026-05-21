@@ -45,6 +45,12 @@ void main() {
       expect(date.day, day);
     });
 
+    test('Date format', () {
+      final fmt = "EEEE d MMMM yyyy";
+      final string = DateFormat(fmt).format(now);
+      expect(today.format(fmt), string);
+    });
+
     test('Date toString', () {
       final string = DateFormat("yyyy-MM-dd").format(now);
       expect(today.toString(), string);

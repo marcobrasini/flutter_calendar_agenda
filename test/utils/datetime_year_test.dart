@@ -40,6 +40,12 @@ void main() {
       expect(year.year, current.year);
     });
 
+    test('Year format', () {
+      final fmt = "yyyy";
+      final string = DateFormat(fmt).format(now);
+      expect(current.format(fmt), string);
+    });
+
     test('Year toString', () {
       final string = DateFormat("yyyy").format(now);
       expect(current.toString(), string);
