@@ -4,6 +4,7 @@ import '../../enums.dart';
 
 /// Paints 24 hour lines.
 class LinesPainter extends CustomPainter {
+  final int divisions;
   final List<double> positions;
   final LineStyle lineStyle;
   final double lineWidth;
@@ -16,9 +17,10 @@ class LinesPainter extends CustomPainter {
   bool get isVertical => direction == LineDirection.vertical;
   bool get isHorizontal => direction == LineDirection.horizontal;
 
-  LinesPainter({
+  const LinesPainter({
     this.lineStyle = LineStyle.solid,
-    required this.positions,
+    this.divisions = 0,
+    this.positions = const <double>[],
     required this.lineColor,
     required this.lineWidth,
     required this.direction,
@@ -28,6 +30,13 @@ class LinesPainter extends CustomPainter {
     this.dashedSpace,
   });
 
+  List<double> linePositions(Size size) {
+    if (positions.isEmpty) {
+      final step = ((isHorizontal) ? size.height : size.width) / divisions;
+      return [for (int i = 0; i < divisions + 1; i++) i * step];
+    }
+    return positions;
+  }
 
   void paintSolid(
       Paint paint,
@@ -66,7 +75,7 @@ class LinesPainter extends CustomPainter {
       ..color = lineColor;
     final beg = offset;
     final end = beg + (length ?? ((isHorizontal) ? size.width : size.height) - beg);
-    for (var fix in positions) {
+    for (var fix in linePositions(size)) {
       switch (lineStyle) {
         case LineStyle.solid:
           paintSolid(paint, canvas, size, fix, beg, end);
@@ -81,6 +90,7 @@ class LinesPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return oldDelegate is LinesPainter && (
+        divisions != oldDelegate.divisions ||
         positions != oldDelegate.positions ||
         lineStyle != oldDelegate.lineStyle ||
         lineWidth != oldDelegate.lineWidth ||

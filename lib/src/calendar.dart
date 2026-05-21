@@ -1,6 +1,7 @@
+import 'package:calendar/src/widgets/views/view_daily.dart';
+import 'package:calendar/src/widgets/views/view_weekly.dart';
 import 'package:flutter/material.dart';
 import 'widgets/components/header_calendar.dart';
-import 'widgets/pages/page_daily.dart';
 import 'utils/datetime.dart';
 import 'enums.dart';
 
@@ -30,7 +31,9 @@ class _CalendarState extends State<Calendar> {
       case CalendarView.daily:
         return dateTime.format("d MMMM yyyy");
       case CalendarView.weekly:
-        return dateTime.toString();
+        final start = dateTime.mon.format("dd/MM/yyyy");
+        final stop = dateTime.sun.format("dd/MM/yyyy");
+        return "${start} -- ${stop}";
       case CalendarView.monthly:
         return dateTime.format("MMMM yyyy");
     }
@@ -39,11 +42,15 @@ class _CalendarState extends State<Calendar> {
   Widget page() {
     switch (widget.view) {
       case CalendarView.daily:
-        return DailyPage(
-          textPadding: 16.0,
+        return DailyView(
+          date: dateTime,
+          timePadding: 16.0,
         );
       case CalendarView.weekly:
-        return Placeholder();
+        return WeeklyView(
+          week: dateTime,
+          timePadding: 16.0,
+        );
       case CalendarView.monthly:
         return Placeholder();
     }

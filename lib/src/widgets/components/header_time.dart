@@ -6,26 +6,24 @@ class TimeHeader extends StatelessWidget {
   final int fromHour;
   final int toHour;
   final int step;
-  final double offset;
   final double height;
-  final double? width;
-  final Color? background;
+  final double margin;
   final String timeFormat;
-  final double? textPadding;
-  final TextStyle? textStyle;
+  final double? timePadding;
+  final TextStyle? timeStyle;
+  final Color? background;
 
   const TimeHeader({
     super.key,
     required this.fromHour,
     required this.toHour,
     required this.step,
-    required this.offset,
     required this.height,
-    this.width,
-    this.background,
+    required this.margin,
     required this.timeFormat,
-    this.textPadding,
-    this.textStyle,
+    this.timePadding,
+    this.timeStyle,
+    this.background,
   });
 
   int get length => (toHour - fromHour) * 60;
@@ -58,16 +56,16 @@ class TimeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: background,
-      height: height + offset,
+      height: height + margin,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           for (Time time in times)
-            (textPadding == null)
-                ? Text(time.format(timeFormat), style: textStyle)
+            (timePadding == null)
+                ? Text(time.format(timeFormat), style: timeStyle)
                 : Padding(
-                  padding: EdgeInsets.symmetric(horizontal: textPadding!),
-                  child: Text(time.format(timeFormat), style: textStyle),
+                  padding: EdgeInsets.symmetric(horizontal: timePadding!),
+                  child: Text(time.format(timeFormat), style: timeStyle),
                 ),
         ],
       )

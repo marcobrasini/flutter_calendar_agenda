@@ -4,49 +4,67 @@ import '../../utils/datetime.dart';
 import '../../enums.dart';
 
 
-typedef onTapCallback = void Function(Time time);
+typedef OnTapCallback = void Function(int day, Time time);
 
 
-class DailyFrame extends StatelessWidget {
+class WeeklyFrame extends StatelessWidget {
   final double height;
   final double width;
+  final int dateSlots;
   final int timeSlots;
+  final double dateScale;
   final double timeScale;
   final LineStyle lineStyle;
   final Color lineColor;
   final double lineWidth;
-  final double lineOffset;
+  final double? lineLength;
+  final double lineOffsetX;
+  final double lineOffsetY;
   final double? dashedWidth;
   final double? dashedSpace;
-  final onTapCallback? dailyTap;
+  final OnTapCallback? weeklyTap;
 
-  const DailyFrame({
+  const WeeklyFrame({
     super.key,
     required this.width,
     required this.height,
+    required this.dateSlots,
     required this.timeSlots,
+    required this.dateScale,
     required this.timeScale,
     required this.lineColor,
     required this.lineStyle,
     required this.lineWidth,
-    required this.lineOffset,
+    required this.lineOffsetX,
+    required this.lineOffsetY,
+    this.lineLength,
     this.dashedWidth,
     this.dashedSpace,
-    this.dailyTap,
+    this.weeklyTap,
   });
 
-  List<double> positionsY(double height) {
-    final positionList = <double>[0.0];
-    final delta = height / timeSlots;
-    for (int i = 0; i < timeSlots; i++) {
-      positionList.add(positionList[i] + delta);
-    }
-    return positionList;
-  }
+  // List<double> positionsX(double width) {
+  //   final positionList = <double>[0.0];
+  //   final delta = width / daySlots;
+  //   for (int i = 0; i < daySlots; i++) {
+  //     positionList.add(positionList[i] + delta);
+  //   }
+  //   return positionList;
+  // }
+  //
+  // List<double> positionsY(double height) {
+  //   final positionList = <double>[0.0];
+  //   final delta = height / timeSlots;
+  //   for (int i = 0; i < timeSlots; i++) {
+  //     positionList.add(positionList[i] + delta);
+  //   }
+  //   return positionList;
+  // }
 
   void _onTapUp(TapUpDetails details) {
     final minutes = (details.localPosition.dy * timeScale).toInt();
-    if (dailyTap != null) dailyTap!(Time(0, 0) + minutes);
+    final day = (details.localPosition.dx * dateScale).toInt();
+    if (weeklyTap != null) weeklyTap!(day, Time(0, 0) + minutes);
   }
 
   @override
@@ -58,7 +76,7 @@ class DailyFrame extends StatelessWidget {
         lineStyle: lineStyle,
         lineColor: lineColor,
         lineWidth: lineWidth,
-        offset: lineOffset,
+        offset: lineOffsetX,
         dashedSpace: dashedSpace,
         dashedWidth: dashedWidth,
         direction: LineDirection.horizontal,
@@ -67,11 +85,11 @@ class DailyFrame extends StatelessWidget {
     final verticalPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        positions: [0.0],
+        divisions: dateSlots,
         lineStyle: lineStyle,
         lineColor: lineColor,
         lineWidth: lineWidth,
-        offset: lineOffset,
+        offset: lineOffsetY,
         dashedSpace: dashedSpace,
         dashedWidth: dashedWidth,
         direction: LineDirection.vertical,
