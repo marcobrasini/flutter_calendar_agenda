@@ -1,4 +1,6 @@
+import 'package:calendar/src/data/event.dart';
 import 'package:calendar/src/utils/datetime.dart';
+import 'package:calendar/src/widgets/pages/page_daily.dart';
 import 'package:flutter/material.dart';
 import '../components/header_time.dart';
 import '../frames/frame_daily.dart';
@@ -116,8 +118,20 @@ class _DailyViewState extends State<DailyView> {
           dashedSpace: widget.dashedSpace,
           dashedWidth: widget.dashedWidth,
         );
-        final dayPage = SingleChildScrollView(
-          child:Row(
+        final dayPage = DailyPage(
+          date: widget.date,
+          events: [Event.make(data: {
+            "start": DateTime.now(),
+            "stop": DateTime.now().add(Duration(hours: 1)),
+            "color": Colors.pink,
+            "subject": "Event",
+          })],
+          width: dateWidth,
+          height: sizeHeight,
+          timeScale: 60 * timeSlots / sizeHeight,
+        );
+        return SingleChildScrollView(
+          child: Row(
             children: [
               timeHeader,
               Expanded(
@@ -125,13 +139,17 @@ class _DailyViewState extends State<DailyView> {
                   padding: EdgeInsets.symmetric(
                       vertical: offset / 2
                   ),
-                  child: dayFrame,
+                  child: Stack(
+                    children: [
+                      dayFrame,
+                      dayPage,
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         );
-        return dayPage;
       },
     );
   }

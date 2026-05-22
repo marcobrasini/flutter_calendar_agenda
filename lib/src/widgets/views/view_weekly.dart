@@ -1,5 +1,7 @@
+import 'package:calendar/src/data/event.dart';
 import 'package:calendar/src/utils/datetime.dart';
 import 'package:calendar/src/widgets/components/header_week.dart';
+import 'package:calendar/src/widgets/pages/page_weekly.dart';
 import 'package:flutter/material.dart';
 import '../components/header_time.dart';
 import '../frames/frame_weekly.dart';
@@ -72,6 +74,7 @@ class _WeeklyViewState extends State<WeeklyView> {
     Time time = (widget.timeRound != null)
         ? tappedTime.round(widget.timeRound!)
         : tappedTime;
+    time += widget.fromHour * 60;
     print((widget.week.mon + day) & time);
   }
 
@@ -82,6 +85,15 @@ class _WeeklyViewState extends State<WeeklyView> {
       textDirection: TextDirection.ltr,
     )..layout();
     return layout.width + (widget.timePadding ?? 0) * 2;
+  }
+
+  double dateWidth(BuildContext context) {
+    final style = widget.timeStyle ?? DefaultTextStyle.of(context).style;
+    final layout = TextPainter(
+      text: TextSpan(text: Date.now().format(widget.dateFormat), style: style),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    return layout.height + (widget.datePadding ?? 0) * 2;
   }
 
   double timeMargin(BuildContext context) {
@@ -103,10 +115,12 @@ class _WeeklyViewState extends State<WeeklyView> {
         final dateSlots = widget.toDay - widget.fromDay + 1;
         final timeSlots = widget.toHour - widget.fromHour;
         final sizeHeight = (widget.rate == 0)
-            ? constraints.maxHeight - margin
+            ? constraints.maxHeight - margin - dateWidth(context)
             : 60 * timeSlots * widget.rate;
         final sizeWidth = constraints.maxWidth;
         final weekWidth = sizeWidth - offset;
+        final dateScale = dateSlots / weekWidth;
+        final timeScale = 60 * timeSlots / sizeHeight;
         final timeHeader = TimeHeader(
           fromHour: widget.fromHour,
           toHour: widget.toHour,
@@ -135,8 +149,8 @@ class _WeeklyViewState extends State<WeeklyView> {
           height: sizeHeight,
           dateSlots: dateSlots,
           timeSlots: timeSlots,
-          dateScale: dateSlots / weekWidth,
-          timeScale: 60 * timeSlots / sizeHeight,
+          dateScale: dateScale,
+          timeScale: timeScale,
           lineStyle: widget.lineStyle,
           lineColor: widget.lineColor,
           lineWidth: widget.lineWidth,
@@ -145,18 +159,27 @@ class _WeeklyViewState extends State<WeeklyView> {
           dashedSpace: widget.dashedSpace,
           dashedWidth: widget.dashedWidth,
         );
-        final weekPage = Row(
-          children: [
-            timeHeader,
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    vertical: margin / 2
-                ),
-                child: weekFrame,
-              ),
-            ),
+        final weekPage = WeeklyPage(
+          week: widget.week,
+          events: [
+            Event.make(data: {
+              "start": DateTime.now(),
+              "stop": DateTime.now().add(Duration(hours: 1)),
+              "color": Colors.pink,
+              "subject": "Event",
+            }),
+            Event.make(data: {
+              "start": DateTime.now().add(Duration(days: -2, hours: -4)),
+              "stop": DateTime.now().add(Duration(days: -2, hours: -3)),
+              "color": Colors.green,
+              "subject": "Event",
+            })
           ],
+          width: weekWidth,
+          height: sizeHeight,
+          fromHour: widget.fromHour,
+          dateScale: dateScale,
+          timeScale: timeScale,
         );
         return Column(
           children: [
@@ -168,7 +191,24 @@ class _WeeklyViewState extends State<WeeklyView> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: weekPage,
+                child: Row(
+                  children: [
+                    timeHeader,
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            vertical: margin / 2
+                        ),
+                        child: Stack(
+                            children: [
+                              weekFrame,
+                              weekPage,
+                            ]
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
           ],

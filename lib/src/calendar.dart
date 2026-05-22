@@ -44,12 +44,12 @@ class _CalendarState extends State<Calendar> {
       case CalendarView.daily:
         return DailyView(
           date: dateTime,
-          timePadding: 16.0,
+          timePadding: 8.0,
         );
       case CalendarView.weekly:
         return WeeklyView(
           week: dateTime,
-          timePadding: 16.0,
+          timePadding: 8.0,
         );
       case CalendarView.monthly:
         return Placeholder();
