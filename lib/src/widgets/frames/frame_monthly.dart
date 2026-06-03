@@ -1,21 +1,26 @@
+import 'package:calendar/src/const.dart';
+import 'package:calendar/src/mixin.dart';
 import 'package:flutter/material.dart';
 import '../components/painter_lines.dart';
 import '../../enums.dart';
-import '../../mixin.dart';
+import '../../utils/datetime.dart';
 
 
-typedef OnTapCallback = void Function(int minute);
+typedef OnTapCallback = void Function(int week, int day);
 
 
-class DailyFrame extends StatelessWidget with TimeScheme {
+class MonthlyFrame extends StatelessWidget with DateScheme, WeekScheme {
 
-  const DailyFrame({
+  const MonthlyFrame({
     super.key,
     required this.width,
     required this.height,
-    required this.begHour,
-    required this.endHour,
-    required this.timeStep,
+    required this.begWeek,
+    required this.endWeek,
+    required this.weekStep,
+    required this.begDay,
+    required this.endDay,
+    required this.dateStep,
     // LinePainter attributes
     required this.lineStyle,
     required this.lineColor,
@@ -25,16 +30,19 @@ class DailyFrame extends StatelessWidget with TimeScheme {
     this.dashedWidth,
     this.dashedSpace,
     // Interactive callback
-    this.dailyTap,
+    this.monthlyTap,
   });
 
   final double width;
   final double height;
-  @override final int begHour;
-  @override final int endHour;
-  @override final int timeStep;
-  double get timeScale => minutes / height;
-  // LinePainter attributes
+  @override final int begWeek;
+  @override final int endWeek;
+  @override final int weekStep;
+  double get weekScale => weeks / height;
+  @override final int begDay;
+  @override final int endDay;
+  @override final int dateStep;
+  double get dateScale => days / width;
   final LineStyle lineStyle;
   final Color lineColor;
   final double lineWidth;
@@ -42,19 +50,21 @@ class DailyFrame extends StatelessWidget with TimeScheme {
   final double lineOffsetY;
   final double? dashedWidth;
   final double? dashedSpace;
-  // Interactive callback
-  final OnTapCallback? dailyTap;
+  final OnTapCallback? monthlyTap;
 
-  void _onTapUp(TapUpDetails details) => dailyTap!(
-      (details.localPosition.dy * timeScale).toInt()
-  );
+  void _onTapUp(TapUpDetails details) {
+    if (monthlyTap == null) return;
+    final date = (details.localPosition.dx * dateScale).toInt();
+    final week = (details.localPosition.dy * weekScale).toInt();
+    monthlyTap!(week, date);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final timePainter = CustomPaint(
+    final weekPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: hours,
+        divisions: weeks,
         lineStyle: lineStyle,
         lineColor: lineColor,
         lineWidth: lineWidth,
@@ -67,7 +77,7 @@ class DailyFrame extends StatelessWidget with TimeScheme {
     final dayPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        positions: [0.0],
+        divisions: days,
         lineStyle: lineStyle,
         lineColor: lineColor,
         lineWidth: lineWidth,
@@ -77,9 +87,9 @@ class DailyFrame extends StatelessWidget with TimeScheme {
         direction: LineDirection.vertical,
       ),
     );
-    final framePainter = Stack(
+    final linePainter = Stack(
       children: [
-        timePainter,
+        weekPainter,
         dayPainter,
       ],
     );
@@ -87,8 +97,8 @@ class DailyFrame extends StatelessWidget with TimeScheme {
         height: height,
         width: width,
         child: GestureDetector(
-          onTapUp: (dailyTap == null) ? null : _onTapUp,
-          child: framePainter,
+          onTapUp: _onTapUp,
+          child: linePainter,
         )
     );
   }

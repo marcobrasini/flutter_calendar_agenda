@@ -2,17 +2,30 @@ import 'dart:ui';
 import 'enums.dart';
 
 const initialHour = 0;
-const finalHour = 24;
+const finalHour = Duration.hoursPerDay;
+const stepHour = Duration.minutesPerHour;
+
 const initialDay = DateTime.monday;
 const finalDay = DateTime.sunday;
+const stepDay = 1;
+
+const initialWeek = 0;
+const finalWeek = 6;
+const stepWeek = DateTime.daysPerWeek;
 
 const timeHeaderPadding = 8.0;
+const dateHeaderPadding = 8.0;
+const weekHeaderPadding = 8.0;
 const textHeaderPadding = 0.0;
+const textHeaderMargin = 0.0;
 const textLineSpacing = 1.5;
+const textSlotPadding = 4.0;
 
-const dayHeaderFormat = "EEE";
+const dayHeaderFormat = "d";
 const dateHeaderFormat = "EEE\nd";
 const timeHeaderFormat = "HH:mm";
+const weekHeaderFormat = "EEE";
+const timeHeaderRatio = 1.0;
 
 const eventMaxLines = 1;
 
@@ -25,4 +38,4 @@ const dashFrameWidth = 4.0;
 const dashFrameSpace = 4.0;
 
 const dayMonthSlots = 7;
-const weekMonthSlots = 5;
+const weekMonthSlots = 6;

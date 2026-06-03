@@ -4,6 +4,7 @@ import 'package:calendar/src/data/source.dart';
 import 'package:calendar/src/enums.dart';
 import 'package:calendar/src/calendar.dart';
 import 'package:flutter/material.dart';
+import 'package:calendar/src/utils/datetime.dart';
 
 
 void main() {
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
+    final now = Date.now() & Time(9, 15);
     return MaterialApp(
       title: 'Demo Griglia 2x2',
       theme: ThemeData(
@@ -27,9 +28,11 @@ class MyApp extends StatelessWidget {
         body: Padding(
           padding: EdgeInsets.all(16.0),
           child: Calendar(
-            view: CalendarView.weekly,
-            fromHour: 6,
-            toHour: 22,
+            view: CalendarView.monthly,
+            begHour: 6,
+            endHour: 22,
+            begDay: 1,
+            endDay: 6,
             source: Source([
               Event(
                 id: "event1",
@@ -40,12 +43,12 @@ class MyApp extends StatelessWidget {
               ),
               Event(
                 id: "event2",
-                start: now.add(Duration(days:2, hours: 1)),
-                stop: now.add(Duration(days:2, hours: 2)),
+                start: now.add(Duration(days:-2)),
+                stop: now.add(Duration(days:-2, hours: 1)),
                 color:  Colors.pink,
                 subject: "Events",
                 pattern: Pattern.fromICSString(
-                    now.add(Duration(days:2, hours: 1)),
+                    now.add(Duration(days:-2, hours: 1)),
                     "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=MO,FR;"
                 ),
               )

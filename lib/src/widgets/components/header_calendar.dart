@@ -6,6 +6,11 @@ typedef HeaderCallback = void Function();
 
 class CalendarHeader extends StatelessWidget {
 
+  final String title;
+  final HeaderCallback next;
+  final HeaderCallback last;
+  final TextStyle? textStyle;
+
   const CalendarHeader({
     super.key,
     required this.title,
@@ -13,11 +18,6 @@ class CalendarHeader extends StatelessWidget {
     required this.next,
     this.textStyle,
   });
-
-  final String title;
-  final HeaderCallback next;
-  final HeaderCallback last;
-  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {

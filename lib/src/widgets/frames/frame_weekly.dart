@@ -1,18 +1,47 @@
+import 'package:calendar/src/mixin.dart';
 import 'package:flutter/material.dart';
-import '../painters/painter_lines.dart';
+import '../components/painter_lines.dart';
 import '../../enums.dart';
 
 
 typedef OnTapCallback = void Function(int day, int minute);
 
 
-class WeeklyFrame extends StatelessWidget {
+class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
+
+  const WeeklyFrame({
+    super.key,
+    required this.width,
+    required this.height,
+    required this.begHour,
+    required this.endHour,
+    required this.timeStep,
+    required this.begDay,
+    required this.endDay,
+    required this.dateStep,
+    // LinePainter attributes
+    required this.lineStyle,
+    required this.lineColor,
+    required this.lineWidth,
+    required this.lineOffsetX,
+    required this.lineOffsetY,
+    this.dashedWidth,
+    this.dashedSpace,
+    // Interactive callback
+    this.weeklyTap,
+  });
+
   final double width;
   final double height;
-  final int daySlots;
-  final int timeSlots;
-  final double dayScale;
-  final double timeScale;
+  @override final int begDay;
+  @override final int endDay;
+  @override final int dateStep;
+  double get dateScale => days / width;
+  @override final int begHour;
+  @override final int endHour;
+  @override final int timeStep;
+  double get timeScale => minutes / height;
+  // LinePainter attributes
   final LineStyle lineStyle;
   final Color lineColor;
   final double lineWidth;
@@ -20,29 +49,12 @@ class WeeklyFrame extends StatelessWidget {
   final double lineOffsetY;
   final double? dashedWidth;
   final double? dashedSpace;
+  // Interactive callback
   final OnTapCallback? weeklyTap;
-
-  const WeeklyFrame({
-    super.key,
-    required this.width,
-    required this.height,
-    required this.daySlots,
-    required this.timeSlots,
-    required this.dayScale,
-    required this.timeScale,
-    required this.lineColor,
-    required this.lineStyle,
-    required this.lineWidth,
-    required this.lineOffsetX,
-    required this.lineOffsetY,
-    this.dashedWidth,
-    this.dashedSpace,
-    this.weeklyTap,
-  });
 
   void _onTapUp(TapUpDetails details) {
     if (weeklyTap == null) return;
-    final day = (details.localPosition.dx * dayScale).toInt();
+    final day = (details.localPosition.dx * dateScale).toInt();
     final minutes = (details.localPosition.dy * timeScale).toInt();
     weeklyTap!(day, minutes);
   }
@@ -52,7 +64,7 @@ class WeeklyFrame extends StatelessWidget {
     final timePainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: timeSlots,
+        divisions: hours,
         lineStyle: lineStyle,
         lineColor: lineColor,
         lineWidth: lineWidth,
@@ -65,7 +77,7 @@ class WeeklyFrame extends StatelessWidget {
     final dayPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: daySlots,
+        divisions: days,
         lineStyle: lineStyle,
         lineColor: lineColor,
         lineWidth: lineWidth,

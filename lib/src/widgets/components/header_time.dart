@@ -1,63 +1,54 @@
+import 'package:calendar/src/context.dart';
+import 'package:calendar/src/mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/src/utils/datetime.dart';
 import '../../const.dart';
 
-
-class TimeHeader extends StatelessWidget {
-  final int fromHour;
-  final int toHour;
-  final int step;
-  final double height;
-  final double margin;
-  final String timeFormat;
-  final double? timePadding;
-  final TextStyle? timeStyle;
-  final Color? background;
+class TimeHeader extends StatelessWidget with TimeScheme {
 
   const TimeHeader({
     super.key,
-    required this.fromHour,
-    required this.toHour,
-    required this.step,
-    required this.height,
-    required this.margin,
-    required this.timeFormat,
-    this.timePadding,
-    this.timeStyle,
+    required this.begHour,
+    required this.endHour,
+    required this.timeStep,
+    this.width,
+    this.height,
     this.background,
+    this.timeFormat,
+    this.timePadding,
+    this.timeTextStyle,
   });
 
-  int get length => (toHour - fromHour) * Duration.minutesPerHour;
-
-  Time get from => (fromHour == initialHour) ? Time.beg : Time(fromHour, 0);
-
-  Time get to => (toHour == finalHour) ? Time.end : Time(toHour, 0);
+  @override final int begHour;
+  @override final int endHour;
+  @override final int timeStep;
+  final double? width;
+  final double? height;
+  final Color? background;
+  final String? timeFormat;
+  final double? timePadding;
+  final TextStyle? timeTextStyle;
 
   List<Time> get times {
     final timeList = <Time>[];
-    var time = from.time as DateTime;
+    var time = from as DateTime;
     while (time.isBefore(to)) {
       timeList.add(time.time);
-      time = time.add(Duration(minutes: step));
+      time = time.add(Duration(minutes: timeStep));
     }
     timeList.add(to);
     return timeList;
   }
 
-  List<double> get positions {
-    final positionList = <double>[0.0];
-    final delta = height / (times.length - 1);
-    for (int i = 0; i < times.length - 1; i++) {
-      positionList.add(positionList[i] + delta);
-    }
-    return positionList;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final margin = context.timeMargin(timeTextStyle);
+    final headerWidth = width;
+    final headerHeight = (height == null) ? null : height! + margin;
     return Container(
+      width: headerWidth,
+      height: headerHeight,
       color: background,
-      height: height + margin,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -67,8 +58,9 @@ class TimeHeader extends StatelessWidget {
                 horizontal: timePadding ?? textHeaderPadding,
               ),
               child: Text(
-                time.format(timeFormat),
-                style: timeStyle,
+                time.format(timeFormat ?? timeHeaderFormat),
+                textAlign: TextAlign.center,
+                style: timeTextStyle,
               ),
             ),
         ],

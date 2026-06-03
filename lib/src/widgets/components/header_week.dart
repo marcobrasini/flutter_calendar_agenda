@@ -1,65 +1,65 @@
 import 'package:calendar/src/const.dart';
+import 'package:calendar/src/mixin.dart';
 import 'package:calendar/src/utils/datetime.dart';
+import 'package:calendar/src/widgets/components/slot_date.dart';
 import 'package:flutter/material.dart';
 
 
-class WeekHeader extends StatelessWidget {
-  final Week week;
-  final int fromDay;
-  final int toDay;
-  final double? width;
-  final double? height;
-  final Color? background;
-  final String? dateFormat;
-  final double? datePadding;
-  final TextStyle? dateStyle;
+class WeekHeader extends StatelessWidget with DateScheme {
 
   const WeekHeader({
     super.key,
     required this.week,
-    required this.fromDay,
-    required this.toDay,
+    required this.begDay,
+    required this.endDay,
+    required this.dateStep,
     this.width,
     this.height,
     this.background,
     this.dateFormat,
     this.datePadding,
-    this.dateStyle,
+    this.dateTextStyle,
   });
+
+  final Week week;
+  @override final int begDay;
+  @override final int endDay;
+  @override final int dateStep;
+  final double? width;
+  final double? height;
+  final Color? background;
+  final String? dateFormat;
+  final double? datePadding;
+  final TextStyle? dateTextStyle;
 
   List<Date> get dates {
     final dateList = <Date>[];
-    var date = week.mon;
-    for (int i = fromDay ; i <= toDay ; i++) {
-      dateList.add(date + i - 1);
+    var date = week.mon + (begDay - 1);
+    for (int i = 0 ; i < days ; i++) {
+      dateList.add(date + i);
     }
     return dateList;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        color: background,
-        height: height,
+    final widgets = <Widget>[];
+    for (Date date in dates) {
+      widgets.add(Expanded(
+          child: DateSlot(
+            date: date,
+            dateFormat: dateFormat ?? dateHeaderFormat,
+            datePadding: datePadding ?? dateHeaderPadding,
+            dateTextStyle: dateTextStyle,
+            dateBackground: background,
+          )
+      ));
+    }
+    return SizedBox(
         width: width,
+        height: height,
         child: Row(
-          children: [
-            for (Date date in dates)
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      vertical: datePadding ?? textHeaderPadding,
-                  ),
-                  child: Center(
-                    child: Text(
-                      date.format(dateFormat ?? dateHeaderFormat),
-                      textAlign: TextAlign.center,
-                      style: dateStyle,
-                    ),
-                  ),
-                ),
-              )
-          ],
+          children: widgets,
         )
     );
   }

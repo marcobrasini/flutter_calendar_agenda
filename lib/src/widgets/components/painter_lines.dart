@@ -1,9 +1,24 @@
+import 'package:calendar/src/const.dart';
 import 'package:flutter/material.dart';
 import '../../enums.dart';
 
 
 /// Paints 24 hour lines.
 class LinesPainter extends CustomPainter {
+
+  const LinesPainter({
+    this.divisions = 0,
+    this.positions = const <double>[],
+    required this.lineStyle,
+    required this.lineColor,
+    required this.lineWidth,
+    required this.direction,
+    this.offset = 0.0,
+    this.length,
+    this.dashedWidth,
+    this.dashedSpace,
+  });
+
   final int divisions;
   final List<double> positions;
   final LineStyle lineStyle;
@@ -16,19 +31,6 @@ class LinesPainter extends CustomPainter {
   final LineDirection direction;
   bool get isVertical => direction == LineDirection.vertical;
   bool get isHorizontal => direction == LineDirection.horizontal;
-
-  const LinesPainter({
-    this.lineStyle = LineStyle.solid,
-    this.divisions = 0,
-    this.positions = const <double>[],
-    required this.lineColor,
-    required this.lineWidth,
-    required this.direction,
-    this.offset = 0.0,
-    this.length,
-    this.dashedWidth,
-    this.dashedSpace,
-  });
 
   List<double> linePositions(Size size) {
     if (positions.isEmpty) {

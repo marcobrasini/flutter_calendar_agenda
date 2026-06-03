@@ -6,6 +6,7 @@ class Time extends DateTime {
       : super(year, month, day, hour, minute);
 
   factory Time(int hour, int minute) => Time._(1, 1, 1, hour, minute);
+  factory Time.fromHour(int hours) => Time(hours, 0);
   factory Time.fromMinutes(int minutes) => Time(minutes ~/ 60, minutes % 60);
 
   static final TimeBeg beg = TimeBeg();
