@@ -7,9 +7,10 @@ import 'package:flutter/material.dart';
 class DailyPage extends StatefulWidget {
   final List<Event> events;
   final Date date;
-  final double height;
   final double width;
+  final double height;
   final double timeScale;
+  final int fromHour;
 
   const DailyPage({
     super.key,
@@ -18,35 +19,33 @@ class DailyPage extends StatefulWidget {
     required this.width,
     required this.height,
     required this.timeScale,
+    required this.fromHour,
   });
 
   @override
   State<DailyPage> createState() => _DailyPageState();
 }
 
+
 class _DailyPageState extends State<DailyPage> {
 
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  int y(Event event) => event.start.time % Time(widget.fromHour, 0);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: widget.height,
       width: widget.width,
+      height: widget.height,
       child: Stack(
         children: [
           for (var event in widget.events)
             Positioned(
-                top: (event.start.time % widget.date) / widget.timeScale,
-                child: EventSlot(
-                  event: event,
-                  width: widget.width,
-                  height: event.duration.inMinutes / widget.timeScale,
-                )
+              top: y(event) / widget.timeScale,
+              child: EventSlot(
+                event: event,
+                width: widget.width,
+                height: event.duration.inMinutes / widget.timeScale,
+              ),
             )
         ],
       ),

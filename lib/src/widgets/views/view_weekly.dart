@@ -1,4 +1,4 @@
-import 'package:calendar/src/data/event.dart';
+import 'package:calendar/src/context.dart';
 import 'package:calendar/src/utils/datetime.dart';
 import 'package:calendar/src/widgets/components/header_week.dart';
 import 'package:calendar/src/widgets/pages/page_weekly.dart';
@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../components/header_time.dart';
 import '../frames/frame_weekly.dart';
 import '../../enums.dart';
+import '../../data/source.dart';
 
 
 class WeeklyView extends StatefulWidget {
@@ -69,36 +70,14 @@ class WeeklyView extends StatefulWidget {
 
 class _WeeklyViewState extends State<WeeklyView> {
 
-  void onPageTap(int tappedDay, Time tappedTime) {
+  void onPageTap(int tappedDay, int tappedMinute) {
     int day = tappedDay;
-    Time time = (widget.timeRound != null)
-        ? tappedTime.round(widget.timeRound!)
-        : tappedTime;
+    Time time = Time(0, 0) + tappedMinute;
+    if (widget.timeRound != null) {
+      time = time.round(widget.timeRound!);
+    }
     time += widget.fromHour * 60;
     print((widget.week.mon + day) & time);
-  }
-
-  double timeWidth(BuildContext context) {
-    final style = widget.timeStyle ?? DefaultTextStyle.of(context).style;
-    final layout = TextPainter(
-      text: TextSpan(text: Time(0, 0).format(widget.timeFormat), style: style),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return layout.width + (widget.timePadding ?? 0) * 2;
-  }
-
-  double dateWidth(BuildContext context) {
-    final style = widget.timeStyle ?? DefaultTextStyle.of(context).style;
-    final layout = TextPainter(
-      text: TextSpan(text: Date.now().format(widget.dateFormat), style: style),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return layout.height + (widget.datePadding ?? 0) * 2;
-  }
-
-  double timeMargin(BuildContext context) {
-    final style = widget.timeStyle ?? DefaultTextStyle.of(context).style;
-    return style.fontSize! * (style.height ?? 1.5);
   }
 
   @override
@@ -108,24 +87,26 @@ class _WeeklyViewState extends State<WeeklyView> {
 
   @override
   Widget build(BuildContext context) {
+    final source = CalendarSource.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final offset = timeWidth(context);
-        final margin = timeMargin(context);
-        final dateSlots = widget.toDay - widget.fromDay + 1;
+        final dateOffset = context.dateWidth(widget.dateFormat, widget.dateStyle, widget.datePadding);
+        final timeOffset = context.timeWidth(widget.timeFormat, widget.timeStyle, widget.timePadding);
+        final timeMargin = context.timeMargin(widget.timeStyle);
+        final daySlots = widget.toDay - widget.fromDay + 1;
         final timeSlots = widget.toHour - widget.fromHour;
         final sizeHeight = (widget.rate == 0)
-            ? constraints.maxHeight - margin - dateWidth(context)
+            ? constraints.maxHeight - timeMargin - dateOffset
             : 60 * timeSlots * widget.rate;
         final sizeWidth = constraints.maxWidth;
-        final weekWidth = sizeWidth - offset;
-        final dateScale = dateSlots / weekWidth;
+        final weekWidth = sizeWidth - timeOffset;
+        final dayScale = daySlots / weekWidth;
         final timeScale = 60 * timeSlots / sizeHeight;
         final timeHeader = TimeHeader(
           fromHour: widget.fromHour,
           toHour: widget.toHour,
           step: widget.step,
-          margin: margin,
+          margin: timeMargin,
           height: sizeHeight,
           background: widget.timeBackground,
           timeFormat: widget.timeFormat,
@@ -136,7 +117,6 @@ class _WeeklyViewState extends State<WeeklyView> {
           week: widget.week,
           fromDay: widget.fromDay,
           toDay: widget.toDay,
-          step: widget.step,
           width: weekWidth,
           background: widget.dateBackground,
           dateFormat: widget.dateFormat,
@@ -147,9 +127,9 @@ class _WeeklyViewState extends State<WeeklyView> {
           weeklyTap: onPageTap,
           width: weekWidth,
           height: sizeHeight,
-          dateSlots: dateSlots,
+          daySlots: daySlots,
           timeSlots: timeSlots,
-          dateScale: dateScale,
+          dayScale: dayScale,
           timeScale: timeScale,
           lineStyle: widget.lineStyle,
           lineColor: widget.lineColor,
@@ -161,31 +141,18 @@ class _WeeklyViewState extends State<WeeklyView> {
         );
         final weekPage = WeeklyPage(
           week: widget.week,
-          events: [
-            Event.make(data: {
-              "start": DateTime.now(),
-              "stop": DateTime.now().add(Duration(hours: 1)),
-              "color": Colors.pink,
-              "subject": "Event",
-            }),
-            Event.make(data: {
-              "start": DateTime.now().add(Duration(days: -2, hours: -4)),
-              "stop": DateTime.now().add(Duration(days: -2, hours: -3)),
-              "color": Colors.green,
-              "subject": "Event",
-            })
-          ],
+          events: source.forWeek(widget.week),
           width: weekWidth,
           height: sizeHeight,
           fromHour: widget.fromHour,
-          dateScale: dateScale,
+          dayScale: dayScale,
           timeScale: timeScale,
         );
         return Column(
           children: [
             Row(
               children: [
-                SizedBox(width: timeWidth(context)),
+                SizedBox(width: timeOffset),
                 weekHeader,
               ],
             ),
@@ -197,7 +164,7 @@ class _WeeklyViewState extends State<WeeklyView> {
                     Expanded(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                            vertical: margin / 2
+                            vertical: timeMargin / 2
                         ),
                         child: Stack(
                             children: [
@@ -217,4 +184,3 @@ class _WeeklyViewState extends State<WeeklyView> {
     );
   }
 }
-

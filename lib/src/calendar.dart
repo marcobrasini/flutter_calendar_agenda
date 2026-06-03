@@ -1,17 +1,30 @@
-import 'package:calendar/src/widgets/views/view_daily.dart';
-import 'package:calendar/src/widgets/views/view_weekly.dart';
+import 'package:calendar/src/const.dart';
 import 'package:flutter/material.dart';
+import 'widgets/views/view_daily.dart';
+import 'widgets/views/view_weekly.dart';
 import 'widgets/components/header_calendar.dart';
 import 'utils/datetime.dart';
+import 'data/source.dart';
 import 'enums.dart';
 
 
 class Calendar extends StatefulWidget {
   final CalendarView view;
+  final Source source;
+  final int fromHour;
+  final int toHour;
+  final int fromDay;
+  final int toDay;
   final TextStyle? headerTextStyle;
+
   const Calendar({
     super.key,
     required this.view,
+    required this.source,
+    this.fromHour = initialHour,
+    this.toHour = finalHour,
+    this.fromDay = initialDay,
+    this.toDay = finalDay,
     this.headerTextStyle,
   });
 
@@ -33,7 +46,7 @@ class _CalendarState extends State<Calendar> {
       case CalendarView.weekly:
         final start = dateTime.mon.format("dd/MM/yyyy");
         final stop = dateTime.sun.format("dd/MM/yyyy");
-        return "${start} -- ${stop}";
+        return "$start ── $stop";
       case CalendarView.monthly:
         return dateTime.format("MMMM yyyy");
     }
@@ -44,11 +57,17 @@ class _CalendarState extends State<Calendar> {
       case CalendarView.daily:
         return DailyView(
           date: dateTime,
+          fromHour: widget.fromHour,
+          toHour: widget.toHour,
           timePadding: 8.0,
         );
       case CalendarView.weekly:
         return WeeklyView(
           week: dateTime,
+          fromHour: widget.fromHour,
+          toHour: widget.toHour,
+          fromDay: widget.fromDay,
+          toDay: widget.toDay,
           timePadding: 8.0,
         );
       case CalendarView.monthly:
@@ -74,18 +93,22 @@ class _CalendarState extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CalendarHeader(
-          title: title(),
-          last: last,
-          next: next,
-          textStyle: widget.headerTextStyle,
-        ),
-        Expanded(
-          child: page(),
-        ),
-      ],
+    return CalendarSource(
+      source: widget.source,
+      child: Column(
+        children: [
+          CalendarHeader(
+            title: title(),
+            last: last,
+            next: next,
+            textStyle: widget.headerTextStyle,
+          ),
+          Expanded(
+            child: page(),
+          ),
+        ],
+        // ),
+      ),
     );
   }
 }

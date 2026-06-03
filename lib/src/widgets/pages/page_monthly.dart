@@ -1,38 +1,39 @@
 import 'package:calendar/src/data/event.dart';
+import 'package:calendar/src/data/source.dart';
 import 'package:calendar/src/utils/datetime.dart';
 import 'package:calendar/src/widgets/components/slot_event.dart';
 import 'package:flutter/material.dart';
 
 
-class WeeklyPage extends StatefulWidget {
+class MonthlyPage extends StatefulWidget {
   final List<Event> events;
-  final Week week;
+  final Month month;
   final double width;
   final double height;
   final double dayScale;
-  final double timeScale;
-  final int fromHour;
+  final double weekScale;
+  final int fromDay;
 
-  const WeeklyPage({
+  const MonthlyPage({
     super.key,
-    required this.week,
+    required this.month,
     required this.events,
     required this.width,
     required this.height,
     required this.dayScale,
-    required this.timeScale,
-    required this.fromHour,
+    required this.weekScale,
+    required this.fromDay,
   });
 
   @override
-  State<WeeklyPage> createState() => _WeeklyPageState();
+  State<MonthlyPage> createState() => _MonthlyPageState();
 }
 
 
-class _WeeklyPageState extends State<WeeklyPage> {
+class _MonthlyPageState extends State<MonthlyPage> {
 
-  int x(Event event) => event.start.date % widget.week;
-  int y(Event event) => event.start.time % Time(widget.fromHour, 0);
+  int x(Event event) => event.start.weekday - widget.fromDay;
+  int y(Event event) => event.start.date % (widget.month.weekStart as Date) ~/ 7;
 
   @override
   Widget build(BuildContext context) {
@@ -43,12 +44,12 @@ class _WeeklyPageState extends State<WeeklyPage> {
         children: [
           for (var event in widget.events)
             Positioned(
-              top: y(event) / widget.timeScale,
+              top: y(event) / widget.weekScale,
               left: x(event) / widget.dayScale,
               child: EventSlot(
                 event: event,
                 width: 1 / widget.dayScale,
-                height: event.duration.inMinutes / widget.timeScale,
+                height: event.duration.inMinutes / widget.weekScale,
               ),
             )
         ],

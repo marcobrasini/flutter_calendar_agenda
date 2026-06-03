@@ -1,10 +1,11 @@
-import 'package:calendar/src/data/event.dart';
+import 'package:calendar/src/data/source.dart';
 import 'package:calendar/src/utils/datetime.dart';
 import 'package:calendar/src/widgets/pages/page_daily.dart';
 import 'package:flutter/material.dart';
 import '../components/header_time.dart';
 import '../frames/frame_daily.dart';
 import '../../enums.dart';
+import '../../context.dart';
 
 
 class DailyView extends StatefulWidget {
@@ -56,25 +57,12 @@ class DailyView extends StatefulWidget {
 
 class _DailyViewState extends State<DailyView> {
 
-  void onPageTap(Time tapped) {
-    Time time = (widget.timeRound != null)
-        ? tapped.round(widget.timeRound!)
-        : tapped;
+  void onPageTap(int tapped) {
+    Time time = Time.fromMinutes(tapped);
+    if (widget.timeRound != null) {
+      time = time.round(widget.timeRound!);
+    }
     print(widget.date & time);
-  }
-
-  double timeWidth(BuildContext context) {
-    final style = widget.timeStyle ?? DefaultTextStyle.of(context).style;
-    final layout = TextPainter(
-      text: TextSpan(text: Time(0, 0).format(widget.timeFormat), style: style),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return layout.width + (widget.timePadding ?? 0) * 2;
-  }
-
-  double timeMargin(BuildContext context) {
-    final style = widget.timeStyle ?? DefaultTextStyle.of(context).style;
-    return style.fontSize! * (style.height ?? 1.5);
   }
 
   @override
@@ -84,21 +72,24 @@ class _DailyViewState extends State<DailyView> {
 
   @override
   Widget build(BuildContext context) {
+    final source = CalendarSource.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
-        final offset = timeWidth(context);
-        final margin = timeMargin(context);
+        final timeMargin = context.timeMargin(widget.timeStyle);
+        final timeOffset = context.timeWidth(
+            widget.timeFormat, widget.timeStyle, widget.timePadding
+        );
         final timeSlots = widget.toHour - widget.fromHour;
         final sizeHeight = (widget.rate == 0)
-            ? constraints.maxHeight - margin
+            ? constraints.maxHeight - timeMargin
             : 60 * timeSlots * widget.rate;
         final sizeWidth = constraints.maxWidth;
-        final dateWidth = sizeWidth - offset;
+        final dateWidth = sizeWidth - timeOffset;
         final timeHeader = TimeHeader(
           fromHour: widget.fromHour,
           toHour: widget.toHour,
           step: widget.step,
-          margin: margin,
+          margin: timeMargin,
           height: sizeHeight,
           background: widget.timeBackground,
           timeFormat: widget.timeFormat,
@@ -120,35 +111,32 @@ class _DailyViewState extends State<DailyView> {
         );
         final dayPage = DailyPage(
           date: widget.date,
-          events: [Event.make(data: {
-            "start": DateTime.now(),
-            "stop": DateTime.now().add(Duration(hours: 1)),
-            "color": Colors.pink,
-            "subject": "Event",
-          })],
+          events: source.forDate(widget.date),
           width: dateWidth,
           height: sizeHeight,
           timeScale: 60 * timeSlots / sizeHeight,
+          fromHour: widget.fromHour,
         );
-        return SingleChildScrollView(
-          child: Row(
-            children: [
-              timeHeader,
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      vertical: offset / 2
-                  ),
-                  child: Stack(
-                    children: [
-                      dayFrame,
-                      dayPage,
-                    ],
-                  ),
+        final dayView = Row(
+          children: [
+            timeHeader,
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    vertical: timeMargin / 2
+                ),
+                child: Stack(
+                  children: [
+                    dayFrame,
+                    dayPage,
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        );
+        return (widget.rate == 0) ? dayView : SingleChildScrollView(
+          child: dayView,
         );
       },
     );

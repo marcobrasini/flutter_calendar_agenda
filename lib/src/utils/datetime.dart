@@ -6,6 +6,7 @@ class Time extends DateTime {
       : super(year, month, day, hour, minute);
 
   factory Time(int hour, int minute) => Time._(1, 1, 1, hour, minute);
+  factory Time.fromMinutes(int minutes) => Time(minutes ~/ 60, minutes % 60);
 
   static final TimeBeg beg = TimeBeg();
   static final TimeEnd end = TimeEnd();
@@ -155,6 +156,11 @@ class Date extends DateTime {
 
 
 class Week extends DateTime {
+  static final weekDays = Week(2024, 0);
+
+  final int week;
+  final int weekYear;
+
   Week._(super.year, super.month, super.day, this.week, this.weekYear);
 
   factory Week(int year, [int week = 0]) {
@@ -163,8 +169,6 @@ class Week extends DateTime {
     return Week._(date.year, date.month, date.day, week % 53, weekYear);
   }
 
-  final int week;
-  final int weekYear;
   Date get mon => Date(year, month, day + 0);
   Date get tue => Date(year, month, day + 1);
   Date get wed => Date(year, month, day + 2);

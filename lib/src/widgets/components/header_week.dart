@@ -1,3 +1,4 @@
+import 'package:calendar/src/const.dart';
 import 'package:calendar/src/utils/datetime.dart';
 import 'package:flutter/material.dart';
 
@@ -6,33 +7,29 @@ class WeekHeader extends StatelessWidget {
   final Week week;
   final int fromDay;
   final int toDay;
-  final int step;
-  final double? height;
   final double? width;
+  final double? height;
   final Color? background;
-  final String dateFormat;
+  final String? dateFormat;
   final double? datePadding;
   final TextStyle? dateStyle;
-  final Widget? timeSlot;
 
   const WeekHeader({
     super.key,
     required this.week,
     required this.fromDay,
     required this.toDay,
-    required this.step,
-    this.height,
     this.width,
+    this.height,
     this.background,
-    required this.dateFormat,
+    this.dateFormat,
     this.datePadding,
     this.dateStyle,
-    this.timeSlot,
   });
 
   List<Date> get dates {
     final dateList = <Date>[];
-    var date = week.date;
+    var date = week.mon;
     for (int i = fromDay ; i <= toDay ; i++) {
       dateList.add(date + i - 1);
     }
@@ -47,32 +44,21 @@ class WeekHeader extends StatelessWidget {
         width: width,
         child: Row(
           children: [
-            if (timeSlot != null) timeSlot!,
-            Expanded(
-              child: Row(
-                children: [
-                  for (Date date in dates)
-                    Expanded(
-                      child: (datePadding == null)
-                          ? Center(
-                          child: Text(date.format(dateFormat),
-                            textAlign: TextAlign.center,
-                            style: dateStyle,
-                          )
-                      )
-                          : Padding(
-                        padding: EdgeInsets.symmetric(vertical: datePadding!),
-                        child: Center(
-                          child: Text(date.format(dateFormat),
-                            textAlign: TextAlign.center,
-                            style: dateStyle,
-                          ),
-                        ),
-                      ),
-                    )
-                ],
-              ),
-            ),
+            for (Date date in dates)
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      vertical: datePadding ?? textHeaderPadding,
+                  ),
+                  child: Center(
+                    child: Text(
+                      date.format(dateFormat ?? dateHeaderFormat),
+                      textAlign: TextAlign.center,
+                      style: dateStyle,
+                    ),
+                  ),
+                ),
+              )
           ],
         )
     );

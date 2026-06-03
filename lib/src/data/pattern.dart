@@ -1,3 +1,4 @@
+import 'package:rrule/rrule.dart';
 import 'package:flutter/foundation.dart';
 import 'package:calendar/src/utils/datetime.dart';
 
@@ -11,6 +12,26 @@ enum PatternType {
 
 
 class Pattern with Diagnosticable {
+  static const _ICSToType = {
+    "DAILY": PatternType.daily,
+    "WEEKLY": PatternType.weekly,
+    "MONTHLY": PatternType.monthly,
+    "YEARLY": PatternType.yearly,
+  };
+  static const _TypeToICS = {
+    PatternType.daily: "DAILY",
+    PatternType.weekly: "WEEKLY",
+    PatternType.monthly: "MONTHLY",
+    PatternType.yearly: "YEARLY",
+  };
+
+  final PatternType type;
+  final DateTime since;
+  final int step;
+  final int? count;
+  final DateTime? until;
+  final Set<DateTime> exceptions;
+  List<Date> recurrences;
 
   Pattern({
     required this.since,
@@ -22,13 +43,59 @@ class Pattern with Diagnosticable {
     this.recurrences = const [],
   });
 
-  final PatternType type;
-  final DateTime since;
-  final int step;
-  final int? count;
-  final DateTime? until;
-  final Set<DateTime> exceptions;
-  List<Date> recurrences;
+  factory Pattern.fromICSString(DateTime since, String rule) {
+    final rrule = RecurrenceRule.fromString(rule);
+    final type = Pattern._ICSToType[rrule.frequency.toString()]!;
+    final recurrences = <Date>[];
+    switch (type) {
+      case PatternType.daily:
+        break;
+      case PatternType.weekly:
+        for (var day in rrule.byWeekDays) {
+          recurrences.add(Date(2024, 1, day.day));
+        }
+        break;
+      case PatternType.monthly:
+        for (var day in rrule.byMonthDays) {
+          recurrences.add(Date(2024, 1, day));
+        }
+        break;
+      case PatternType.yearly:
+        for (var month in rrule.byMonths) {
+          if (rrule.byMonthDays.isEmpty) {
+            recurrences.add(Date(2024, month, 1));
+          } else {
+            for (var day in rrule.byMonthDays) {
+              recurrences.add(Date(2024, month, day));
+            }
+          }
+        }
+        for (var day in rrule.byYearDays) {
+          recurrences.add(Date(2024, 1, day));
+        }
+        break;
+    }
+    return Pattern(
+      since: since,
+      type: type,
+      step: rrule.interval ?? 1,
+      count: rrule.count,
+      until: rrule.until,
+      recurrences: recurrences,
+    );
+  }
+
+  String toICSString() {
+    final strings = <String>["FREQ:${_TypeToICS[type]}"];
+    if (step != 1) strings.add("INTERVAL=$step");
+    if (count != null) strings.add("COUNT=$count");
+    if (until != null) strings.add("UNTIL=${until!.toISOCompact()}");
+    if (exceptions.isNotEmpty) {
+      final dates = exceptions.map((e) => e.toISOCompact()).join(",");
+      strings.add("EXDATE=$dates");
+    }
+    return "RRULE:${strings.join(";")};";
+  }
 
   PatternIterator get iterator {
     switch(type) {

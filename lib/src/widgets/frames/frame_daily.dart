@@ -4,12 +4,12 @@ import '../../utils/datetime.dart';
 import '../../enums.dart';
 
 
-typedef onTapCallback = void Function(Time time);
+typedef OnTapCallback = void Function(int minute);
 
 
 class DailyFrame extends StatelessWidget {
-  final double height;
   final double width;
+  final double height;
   final int timeSlots;
   final double timeScale;
   final LineStyle lineStyle;
@@ -18,7 +18,7 @@ class DailyFrame extends StatelessWidget {
   final double lineOffset;
   final double? dashedWidth;
   final double? dashedSpace;
-  final onTapCallback? dailyTap;
+  final OnTapCallback? dailyTap;
 
   const DailyFrame({
     super.key,
@@ -35,23 +35,15 @@ class DailyFrame extends StatelessWidget {
     this.dailyTap,
   });
 
-  List<double> positionsY(double height) {
-    final positionList = <double>[0.0];
-    final delta = height / timeSlots;
-    for (int i = 0; i < timeSlots; i++) {
-      positionList.add(positionList[i] + delta);
-    }
-    return positionList;
-  }
-
   void _onTapUp(TapUpDetails details) {
+    if (dailyTap == null) return;
     final minutes = (details.localPosition.dy * timeScale).toInt();
-    if (dailyTap != null) dailyTap!(Time(0, 0) + minutes);
+    dailyTap!(minutes);
   }
 
   @override
   Widget build(BuildContext context) {
-    final horizontalPainter = CustomPaint(
+    final timePainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
         divisions: timeSlots,
@@ -64,7 +56,7 @@ class DailyFrame extends StatelessWidget {
         direction: LineDirection.horizontal,
       ),
     );
-    final verticalPainter = CustomPaint(
+    final dayPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
         positions: [0.0],
@@ -77,10 +69,10 @@ class DailyFrame extends StatelessWidget {
         direction: LineDirection.vertical,
       ),
     );
-    final linePainter = Stack(
+    final framePainter = Stack(
       children: [
-        horizontalPainter,
-        verticalPainter,
+        timePainter,
+        dayPainter,
       ],
     );
     return SizedBox(
@@ -88,7 +80,7 @@ class DailyFrame extends StatelessWidget {
         width: width,
         child: GestureDetector(
           onTapUp: _onTapUp,
-          child: linePainter,
+          child: framePainter,
         )
     );
   }

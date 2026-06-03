@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import '../painters/painter_lines.dart';
-import '../../utils/datetime.dart';
 import '../../enums.dart';
 
 
-typedef OnTapCallback = void Function(int day, Time time);
+typedef OnTapCallback = void Function(int day, int minute);
 
 
 class WeeklyFrame extends StatelessWidget {
-  final double height;
   final double width;
-  final int dateSlots;
+  final double height;
+  final int daySlots;
   final int timeSlots;
-  final double dateScale;
+  final double dayScale;
   final double timeScale;
   final LineStyle lineStyle;
   final Color lineColor;
   final double lineWidth;
-  final double? lineLength;
   final double lineOffsetX;
   final double lineOffsetY;
   final double? dashedWidth;
@@ -28,48 +26,30 @@ class WeeklyFrame extends StatelessWidget {
     super.key,
     required this.width,
     required this.height,
-    required this.dateSlots,
+    required this.daySlots,
     required this.timeSlots,
-    required this.dateScale,
+    required this.dayScale,
     required this.timeScale,
     required this.lineColor,
     required this.lineStyle,
     required this.lineWidth,
     required this.lineOffsetX,
     required this.lineOffsetY,
-    this.lineLength,
     this.dashedWidth,
     this.dashedSpace,
     this.weeklyTap,
   });
 
-  // List<double> positionsX(double width) {
-  //   final positionList = <double>[0.0];
-  //   final delta = width / daySlots;
-  //   for (int i = 0; i < daySlots; i++) {
-  //     positionList.add(positionList[i] + delta);
-  //   }
-  //   return positionList;
-  // }
-  //
-  // List<double> positionsY(double height) {
-  //   final positionList = <double>[0.0];
-  //   final delta = height / timeSlots;
-  //   for (int i = 0; i < timeSlots; i++) {
-  //     positionList.add(positionList[i] + delta);
-  //   }
-  //   return positionList;
-  // }
-
   void _onTapUp(TapUpDetails details) {
+    if (weeklyTap == null) return;
+    final day = (details.localPosition.dx * dayScale).toInt();
     final minutes = (details.localPosition.dy * timeScale).toInt();
-    final day = (details.localPosition.dx * dateScale).toInt();
-    if (weeklyTap != null) weeklyTap!(day, Time(0, 0) + minutes);
+    weeklyTap!(day, minutes);
   }
 
   @override
   Widget build(BuildContext context) {
-    final horizontalPainter = CustomPaint(
+    final timePainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
         divisions: timeSlots,
@@ -82,10 +62,10 @@ class WeeklyFrame extends StatelessWidget {
         direction: LineDirection.horizontal,
       ),
     );
-    final verticalPainter = CustomPaint(
+    final dayPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: dateSlots,
+        divisions: daySlots,
         lineStyle: lineStyle,
         lineColor: lineColor,
         lineWidth: lineWidth,
@@ -95,10 +75,10 @@ class WeeklyFrame extends StatelessWidget {
         direction: LineDirection.vertical,
       ),
     );
-    final linePainter = Stack(
+    final framePainter = Stack(
       children: [
-        horizontalPainter,
-        verticalPainter,
+        timePainter,
+        dayPainter,
       ],
     );
     return SizedBox(
@@ -106,7 +86,7 @@ class WeeklyFrame extends StatelessWidget {
         width: width,
         child: GestureDetector(
           onTapUp: _onTapUp,
-          child: linePainter,
+          child: framePainter,
         )
     );
   }

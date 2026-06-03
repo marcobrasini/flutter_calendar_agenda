@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calendar/src/utils/datetime.dart';
+import '../../const.dart';
 
 
 class TimeHeader extends StatelessWidget {
@@ -26,11 +27,11 @@ class TimeHeader extends StatelessWidget {
     this.background,
   });
 
-  int get length => (toHour - fromHour) * 60;
+  int get length => (toHour - fromHour) * Duration.minutesPerHour;
 
-  Time get from => (fromHour == 0) ? Time.beg : Time(fromHour, 0);
+  Time get from => (fromHour == initialHour) ? Time.beg : Time(fromHour, 0);
 
-  Time get to => (toHour == 24) ? Time.end : Time(toHour, 0);
+  Time get to => (toHour == finalHour) ? Time.end : Time(toHour, 0);
 
   List<Time> get times {
     final timeList = <Time>[];
@@ -61,12 +62,15 @@ class TimeHeader extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           for (Time time in times)
-            (timePadding == null)
-                ? Text(time.format(timeFormat), style: timeStyle)
-                : Padding(
-                  padding: EdgeInsets.symmetric(horizontal: timePadding!),
-                  child: Text(time.format(timeFormat), style: timeStyle),
-                ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: timePadding ?? textHeaderPadding,
+              ),
+              child: Text(
+                time.format(timeFormat),
+                style: timeStyle,
+              ),
+            ),
         ],
       )
     );
