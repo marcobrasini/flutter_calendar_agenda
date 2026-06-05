@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         body: Padding(
           padding: EdgeInsets.all(16.0),
           child: Calendar(
-            view: CalendarView.monthly,
+            view: CalendarView.weekly,
             begHour: 6,
             endHour: 22,
             begDay: 1,

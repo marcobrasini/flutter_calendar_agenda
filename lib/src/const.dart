@@ -22,9 +22,20 @@ const textLineSpacing = 1.5;
 const textSlotPadding = 4.0;
 
 const dayHeaderFormat = "d";
-const dateHeaderFormat = "EEE\nd";
 const timeHeaderFormat = "HH:mm";
+const dateHeaderFormat = "EEE\nd";
 const weekHeaderFormat = "EEE";
+
+const dailyHeaderFormat = "EEEE d MMMM yyyy";
+const dailyHeaderPadding = 0.0;
+
+const weeklyHeaderFormat = "d MMMM yyyy";
+const weekdayHeaderFormat = "EEE\nd";
+const weeklyHeaderPadding = 0.0;
+
+const monthlyHeaderFormat = "MMMM yyyy";
+const monthlyHeaderPadding = 0.0;
+
 const timeHeaderRatio = 1.0;
 
 const eventMaxLines = 1;
@@ -39,3 +50,6 @@ const dashFrameSpace = 4.0;
 
 const dayMonthSlots = 7;
 const weekMonthSlots = 6;
+
+const swipeLength = 50;
+const swipeSpeed = 100;

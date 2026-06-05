@@ -1,21 +1,17 @@
-import 'package:calendar/src/const.dart';
-import 'package:calendar/src/context.dart';
-import 'package:calendar/src/mixin.dart';
-import 'package:calendar/src/utils/datetime.dart';
-import 'package:calendar/src/widgets/components/header_week.dart';
-import 'package:calendar/src/widgets/pages/page_weekly.dart';
 import 'package:flutter/material.dart';
 import '../components/header_time.dart';
 import '../frames/frame_weekly.dart';
+import '../pages/page_weekly.dart';
+import '../../utils/datetime.dart';
+import '../../context.dart';
 import '../../enums.dart';
-import '../../data/source.dart';
+import '../../mixin.dart';
 
 
-class WeeklyView extends StatefulWidget with DateScheme, TimeScheme {
+class WeeklyView extends StatelessWidget with DateScheme, TimeScheme {
 
   const WeeklyView({
     super.key,
-    required this.week,
     required this.begDay,
     required this.endDay,
     required this.dateStep,
@@ -25,14 +21,19 @@ class WeeklyView extends StatefulWidget with DateScheme, TimeScheme {
     // TimeHeader attributes
     required this.timeRatio,
     required this.timeFormat,
-    this.timePadding,
+    required this.timePadding,
     this.timeTextStyle,
     this.timeBackground,
     // DateHeader attributes,
     required this.dateFormat,
-    this.datePadding,
+    required this.datePadding,
     this.dateTextStyle,
     this.dateBackground,
+    //
+    required this.weeklyFormat,
+    required this.weeklyPadding,
+    this.weeklyTextStyle,
+    this.weeklyBackground,
     // LinePainter attributes
     required this.lineColor,
     required this.lineStyle,
@@ -43,10 +44,11 @@ class WeeklyView extends StatefulWidget with DateScheme, TimeScheme {
     this.dashedSpace,
     // Interactive callback
     this.timeRound,
+    //
+    this.cornerWidget,
   });
 
   // TimeHeader attributes
-  final Week week;
   @override final int begDay;
   @override final int endDay;
   @override final int dateStep;
@@ -56,12 +58,16 @@ class WeeklyView extends StatefulWidget with DateScheme, TimeScheme {
   final double timeRatio;
   final String dateFormat;
   final String timeFormat;
-  final double? datePadding;
-  final double? timePadding;
+  final String weeklyFormat;
+  final double datePadding;
+  final double timePadding;
+  final double weeklyPadding;
   final TextStyle? dateTextStyle;
   final TextStyle? timeTextStyle;
+  final TextStyle? weeklyTextStyle;
   final Color? dateBackground;
   final Color? timeBackground;
+  final Color? weeklyBackground;
   // LinePainter attributes
   final LineStyle lineStyle;
   final Color lineColor;
@@ -71,122 +77,108 @@ class WeeklyView extends StatefulWidget with DateScheme, TimeScheme {
   final double? dashedWidth;
   final double? dashedSpace;
   final int? timeRound;
-
-  @override
-  State<WeeklyView> createState() => _WeeklyViewState();
-}
-
-
-class _WeeklyViewState extends State<WeeklyView> {
+  final Widget? cornerWidget;
+  
 
   void onPageTap(int tappedDay, int tappedMinute) {
-    Date date = widget.week.mon + tappedDay;
-    Time time = Time(widget.begHour, tappedMinute);
-    if (widget.timeRound != null) {
-      time = time.round(widget.timeRound!);
+    // Date date = week.mon + tappedDay;
+    Time time = Time(begHour, tappedMinute);
+    if (timeRound != null) {
+      time = time.round(timeRound!);
     }
-    print(date & time);
+    print(time);
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final timeMargin = context.timeMargin(widget.timeTextStyle);
+        final timeMargin = context.timeMargin(timeTextStyle);
         final timeOffset = context.timeWidth(
-            widget.timeFormat, widget.timeTextStyle, widget.timePadding
-        );
+            timeFormat, timeTextStyle, timePadding);
         final dateOffset = context.dateWidth(
-            widget.dateFormat, widget.dateTextStyle, widget.datePadding
-        );
+            dateFormat, dateTextStyle, datePadding);
         //
-        final sizeHeight = (widget.timeRatio == 0)
+        final pageHeight = (timeRatio == 0)
             ? constraints.maxHeight - timeMargin - dateOffset
-            : widget.minutes * widget.timeRatio;
-        final sizeWidth = constraints.maxWidth - timeOffset;
+            : minutes * timeRatio;
+        final pageWidth = constraints.maxWidth - timeOffset;
         //
-        final timeHeader = TimeHeader(
-          begHour: widget.begHour,
-          endHour: widget.endHour,
-          timeStep: widget.timeStep,
-          height: sizeHeight,
-          timeFormat: widget.timeFormat,
-          timePadding: widget.timePadding,
-          timeTextStyle: widget.timeTextStyle,
-          background: widget.timeBackground,
+        final cornerFrame = SizedBox(
+          width: timeOffset,
+          height: dateOffset,
+          child: cornerWidget,
         );
-        final weekHeader = WeekHeader(
-          week: widget.week,
-          width: sizeWidth,
-          begDay: widget.begDay,
-          endDay: widget.endDay,
-          dateStep: widget.dateStep,
-          background: widget.dateBackground,
-          dateFormat: widget.dateFormat,
-          datePadding: widget.datePadding,
-          dateTextStyle: widget.dateTextStyle,
+        final headerFrame = SizedBox(
+          width: pageWidth,
+          height: dateOffset,
+        );
+        final timeHeader = TimeHeader(
+          width: timeOffset,
+          height: pageHeight,
+          begHour: begHour,
+          endHour: endHour,
+          timeStep: timeStep,
+          timeFormat: timeFormat,
+          timePadding: timePadding,
+          timeTextStyle: timeTextStyle,
+          background: timeBackground,
         );
         final weekFrame = WeeklyFrame(
-          width: sizeWidth,
-          height: sizeHeight,
-          begDay: widget.begDay,
-          endDay: widget.endDay,
-          dateStep: widget.dateStep,
-          begHour: widget.begHour,
-          endHour: widget.endHour,
-          timeStep: widget.timeStep,
-          lineStyle: widget.lineStyle,
-          lineColor: widget.lineColor,
-          lineWidth: widget.lineWidth,
-          lineOffsetX: widget.lineOffsetX - (widget.timePadding ?? 0)/2,
-          lineOffsetY: widget.lineOffsetY - (widget.datePadding ?? 0)/2,
-          dashedSpace: widget.dashedSpace,
-          dashedWidth: widget.dashedWidth,
+          width: pageWidth,
+          height: pageHeight,
+          header: headerFrame,
+          padding: timeMargin/2,
+          begDay: begDay,
+          endDay: endDay,
+          dateStep: dateStep,
+          begHour: begHour,
+          endHour: endHour,
+          timeStep: timeStep,
+          lineStyle: lineStyle,
+          lineColor: lineColor,
+          lineWidth: lineWidth,
+          lineOffsetX: lineOffsetX - timePadding/2,
+          lineOffsetY: lineOffsetY - datePadding/2,
+          dashedSpace: dashedSpace,
+          dashedWidth: dashedWidth,
           weeklyTap: onPageTap,
         );
         final weekPage = WeeklyPage(
-          week: widget.week,
-          width: sizeWidth,
-          height: sizeHeight,
-          begDay: widget.begDay,
-          endDay: widget.endDay,
-          dateStep: widget.dateStep,
-          begHour: widget.begHour,
-          endHour: widget.endHour,
-          timeStep: widget.timeStep,
+          width: pageWidth,
+          height: pageHeight,
+          padding: timeMargin/2,
+          begDay: begDay,
+          endDay: endDay,
+          dateStep: dateStep,
+          begHour: begHour,
+          endHour: endHour,
+          timeStep: timeStep,
+          dateFormat: dateFormat,
+          datePadding: datePadding,
+          dateTextStyle: dateTextStyle,
+          dateBackground: dateBackground,
         );
         final weekView = Row(
           children: [
-            timeHeader,
+            Column(
+              children: [
+                cornerFrame,
+                timeHeader,
+              ],
+            ),
             Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    vertical: timeMargin / 2
-                ),
-                child: Stack(
-                    children: [
-                      weekFrame,
-                      weekPage,
-                    ]
-                ),
+              child: Stack(
+                children: [
+                  weekFrame,
+                  weekPage,
+                ]
               ),
             ),
           ],
         );
-        return Column(
-          children: [
-            Row(
-              children: [
-                SizedBox(width: timeOffset),
-                weekHeader,
-              ],
-            ),
-            Expanded(
-              child: (widget.timeRatio == 0) ? weekView : SingleChildScrollView(
-                child: weekView,
-              ),
-            )
-          ],
+        return SingleChildScrollView(
+          child: weekView,
         );
       },
     );

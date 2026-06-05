@@ -1,7 +1,7 @@
-import 'package:calendar/src/mixin.dart';
 import 'package:flutter/material.dart';
 import '../components/painter_lines.dart';
 import '../../enums.dart';
+import '../../mixin.dart';
 
 
 typedef OnTapCallback = void Function(int day, int minute);
@@ -13,6 +13,8 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
     super.key,
     required this.width,
     required this.height,
+    required this.header,
+    required this.padding,
     required this.begHour,
     required this.endHour,
     required this.timeStep,
@@ -33,6 +35,8 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
 
   final double width;
   final double height;
+  final Widget header;
+  final double padding;
   @override final int begDay;
   @override final int endDay;
   @override final int dateStep;
@@ -61,7 +65,7 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
 
   @override
   Widget build(BuildContext context) {
-    final timePainter = CustomPaint(
+    final hourPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
         divisions: hours,
@@ -89,17 +93,27 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
     );
     final framePainter = Stack(
       children: [
-        timePainter,
+        hourPainter,
         dayPainter,
       ],
     );
-    return SizedBox(
-        height: height,
-        width: width,
-        child: GestureDetector(
-          onTapUp: _onTapUp,
-          child: framePainter,
-        )
+    return Column(
+      children: [
+        header,
+        Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: padding,
+          ),
+          child: SizedBox(
+              height: height,
+              width: width,
+              child: GestureDetector(
+                onTapUp: _onTapUp,
+                child: framePainter,
+              )
+          ),
+        ),
+      ],
     );
   }
 }

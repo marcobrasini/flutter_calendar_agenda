@@ -1,36 +1,35 @@
-import 'package:calendar/src/const.dart';
-import 'package:calendar/src/mixin.dart';
-import 'package:calendar/src/utils/datetime.dart';
-import 'package:calendar/src/widgets/components/slot_date.dart';
 import 'package:flutter/material.dart';
+import '../components/slot_date.dart';
+import '../../utils/datetime.dart';
+import '../../mixin.dart';
 
 
-class WeekHeader extends StatelessWidget with DateScheme {
+class WeeklyHeader extends StatelessWidget with DateScheme {
 
-  const WeekHeader({
+  const WeeklyHeader({
     super.key,
     required this.week,
     required this.begDay,
     required this.endDay,
     required this.dateStep,
+    required this.dateFormat,
+    required this.datePadding,
+    this.dateTextStyle,
+    this.background,
     this.width,
     this.height,
-    this.background,
-    this.dateFormat,
-    this.datePadding,
-    this.dateTextStyle,
   });
 
   final Week week;
   @override final int begDay;
   @override final int endDay;
   @override final int dateStep;
+  final String dateFormat;
+  final double datePadding;
+  final TextStyle? dateTextStyle;
+  final Color? background;
   final double? width;
   final double? height;
-  final Color? background;
-  final String? dateFormat;
-  final double? datePadding;
-  final TextStyle? dateTextStyle;
 
   List<Date> get dates {
     final dateList = <Date>[];
@@ -48,8 +47,8 @@ class WeekHeader extends StatelessWidget with DateScheme {
       widgets.add(Expanded(
           child: DateSlot(
             date: date,
-            dateFormat: dateFormat ?? dateHeaderFormat,
-            datePadding: datePadding ?? dateHeaderPadding,
+            dateFormat: dateFormat,
+            datePadding: datePadding,
             dateTextStyle: dateTextStyle,
             dateBackground: background,
           )

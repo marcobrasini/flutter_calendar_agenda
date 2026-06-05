@@ -13,6 +13,8 @@ class DailyFrame extends StatelessWidget with TimeScheme {
     super.key,
     required this.width,
     required this.height,
+    required this.header,
+    required this.padding,
     required this.begHour,
     required this.endHour,
     required this.timeStep,
@@ -30,6 +32,8 @@ class DailyFrame extends StatelessWidget with TimeScheme {
 
   final double width;
   final double height;
+  final Widget header;
+  final double padding;
   @override final int begHour;
   @override final int endHour;
   @override final int timeStep;
@@ -83,13 +87,23 @@ class DailyFrame extends StatelessWidget with TimeScheme {
         dayPainter,
       ],
     );
-    return SizedBox(
-        height: height,
-        width: width,
-        child: GestureDetector(
-          onTapUp: (dailyTap == null) ? null : _onTapUp,
-          child: framePainter,
-        )
+    return Column(
+      children: [
+        header,
+        Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: padding,
+          ),
+          child: SizedBox(
+            height: height,
+            width: width,
+            child: GestureDetector(
+              onTapUp: (dailyTap == null) ? null : _onTapUp,
+              child: framePainter,
+            )
+          ),
+        ),
+      ],
     );
   }
 }

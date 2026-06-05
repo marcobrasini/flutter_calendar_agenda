@@ -1,15 +1,15 @@
 import 'package:calendar/src/const.dart';
-import 'package:calendar/src/widgets/views/view_monthly.dart';
 import 'package:flutter/material.dart';
 import 'widgets/views/view_daily.dart';
 import 'widgets/views/view_weekly.dart';
+import 'widgets/views/view_monthly.dart';
 import 'widgets/components/header_calendar.dart';
 import 'utils/datetime.dart';
 import 'data/source.dart';
 import 'enums.dart';
 
 
-class Calendar extends StatefulWidget {
+class Calendar extends StatelessWidget {
   final CalendarView view;
   final Source source;
   final int begHour;
@@ -32,6 +32,16 @@ class Calendar extends StatefulWidget {
   final double datePadding;
   final TextStyle? dateTextStyle;
   final Color? dateBackground;
+  //
+  final String dailyFormat;
+  final double dailyPadding;
+  final TextStyle? dailyTextStyle;
+  final Color? dailyBackground;
+  //
+  final String weeklyFormat;
+  final double weeklyPadding;
+  final TextStyle? weeklyTextStyle;
+  final Color? weeklyBackground;
   //
   final String dayFormat;
   final String weekFormat;
@@ -74,6 +84,16 @@ class Calendar extends StatefulWidget {
     this.dateTextStyle,
     this.dateBackground,
     //
+    this.dailyFormat = dailyHeaderFormat,
+    this.dailyPadding = dailyHeaderPadding,
+    this.dailyTextStyle,
+    this.dailyBackground,
+    //
+    this.weeklyFormat = weeklyHeaderFormat,
+    this.weeklyPadding = weeklyHeaderPadding,
+    this.weeklyTextStyle,
+    this.weeklyBackground,
+    //
     this.dayFormat = dayHeaderFormat,
     this.weekFormat = weekHeaderFormat,
     this.weekPadding = textHeaderPadding,
@@ -91,136 +111,89 @@ class Calendar extends StatefulWidget {
     this.headerTextStyle,
   });
 
-  @override
-  State<Calendar> createState() => _CalendarState();
-}
-
-class _CalendarState extends State<Calendar> {
-  late dynamic dateTime;
-
-  void last() => setState(() {dateTime -= 1;});
-
-  void next() => setState(() {dateTime += 1;});
-
-  String title() {
-    switch (widget.view) {
-      case CalendarView.daily:
-        return dateTime.format("d MMMM yyyy");
-      case CalendarView.weekly:
-        final start = dateTime.mon.format("dd/MM/yyyy");
-        final stop = dateTime.sun.format("dd/MM/yyyy");
-        return "$start ── $stop";
-      case CalendarView.monthly:
-        return dateTime.format("MMMM yyyy");
-    }
-  }
-
-  Widget page() {
-    switch (widget.view) {
+  Widget get page {
+    switch (view) {
       case CalendarView.daily:
         return DailyView(
-          date: dateTime,
-          begHour: widget.begHour,
-          endHour: widget.endHour,
-          timeStep: widget.timeStep,
-          timeRatio: widget.timeRatio,
-          timeFormat: widget.timeFormat,
-          timePadding: widget.timePadding,
-          lineStyle: widget.lineStyle,
-          lineColor: widget.lineColor,
-          lineWidth: widget.lineWidth,
-          lineOffset: widget.lineOffsetX,
-          dashedWidth: widget.dashedWidth,
-          dashedSpace: widget.dashedSpace,
+          begHour: begHour,
+          endHour: endHour,
+          timeStep: timeStep,
+          timeRatio: timeRatio,
+          timeFormat: timeFormat,
+          timePadding: timePadding,
+          dailyFormat: dailyFormat,
+          dailyPadding: dailyPadding,
+          dailyTextStyle: dailyTextStyle,
+          dailyBackground: dailyBackground,
+          lineStyle: lineStyle,
+          lineColor: lineColor,
+          lineWidth: lineWidth,
+          lineOffset: lineOffsetX,
+          dashedWidth: dashedWidth,
+          dashedSpace: dashedSpace,
         );
       case CalendarView.weekly:
         return WeeklyView(
-          week: dateTime,
-          begDay: widget.begDay,
-          endDay: widget.endDay,
-          dateStep: widget.dateStep,
-          begHour: widget.begHour,
-          endHour: widget.endHour,
-          timeStep: widget.timeStep,
-          timeRatio: widget.timeRatio,
-          timeFormat: widget.timeFormat,
-          timePadding: widget.timePadding,
-          timeTextStyle: widget.timeTextStyle,
-          timeBackground: widget.timeBackground,
-          dateFormat: widget.dateFormat,
-          datePadding: widget.datePadding,
-          dateTextStyle: widget.dateTextStyle,
-          dateBackground: widget.dateBackground,
-          lineStyle: widget.lineStyle,
-          lineColor: widget.lineColor,
-          lineWidth: widget.lineWidth,
-          lineOffsetX: widget.lineOffsetX,
-          lineOffsetY: widget.lineOffsetY,
-          dashedWidth: widget.dashedWidth,
-          dashedSpace: widget.dashedSpace,
+          begDay: begDay,
+          endDay: endDay,
+          dateStep: dateStep,
+          begHour: begHour,
+          endHour: endHour,
+          timeStep: timeStep,
+          timeRatio: timeRatio,
+          timeFormat: timeFormat,
+          timePadding: timePadding,
+          timeTextStyle: timeTextStyle,
+          timeBackground: timeBackground,
+          dateFormat: dateFormat,
+          datePadding: datePadding,
+          dateTextStyle: dateTextStyle,
+          dateBackground: dateBackground,
+          weeklyFormat: weeklyFormat,
+          weeklyPadding: weeklyPadding,
+          weeklyTextStyle: weeklyTextStyle,
+          weeklyBackground: weeklyBackground,
+          lineStyle: lineStyle,
+          lineColor: lineColor,
+          lineWidth: lineWidth,
+          lineOffsetX: lineOffsetX,
+          lineOffsetY: lineOffsetY,
+          dashedWidth: dashedWidth,
+          dashedSpace: dashedSpace,
         );
       case CalendarView.monthly:
-        return MonthlyView(
-          month: dateTime,
-          begWeek: widget.begWeek,
-          endWeek: widget.endWeek,
-          weekStep: widget.weekStep,
-          begDay: widget.begDay,
-          endDay: widget.endDay,
-          dateStep: widget.dateStep,
-          weekFormat: widget.weekFormat,
-          weekPadding: widget.weekPadding,
-          weekTextStyle: widget.weekTextStyle,
-          weekBackground: widget.weekBackground,
-          dateFormat: widget.dayFormat,
-          datePadding: widget.datePadding,
-          dateTextStyle: widget.dateTextStyle,
-          dateBackground: widget.dateBackground,
-          lineColor: widget.lineColor,
-          lineStyle: widget.lineStyle,
-          lineWidth: widget.lineWidth,
-          lineOffsetX: widget.lineOffsetX,
-          lineOffsetY: widget.lineOffsetY,
-          dashedWidth: widget.dashedWidth,
-          dashedSpace: widget.dashedSpace,
-        );
+        return Placeholder();
+        // return MonthlyView(
+        //   begWeek: begWeek,
+        //   endWeek: endWeek,
+        //   weekStep: weekStep,
+        //   begDay: begDay,
+        //   endDay: endDay,
+        //   dateStep: dateStep,
+        //   weekFormat: weekFormat,
+        //   weekPadding: weekPadding,
+        //   weekTextStyle: weekTextStyle,
+        //   weekBackground: weekBackground,
+        //   dateFormat: dayFormat,
+        //   datePadding: datePadding,
+        //   dateTextStyle: dateTextStyle,
+        //   dateBackground: dateBackground,
+        //   lineColor: lineColor,
+        //   lineStyle: lineStyle,
+        //   lineWidth: lineWidth,
+        //   lineOffsetX: lineOffsetX,
+        //   lineOffsetY: lineOffsetY,
+        //   dashedWidth: dashedWidth,
+        //   dashedSpace: dashedSpace,
+        // );
     }
-  }
-
-  @override
-  void initState() {
-    switch (widget.view) {
-      case CalendarView.daily:
-        dateTime = Date.now();
-        break;
-      case CalendarView.weekly:
-        dateTime = Week.now();
-        break;
-      case CalendarView.monthly:
-        dateTime = Month.now();
-        break;
-    }
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return CalendarSource(
-      source: widget.source,
-      child: Column(
-        children: [
-          CalendarHeader(
-            title: title(),
-            last: last,
-            next: next,
-            textStyle: widget.headerTextStyle,
-          ),
-          Expanded(
-            child: page(),
-          ),
-        ],
-        // ),
-      ),
+      source: source,
+      child: page,
     );
   }
 }
