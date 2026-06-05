@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../components/painter_lines.dart';
-import '../../enums.dart';
+import '../tools/painter_lines.dart';
+import '../../config.dart';
 import '../../mixin.dart';
+import '../../enums.dart';
 
 
 typedef OnTapCallback = void Function(int day, int minute);
@@ -21,14 +22,6 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
     required this.begDay,
     required this.endDay,
     required this.dateStep,
-    // LinePainter attributes
-    required this.lineStyle,
-    required this.lineColor,
-    required this.lineWidth,
-    required this.lineOffsetX,
-    required this.lineOffsetY,
-    this.dashedWidth,
-    this.dashedSpace,
     // Interactive callback
     this.weeklyTap,
   });
@@ -45,14 +38,6 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
   @override final int endHour;
   @override final int timeStep;
   double get timeScale => minutes / height;
-  // LinePainter attributes
-  final LineStyle lineStyle;
-  final Color lineColor;
-  final double lineWidth;
-  final double lineOffsetX;
-  final double lineOffsetY;
-  final double? dashedWidth;
-  final double? dashedSpace;
   // Interactive callback
   final OnTapCallback? weeklyTap;
 
@@ -65,16 +50,19 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
 
   @override
   Widget build(BuildContext context) {
+    final config = CalendarConfig.of(context)!;
+    final timeMargin = (config.time?.padding ?? 0.0) / 2;
+    final dateMargin = (config.date?.padding ?? 0.0) / 2;
     final hourPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
         divisions: hours,
-        lineStyle: lineStyle,
-        lineColor: lineColor,
-        lineWidth: lineWidth,
-        offset: lineOffsetX,
-        dashedSpace: dashedSpace,
-        dashedWidth: dashedWidth,
+        lineStyle: config.line.style,
+        lineColor: config.line.color,
+        lineWidth: config.line.width,
+        offset: config.line.offsetX - timeMargin,
+        dashedSpace: config.line.dashedSpace,
+        dashedWidth: config.line.dashedWidth,
         direction: LineDirection.horizontal,
       ),
     );
@@ -82,12 +70,12 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
       size: Size.infinite,
       painter: LinesPainter(
         divisions: days,
-        lineStyle: lineStyle,
-        lineColor: lineColor,
-        lineWidth: lineWidth,
-        offset: lineOffsetY,
-        dashedSpace: dashedSpace,
-        dashedWidth: dashedWidth,
+        lineStyle: config.line.style,
+        lineColor: config.line.color,
+        lineWidth: config.line.width,
+        offset: config.line.offsetY - dateMargin,
+        dashedSpace: config.line.dashedSpace,
+        dashedWidth: config.line.dashedWidth,
         direction: LineDirection.vertical,
       ),
     );
@@ -99,18 +87,18 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
     );
     return Column(
       children: [
-        header,
+        if (config.view.showHeader) header,
         Padding(
           padding: EdgeInsets.symmetric(
             vertical: padding,
           ),
           child: SizedBox(
-              height: height,
-              width: width,
-              child: GestureDetector(
-                onTapUp: _onTapUp,
-                child: framePainter,
-              )
+            height: height,
+            width: width,
+            child: GestureDetector(
+              onTapUp: _onTapUp,
+              child: framePainter,
+            )
           ),
         ),
       ],

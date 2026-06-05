@@ -1,8 +1,9 @@
+import 'package:calendar/src/config.dart';
 import 'package:calendar/src/context.dart';
 import 'package:calendar/src/mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/src/utils/datetime.dart';
-import '../../const.dart';
+
 
 class TimeHeader extends StatelessWidget with TimeScheme {
 
@@ -13,10 +14,6 @@ class TimeHeader extends StatelessWidget with TimeScheme {
     required this.timeStep,
     this.width,
     this.height,
-    this.background,
-    this.timeFormat,
-    this.timePadding,
-    this.timeTextStyle,
   });
 
   @override final int begHour;
@@ -24,10 +21,6 @@ class TimeHeader extends StatelessWidget with TimeScheme {
   @override final int timeStep;
   final double? width;
   final double? height;
-  final Color? background;
-  final String? timeFormat;
-  final double? timePadding;
-  final TextStyle? timeTextStyle;
 
   List<Time> get times {
     final timeList = <Time>[];
@@ -42,25 +35,25 @@ class TimeHeader extends StatelessWidget with TimeScheme {
 
   @override
   Widget build(BuildContext context) {
-    final margin = context.timeMargin(timeTextStyle);
+    final timeConfig = CalendarConfig.of(context)!.time!;
     final headerWidth = width;
-    final headerHeight = (height == null) ? null : height! + margin;
+    final headerHeight = height == null ? null : height! + context.timeMargin();
     return Container(
       width: headerWidth,
       height: headerHeight,
-      color: background,
+      color: timeConfig.background,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           for (Time time in times)
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: timePadding ?? textHeaderPadding,
+                horizontal: timeConfig.padding,
               ),
               child: Text(
-                time.format(timeFormat ?? timeHeaderFormat),
+                time.format(timeConfig.format),
                 textAlign: TextAlign.center,
-                style: timeTextStyle,
+                style: timeConfig.textStyle,
               ),
             ),
         ],

@@ -10,6 +10,8 @@ class EventTile extends StatelessWidget {
 
   const EventTile({
     super.key,
+    this.width,
+    this.height,
     required this.event,
     this.padding = 4,
     this.radius = 4,
@@ -20,6 +22,8 @@ class EventTile extends StatelessWidget {
   });
 
   final Event event;
+  final double? width;
+  final double? height;
   final double radius;
   final double padding;
   final TextStyle? textStyle;
@@ -34,9 +38,13 @@ class EventTile extends StatelessWidget {
       onDoubleTap: onDoubleTap == null ? null : () => onDoubleTap!(event),
       onLongPress: onLongPress == null ? null : () => onLongPress!(event),
       child: Container(
+        width: width,
         padding: EdgeInsets.symmetric(horizontal: padding),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: BorderRadius.horizontal(
+            left: Radius.circular(radius),
+            // right: Radius.circular(radius),
+          ),
           color: event.color,
         ),
         child: Text(

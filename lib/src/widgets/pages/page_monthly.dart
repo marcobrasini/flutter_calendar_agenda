@@ -1,36 +1,34 @@
-import 'package:calendar/src/const.dart';
-import 'package:calendar/src/data/event.dart';
-import 'package:calendar/src/data/source.dart';
-import 'package:calendar/src/mixin.dart';
-import 'package:calendar/src/utils/datetime.dart';
-import 'package:calendar/src/widgets/components/slot_date.dart';
-import 'package:calendar/src/widgets/components/slot_event.dart';
-import 'package:calendar/src/widgets/pages/slot_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../tools/header_monthly.dart';
+import '../../utils/datetime.dart';
+import '../../data/event.dart';
+import '../../controller.dart';
+import '../../config.dart';
+import '../../const.dart';
+import '../../mixin.dart';
+import 'page_gesture.dart';
+import 'page_slot.dart';
 
 
-class MonthlyPage extends StatefulWidget with WeekScheme, DateScheme {
+class MonthlyPage extends StatelessWidget with WeekScheme, DateScheme {
 
   const MonthlyPage({
     super.key,
-    required this.month,
     required this.width,
     required this.height,
+    required this.padding,
     required this.begWeek,
     required this.endWeek,
     required this.weekStep,
     required this.begDay,
     required this.endDay,
     required this.dateStep,
-    required this.dateFormat,
-    required this.datePadding,
-    this.dateTextStyle,
-    this.background,
   });
 
-  final Month month;
   final double width;
   final double height;
+  final double padding;
   @override final int begDay;
   @override final int endDay;
   @override final int dateStep;
@@ -39,54 +37,57 @@ class MonthlyPage extends StatefulWidget with WeekScheme, DateScheme {
   @override final int endWeek;
   @override final int weekStep;
   double get weekScale => weeks / height;
-  final String dateFormat;
-  final double datePadding;
-  final TextStyle? dateTextStyle;
-  final Color? background;
-
-  Date get startDate => month.weekStart.date;
-
-  @override
-  State<MonthlyPage> createState() => _MonthlyPageState();
-}
-
-
-class _MonthlyPageState extends State<MonthlyPage> {
-
-  int x(Event event) => event.start.weekday - widget.begDay;
-  int y(Event event) => event.start.date % widget.month.weekStart ~/ stepWeek;
-
-  bool isCurrent(Date date) => date.month != widget.month.month;
 
   @override
   Widget build(BuildContext context) {
+    final config = CalendarConfig.of(context)!;
+    final controller = context.watch<CalendarController>();
+    final month = controller.dateTime as Month;
+    final start = month.weekStart.date;
+    final headerPage = MonthlyHeader(
+      month: month,
+      width: width,
+      begDay: begDay,
+      endDay: endDay,
+      dateStep: dateStep,
+    );
     final slotPainter = Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        for (int i = 0; i < widget.weeks; i++)
+        for (int i = 0; i < weeks; i++)
           Row(
             children: [
-              for (int j = 0; j < widget.days; j++)
-                DateSlot(
-                  width: widget.width / widget.days,
-                  height: widget.height / widget.weeks,
-                  date: widget.startDate + (i * stepWeek + j) + (widget.begDay - 1),
-                  dateFormat: widget.dateFormat,
-                  datePadding: widget.datePadding,
-                  dateTextStyle: widget.dateTextStyle,
-                  dateBackground: widget.background,
-                  dateWidget: PageSlot(
-                    date: widget.startDate + (i * stepWeek + j) + (widget.begDay - 1),
-                  ),
+              for (int j = 0; j < days; j++)
+                SlotPage(
+                  date: start + (i * stepWeek + j) + (begDay - 1),
+                  width: width / days,
+                  height: height / weeks,
                 ),
             ],
           )
       ],
     );
-    return SizedBox(
-      width: widget.width,
-      height: widget.height,
-      child: slotPainter,
+    return Column(
+      children: [
+        if (config.view.showHeader) headerPage,
+        Padding(
+          padding: EdgeInsetsGeometry.symmetric(
+            vertical: padding,
+          ),
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: Stack(
+              children: [
+                slotPainter,
+                SwipePage(
+                  last: controller.last,
+                  next: controller.next,
+                )
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

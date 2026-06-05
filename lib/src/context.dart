@@ -1,32 +1,43 @@
+import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'utils/datetime.dart';
 
 
 extension CalendarMetrics on BuildContext {
-  double timeMargin(TextStyle? style) {
-    final s = style ?? DefaultTextStyle.of(this).style;
+  double timeMargin() {
+    final timeConfig = CalendarConfig.of(this)!.time;
+    if (timeConfig == null) return 0.0;
+    final s = timeConfig.textStyle ?? DefaultTextStyle.of(this).style;
     return s.fontSize! * (s.height ?? 1.5);
   }
 
-  double timeWidth(String format, TextStyle? style, double? padding) {
+  double timeOffset() {
+    final timeConfig = CalendarConfig.of(this)!.time;
+    if (timeConfig == null) return 0.0;
     final layout = TextPainter(
       text: TextSpan(
-          text: Time(0, 0).format(format),
-          style: style ?? DefaultTextStyle.of(this).style
+          text: Time(0, 0).format(timeConfig.format),
+          style: timeConfig.textStyle ?? DefaultTextStyle.of(this).style
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    return layout.width + (padding ?? 0) * 2;
+    return layout.width + timeConfig.padding*2;
   }
 
-  double dateWidth(String format, TextStyle? style, double? padding) {
+  double dateMargin() {
+    return 0.0;
+  }
+
+  double dateOffset() {
+    final dateConfig = CalendarConfig.of(this)!.date;
+    if (dateConfig == null) return 0.0;
     final layout = TextPainter(
       text: TextSpan(
-          text: Date.now().format(format),
-          style: style ?? DefaultTextStyle.of(this).style
+          text: Date.now().format(dateConfig.format),
+          style: dateConfig.textStyle ?? DefaultTextStyle.of(this).style
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    return layout.height + (padding ?? 0) * 2;
+    return layout.height + dateConfig.padding*2;
   }
 }

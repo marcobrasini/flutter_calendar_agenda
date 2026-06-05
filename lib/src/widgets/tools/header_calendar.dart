@@ -1,3 +1,4 @@
+import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 
 
@@ -9,41 +10,43 @@ class CalendarHeader extends StatelessWidget {
   final String title;
   final HeaderCallback next;
   final HeaderCallback last;
-  final TextStyle? textStyle;
+  final bool showButtons;
 
   const CalendarHeader({
     super.key,
     required this.title,
     required this.last,
     required this.next,
-    this.textStyle,
+    this.showButtons = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final header = CalendarConfig.of(context)!.header;
     return Container(
       color: Theme.of(context).primaryColorLight,
       child: Row(
         children: [
-          IconButton(
+          if (showButtons) IconButton(
               onPressed: last,
               icon: Icon(Icons.arrow_left,
-                color: textStyle?.color,
-                size: textStyle?.fontSize,
+                color: header.textStyle?.color,
+                size: header.textStyle?.fontSize,
               )
           ),
           Expanded(
             child: Center(
-                child: Text(title,
-                  style: textStyle,
+                child: Text(
+                  title,
+                  style: header.textStyle,
                 )
             ),
           ),
-          IconButton(
+          if (showButtons) IconButton(
               onPressed: next,
               icon: Icon(Icons.arrow_right,
-                color: textStyle?.color,
-                size: textStyle?.fontSize,
+                color: header.textStyle?.color,
+                size: header.textStyle?.fontSize,
               )
           ),
         ],

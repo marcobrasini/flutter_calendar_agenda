@@ -1,5 +1,6 @@
+import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
-import '../components/slot_date.dart';
+import '../tools/slot_date.dart';
 import '../../utils/datetime.dart';
 
 
@@ -7,34 +8,27 @@ class DailyHeader extends StatelessWidget {
 
   const DailyHeader({
     super.key,
-    required this.date,
-    required this.dateFormat,
-    required this.datePadding,
-    this.dateTextStyle,
-    this.background,
     this.width,
     this.height,
+    required this.date,
   });
 
   final Date date;
-  final String dateFormat;
-  final double datePadding;
-  final TextStyle? dateTextStyle;
-  final Color? background;
   final double? width;
   final double? height;
 
   @override
   Widget build(BuildContext context) {
+    final dateConfig = CalendarConfig.of(context)!.date!;
     return SizedBox(
       width: width,
       height: height,
       child: DateSlot(
         date: date,
-        dateFormat: dateFormat,
-        datePadding: datePadding,
-        dateTextStyle: dateTextStyle,
-        dateBackground: background,
+        dateFormat: dateConfig.format,
+        datePadding: dateConfig.padding,
+        dateTextStyle: dateConfig.textStyle,
+        dateBackground: dateConfig.background,
       ),
     );
   }

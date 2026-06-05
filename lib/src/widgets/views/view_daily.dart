@@ -1,13 +1,11 @@
-import 'package:calendar/src/const.dart';
-import 'package:calendar/src/data/source.dart';
-import 'package:calendar/src/mixin.dart';
-import 'package:calendar/src/utils/datetime.dart';
-import 'package:calendar/src/widgets/pages/page_daily.dart';
 import 'package:flutter/material.dart';
-import '../components/header_time.dart';
+import '../tools/header_time.dart';
 import '../frames/frame_daily.dart';
-import '../../enums.dart';
+import '../pages/page_daily.dart';
+import '../../utils/datetime.dart';
 import '../../context.dart';
+import '../../config.dart';
+import '../../mixin.dart';
 
 
 class DailyView extends StatelessWidget with TimeScheme {
@@ -17,27 +15,8 @@ class DailyView extends StatelessWidget with TimeScheme {
     required this.begHour,
     required this.endHour,
     required this.timeStep,
-    // TimeHeader attributes
     required this.timeRatio,
-    required this.timeFormat,
-    required this.timePadding,
-    this.timeTextStyle,
-    this.timeBackground,
-    // DateHeader attributes
-    required this.dailyFormat,
-    required this.dailyPadding,
-    this.dailyTextStyle,
-    this.dailyBackground,
-    // LinePainter attributes
-    required this.lineColor,
-    required this.lineStyle,
-    required this.lineWidth,
-    required this.lineOffset,
-    this.dashedWidth,
-    this.dashedSpace,
-    // Interactive callback
     this.timeRound,
-    //
     this.cornerWidget,
   });
 
@@ -45,27 +24,8 @@ class DailyView extends StatelessWidget with TimeScheme {
   @override final int endHour;
   @override final int timeStep;
   final double timeRatio;
-  // TimeHeader attributes
-  final String timeFormat;
-  final double timePadding;
-  final TextStyle? timeTextStyle;
-  final Color? timeBackground;
-  // DayHeader attributes
-  final String dailyFormat;
-  final double dailyPadding;
-  final TextStyle? dailyTextStyle;
-  final Color? dailyBackground;
-  // LinePainter attributes
-  final LineStyle lineStyle;
-  final Color lineColor;
-  final double lineWidth;
-  final double lineOffset;
-  final double? dashedWidth;
-  final double? dashedSpace;
   final int? timeRound;
   final Widget? cornerWidget;
-
-
 
   void onPageTap(int tapped) {
     Time time = Time(begHour, tapped);
@@ -77,13 +37,12 @@ class DailyView extends StatelessWidget with TimeScheme {
 
   @override
   Widget build(BuildContext context) {
+    final viewConfig = CalendarConfig.of(context)!.view;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final timeMargin = context.timeMargin(timeTextStyle);
-        final timeOffset = context.timeWidth(
-            timeFormat, timeTextStyle, timePadding);
-        final dateOffset = context.dateWidth(
-            dailyFormat, dailyTextStyle, dailyPadding);
+        final timeMargin = context.timeMargin();
+        final timeOffset = context.timeOffset();
+        final dateOffset = context.dateOffset();
         //
         final pageHeight = (timeRatio == 0)
             ? constraints.maxHeight - timeMargin - dateOffset
@@ -105,10 +64,6 @@ class DailyView extends StatelessWidget with TimeScheme {
           begHour: begHour,
           endHour: endHour,
           timeStep: timeStep,
-          timeFormat: timeFormat,
-          timePadding: timePadding,
-          timeTextStyle: timeTextStyle,
-          background: timeBackground,
         );
         final dayFrame = DailyFrame(
           width: pageWidth,
@@ -118,13 +73,6 @@ class DailyView extends StatelessWidget with TimeScheme {
           begHour: begHour,
           endHour: endHour,
           timeStep: timeStep,
-          lineStyle: lineStyle,
-          lineColor: lineColor,
-          lineWidth: lineWidth,
-          lineOffsetX: lineOffset - timePadding/2,
-          lineOffsetY: lineOffset,
-          dashedSpace: dashedSpace,
-          dashedWidth: dashedWidth,
           dailyTap: onPageTap,
         );
         final dayPage = DailyPage(
@@ -134,16 +82,12 @@ class DailyView extends StatelessWidget with TimeScheme {
           begHour: begHour,
           endHour: endHour,
           timeStep: timeStep,
-          dateFormat: dailyFormat,
-          datePadding: dailyPadding,
-          dateTextStyle: dailyTextStyle,
-          dateBackground: dailyBackground,
         );
         final dayView = Row(
           children: [
             Column(
               children: [
-                cornerFrame,
+                if (viewConfig.showHeader) cornerFrame,
                 timeHeader,
               ],
             ),

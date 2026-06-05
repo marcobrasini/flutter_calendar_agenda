@@ -28,17 +28,51 @@ class MyApp extends StatelessWidget {
         body: Padding(
           padding: EdgeInsets.all(16.0),
           child: Calendar(
-            view: CalendarView.weekly,
+            view: CalendarView.monthly,
             begHour: 6,
             endHour: 22,
-            begDay: 1,
-            endDay: 6,
+            // showHeaderView: false,
             source: Source([
               Event(
                 id: "event1",
                 start: now,
                 stop: now.add(Duration(hours: 1)),
                 color:  Colors.green,
+                subject: "Event",
+              ),
+              Event(
+                id: "event1",
+                start: now,
+                stop: now.add(Duration(hours: 1)),
+                color:  Colors.green.shade100,
+                subject: "Event",
+              ),
+              Event(
+                id: "event1",
+                start: now,
+                stop: now.add(Duration(hours: 1)),
+                color:  Colors.green.shade700,
+                subject: "Event",
+              ),
+              Event(
+                id: "event1",
+                start: now,
+                stop: now.add(Duration(hours: 1)),
+                color:  Colors.green.shade500,
+                subject: "Event",
+              ),
+              Event(
+                id: "event1",
+                start: now,
+                stop: now.add(Duration(hours: 1)),
+                color:  Colors.green.shade600,
+                subject: "Event",
+              ),
+              Event(
+                id: "event3",
+                start: now.add(Duration(hours: -36)),
+                stop: now.add(Duration(hours: 36)),
+                color:  Colors.blue,
                 subject: "Event",
               ),
               Event(

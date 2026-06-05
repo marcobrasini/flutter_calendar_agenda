@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import '../components/header_daily.dart';
-import '../components/slot_event.dart';
+import 'package:provider/provider.dart';
+import '../tools/header_daily.dart';
+import '../tools/slot_event.dart';
 import '../pages/page_gesture.dart';
 import '../../utils/datetime.dart';
 import '../../mixin.dart';
+import '../../config.dart';
+import '../../controller.dart';
 import '../../data/event.dart';
 import '../../data/source.dart';
 
-
-class DailyPage extends StatefulWidget with TimeScheme {
+class DailyPage extends StatelessWidget with TimeScheme {
 
   const DailyPage({
     super.key,
@@ -18,10 +20,6 @@ class DailyPage extends StatefulWidget with TimeScheme {
     required this.begHour,
     required this.endHour,
     required this.timeStep,
-    required this.dateFormat,
-    required this.datePadding,
-    this.dateTextStyle,
-    this.dateBackground,
   });
 
   final double width;
@@ -31,67 +29,44 @@ class DailyPage extends StatefulWidget with TimeScheme {
   @override final int endHour;
   @override final int timeStep;
   double get timeScale => minutes / height;
-  final String dateFormat;
-  final double datePadding;
-  final TextStyle? dateTextStyle;
-  final Color? dateBackground;
 
-  @override
-  State<DailyPage> createState() => _DailyPageState();
-}
-
-
-class _DailyPageState extends State<DailyPage> {
-  late Date date;
-
-  @override
-  void initState() {
-    date = Date.now();
-    super.initState();
-  }
-
-  void _next() => setState(() {date += 1;});
-  void _last() => setState(() {date -= 1;});
-
-
-  int y(Event event) => event.start.time % Time.fromHour(widget.begHour);
+  int y(Event event) => event.start.time % Time.fromHour(begHour);
 
   @override
   Widget build(BuildContext context) {
+    final viewConfig = CalendarConfig.of(context)!.view;
     final source = CalendarSource.of(context);
+    final controller = context.watch<CalendarController>();
+    final date = controller.dateTime as Date;
     final events = source.forDate(date);
     final headerPage = DailyHeader(
       date: date,
-      width: widget.width,
-      background: widget.dateBackground,
-      dateFormat: widget.dateFormat,
-      datePadding: widget.datePadding,
-      dateTextStyle: widget.dateTextStyle,
+      width: width,
     );
     return Column(
       children: [
-        headerPage,
+        if (viewConfig.showHeader) headerPage,
         Padding(
           padding: EdgeInsetsGeometry.symmetric(
-            vertical: widget.padding,
+            vertical: padding,
           ),
           child: SizedBox(
-            width: widget.width,
-            height: widget.height,
+            width: width,
+            height: height,
             child: Stack(
               children: [
                 for (var event in events)
                   Positioned(
-                    top: y(event) / widget.timeScale,
+                    top: y(event) / timeScale,
                     child: EventSlot(
                       event: event,
-                      width: widget.width,
-                      height: event.duration.inMinutes / widget.timeScale,
+                      width: width,
+                      height: event.duration.inMinutes / timeScale,
                     ),
                   ),
                 SwipePage(
-                  last: _last,
-                  next: _next,
+                  last: controller.last,
+                  next: controller.next,
                 )
               ],
             ),

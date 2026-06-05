@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import '../components/header_weekly.dart';
-import '../components/slot_event.dart';
+import 'package:provider/provider.dart';
+import '../tools/header_weekly.dart';
+import '../tools/slot_event.dart';
 import '../pages/page_gesture.dart';
 import '../../utils/datetime.dart';
 import '../../mixin.dart';
+import '../../config.dart';
+import '../../controller.dart';
 import '../../data/event.dart';
 import '../../data/source.dart';
 
 
-class WeeklyPage extends StatefulWidget with DateScheme, TimeScheme {
+class WeeklyPage extends StatelessWidget with DateScheme, TimeScheme {
 
   const WeeklyPage({
     super.key,
@@ -21,10 +24,6 @@ class WeeklyPage extends StatefulWidget with DateScheme, TimeScheme {
     required this.begDay,
     required this.endDay,
     required this.dateStep,
-    required this.dateFormat,
-    required this.datePadding,
-    this.dateTextStyle,
-    this.dateBackground,
   });
 
   final double width;
@@ -38,71 +37,49 @@ class WeeklyPage extends StatefulWidget with DateScheme, TimeScheme {
   @override final int endHour;
   @override final int timeStep;
   double get timeScale => minutes / height;
-  final String dateFormat;
-  final double datePadding;
-  final TextStyle? dateTextStyle;
-  final Color? dateBackground;
 
-  @override
-  State<WeeklyPage> createState() => _WeeklyPageState();
-}
-
-
-class _WeeklyPageState extends State<WeeklyPage> {
-  late Week week;
-
-  @override
-  void initState() {
-    week = Week.now();
-    super.initState();
-  }
-
-  void _next() => setState(() {week += 1;});
-  void _last() => setState(() {week -= 1;});
-
-  int x(Event event) => event.start.weekday - widget.begDay;
-  int y(Event event) => event.start.time % Time.fromHour(widget.begHour);
+  int x(Event event) => event.start.weekday - begDay;
+  int y(Event event) => event.start.time % Time.fromHour(begHour);
 
   @override
   Widget build(BuildContext context) {
+    final viewConfig = CalendarConfig.of(context)!.view;
     final source = CalendarSource.of(context);
+    final controller = context.watch<CalendarController>();
+    final week = controller.dateTime as Week;
     final events = source.forWeek(week);
     final headerPage = WeeklyHeader(
       week: week,
-      width: widget.width,
-      begDay: widget.begDay,
-      endDay: widget.endDay,
-      dateStep: widget.dateStep,
-      background: widget.dateBackground,
-      dateFormat: widget.dateFormat,
-      datePadding: widget.datePadding,
-      dateTextStyle: widget.dateTextStyle,
+      width: width,
+      begDay: begDay,
+      endDay: endDay,
+      dateStep: dateStep,
     );
     return Column(
       children: [
-        headerPage,
+        if (viewConfig.showHeader) headerPage,
         Padding(
           padding: EdgeInsetsGeometry.symmetric(
-            vertical: widget.padding,
+            vertical: padding,
           ),
           child: SizedBox(
-            width: widget.width,
-            height: widget.height,
+            width: width,
+            height: height,
             child: Stack(
               children: [
                 for (var event in events)
                   Positioned(
-                    top: y(event) / widget.timeScale,
-                    left: x(event) / widget.dayScale,
+                    top: y(event) / timeScale,
+                    left: x(event) / dayScale,
                     child: EventSlot(
                       event: event,
-                      width: 1 / widget.dayScale,
-                      height: event.duration.inMinutes / widget.timeScale,
+                      width: 1 / dayScale,
+                      height: event.duration.inMinutes / timeScale,
                     ),
                   ),
                 SwipePage(
-                  last: _last,
-                  next: _next,
+                  last: controller.last,
+                  next: controller.next,
                 )
               ],
             ),

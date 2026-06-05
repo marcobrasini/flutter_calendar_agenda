@@ -21,21 +21,24 @@ const textHeaderMargin = 0.0;
 const textLineSpacing = 1.5;
 const textSlotPadding = 4.0;
 
-const dayHeaderFormat = "d";
-const timeHeaderFormat = "HH:mm";
-const dateHeaderFormat = "EEE\nd";
-const weekHeaderFormat = "EEE";
-
-const dailyHeaderFormat = "EEEE d MMMM yyyy";
+const dailyHeaderFormat = "d MMMM yyyy";
 const dailyHeaderPadding = 0.0;
+const dailyDateFormat = "EEEE";
+const dailyDatePadding = 0.0;
 
 const weeklyHeaderFormat = "d MMMM yyyy";
-const weekdayHeaderFormat = "EEE\nd";
 const weeklyHeaderPadding = 0.0;
+const weeklyDateFormat = "EEE\nd";
+const weeklyDatePadding = 0.0;
 
 const monthlyHeaderFormat = "MMMM yyyy";
 const monthlyHeaderPadding = 0.0;
+const monthlyWeekFormat = "EEE";
+const monthlyWeekPadding = 0.0;
+const monthlyDateFormat = "d";
+const monthlyDatePadding = 0.0;
 
+const timeHeaderFormat = "HH:mm";
 const timeHeaderRatio = 1.0;
 
 const eventMaxLines = 1;

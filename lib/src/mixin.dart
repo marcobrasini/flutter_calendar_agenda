@@ -32,13 +32,3 @@ mixin WeekScheme {
   int get weeks => (endWeek - begWeek) % (weekMonthSlots + 1);
   // double weekScale(double space) => weekSlots / space;
 }
-
-
-mixin LineScheme {
-  LineStyle get lineStyle;
-  Color get lineColor;
-  double get lineWidth;
-  double get lineOffset;
-  double? get dashedWidth;
-  double? get dashedSpace;
-}

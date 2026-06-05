@@ -1,63 +1,17 @@
-import 'package:calendar/src/const.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'widgets/tools/header_calendar.dart';
 import 'widgets/views/view_daily.dart';
 import 'widgets/views/view_weekly.dart';
 import 'widgets/views/view_monthly.dart';
-import 'widgets/components/header_calendar.dart';
-import 'utils/datetime.dart';
 import 'data/source.dart';
 import 'enums.dart';
+import 'const.dart';
+import 'config.dart';
+import 'controller.dart';
 
 
 class Calendar extends StatelessWidget {
-  final CalendarView view;
-  final Source source;
-  final int begHour;
-  final int endHour;
-  final int timeStep;
-  final int begDay;
-  final int endDay;
-  final int dateStep;
-  final int begWeek;
-  final int endWeek;
-  final int weekStep;
-  //
-  final double timeRatio;
-  final String timeFormat;
-  final double timePadding;
-  final TextStyle? timeTextStyle;
-  final Color? timeBackground;
-  //
-  final String dateFormat;
-  final double datePadding;
-  final TextStyle? dateTextStyle;
-  final Color? dateBackground;
-  //
-  final String dailyFormat;
-  final double dailyPadding;
-  final TextStyle? dailyTextStyle;
-  final Color? dailyBackground;
-  //
-  final String weeklyFormat;
-  final double weeklyPadding;
-  final TextStyle? weeklyTextStyle;
-  final Color? weeklyBackground;
-  //
-  final String dayFormat;
-  final String weekFormat;
-  final double weekPadding;
-  final TextStyle? weekTextStyle;
-  final Color? weekBackground;
-  //
-  final LineStyle lineStyle;
-  final Color lineColor;
-  final double lineWidth;
-  final double lineOffsetX;
-  final double lineOffsetY;
-  final double? dashedWidth;
-  final double? dashedSpace;
-  //
-  final TextStyle? headerTextStyle;
 
   const Calendar({
     super.key,
@@ -74,31 +28,28 @@ class Calendar extends StatelessWidget {
     this.weekStep = stepWeek,
     //
     this.timeRatio = timeHeaderRatio,
-    this.timeFormat = timeHeaderFormat,
-    this.timePadding = timeHeaderPadding,
+    this.timeFormat,
+    this.timePadding,
     this.timeTextStyle,
     this.timeBackground,
     //
-    this.dateFormat = dateHeaderFormat,
-    this.datePadding = dateHeaderPadding,
+    this.dateFormat,
+    this.datePadding,
     this.dateTextStyle,
     this.dateBackground,
     //
-    this.dailyFormat = dailyHeaderFormat,
-    this.dailyPadding = dailyHeaderPadding,
-    this.dailyTextStyle,
-    this.dailyBackground,
-    //
-    this.weeklyFormat = weeklyHeaderFormat,
-    this.weeklyPadding = weeklyHeaderPadding,
-    this.weeklyTextStyle,
-    this.weeklyBackground,
-    //
-    this.dayFormat = dayHeaderFormat,
-    this.weekFormat = weekHeaderFormat,
-    this.weekPadding = textHeaderPadding,
+    this.weekFormat,
+    this.weekPadding,
     this.weekTextStyle,
     this.weekBackground,
+    //
+    this.headerFormat,
+    this.headerPadding,
+    this.headerTextStyle,
+    this.headerBackground,
+    this.showHeaderButtons = true,
+    this.showHeaderView = true,
+    this.showHeader = true,
     //
     this.lineStyle = lineFrameStyle,
     this.lineColor = lineFrameColor,
@@ -108,10 +59,148 @@ class Calendar extends StatelessWidget {
     this.dashedWidth,
     this.dashedSpace,
     //
-    this.headerTextStyle,
   });
 
-  Widget get page {
+  final CalendarView view;
+  final Source source;
+  final int begHour;
+  final int endHour;
+  final int timeStep;
+  final int begDay;
+  final int endDay;
+  final int dateStep;
+  final int begWeek;
+  final int endWeek;
+  final int weekStep;
+  //
+  final double timeRatio;
+  final String? timeFormat;
+  final double? timePadding;
+  final TextStyle? timeTextStyle;
+  final Color? timeBackground;
+  //
+  final String? dateFormat;
+  final double? datePadding;
+  final TextStyle? dateTextStyle;
+  final Color? dateBackground;
+  //
+  final String? weekFormat;
+  final double? weekPadding;
+  final TextStyle? weekTextStyle;
+  final Color? weekBackground;
+  //
+  final String? headerFormat;
+  final double? headerPadding;
+  final TextStyle? headerTextStyle;
+  final Color? headerBackground;
+
+  final bool showHeader;
+  final bool showHeaderButtons;
+  final bool showHeaderView;
+  //
+  final LineStyle lineStyle;
+  final Color lineColor;
+  final double lineWidth;
+  final double lineOffsetX;
+  final double lineOffsetY;
+  final double? dashedWidth;
+  final double? dashedSpace;
+
+  TextConfig get headerConfig {
+    switch (view) {
+      case CalendarView.daily:
+        return TextConfig(
+          format: dateFormat ?? dailyHeaderFormat,
+          padding: datePadding ?? dailyHeaderPadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
+      case CalendarView.weekly:
+        return TextConfig(
+          format: dateFormat ?? weeklyHeaderFormat,
+          padding: datePadding ?? weeklyHeaderPadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
+      case CalendarView.monthly:
+        return TextConfig(
+          format: dateFormat ?? monthlyHeaderFormat,
+          padding: datePadding ?? monthlyHeaderPadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
+    }
+  }
+
+  TextConfig? get dateConfig {
+    switch (view) {
+      case CalendarView.daily:
+        return TextConfig(
+          format: dateFormat ?? dailyDateFormat,
+          padding: datePadding ?? dailyDatePadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
+      case CalendarView.weekly:
+        return TextConfig(
+          format: dateFormat ?? weeklyDateFormat,
+          padding: datePadding ?? weeklyDatePadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
+      case CalendarView.monthly:
+        return TextConfig(
+          format: dateFormat ?? monthlyDateFormat,
+          padding: datePadding ?? monthlyDatePadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
+    }
+  }
+
+  TextConfig? get weekConfig {
+    switch (view) {
+      case CalendarView.daily:
+        return null;
+      case CalendarView.weekly:
+        return null;
+      case CalendarView.monthly:
+        return TextConfig(
+          format: dateFormat ?? monthlyWeekFormat,
+          padding: datePadding ?? monthlyWeekPadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
+    }
+  }
+
+  TextConfig get timeConfig {
+    switch (view) {
+      default:
+        return TextConfig(
+          format: timeFormat ?? timeHeaderFormat,
+          padding: timePadding ?? timeHeaderPadding,
+          textStyle: timeTextStyle,
+          background: timeBackground,
+        );
+    }
+  }
+
+  LineConfig get lineConfig => LineConfig(
+    style: lineStyle,
+    color: lineColor,
+    width: lineWidth,
+    offsetX: lineOffsetX,
+    offsetY: lineOffsetY,
+    dashedWidth: dashedWidth,
+    dashedSpace: dashedSpace,
+  );
+
+  ViewConfig get viewConfig => ViewConfig(
+    showHeader: showHeaderView,
+  );
+
+  Widget get viewer {
     switch (view) {
       case CalendarView.daily:
         return DailyView(
@@ -119,18 +208,6 @@ class Calendar extends StatelessWidget {
           endHour: endHour,
           timeStep: timeStep,
           timeRatio: timeRatio,
-          timeFormat: timeFormat,
-          timePadding: timePadding,
-          dailyFormat: dailyFormat,
-          dailyPadding: dailyPadding,
-          dailyTextStyle: dailyTextStyle,
-          dailyBackground: dailyBackground,
-          lineStyle: lineStyle,
-          lineColor: lineColor,
-          lineWidth: lineWidth,
-          lineOffset: lineOffsetX,
-          dashedWidth: dashedWidth,
-          dashedSpace: dashedSpace,
         );
       case CalendarView.weekly:
         return WeeklyView(
@@ -141,51 +218,16 @@ class Calendar extends StatelessWidget {
           endHour: endHour,
           timeStep: timeStep,
           timeRatio: timeRatio,
-          timeFormat: timeFormat,
-          timePadding: timePadding,
-          timeTextStyle: timeTextStyle,
-          timeBackground: timeBackground,
-          dateFormat: dateFormat,
-          datePadding: datePadding,
-          dateTextStyle: dateTextStyle,
-          dateBackground: dateBackground,
-          weeklyFormat: weeklyFormat,
-          weeklyPadding: weeklyPadding,
-          weeklyTextStyle: weeklyTextStyle,
-          weeklyBackground: weeklyBackground,
-          lineStyle: lineStyle,
-          lineColor: lineColor,
-          lineWidth: lineWidth,
-          lineOffsetX: lineOffsetX,
-          lineOffsetY: lineOffsetY,
-          dashedWidth: dashedWidth,
-          dashedSpace: dashedSpace,
         );
       case CalendarView.monthly:
-        return Placeholder();
-        // return MonthlyView(
-        //   begWeek: begWeek,
-        //   endWeek: endWeek,
-        //   weekStep: weekStep,
-        //   begDay: begDay,
-        //   endDay: endDay,
-        //   dateStep: dateStep,
-        //   weekFormat: weekFormat,
-        //   weekPadding: weekPadding,
-        //   weekTextStyle: weekTextStyle,
-        //   weekBackground: weekBackground,
-        //   dateFormat: dayFormat,
-        //   datePadding: datePadding,
-        //   dateTextStyle: dateTextStyle,
-        //   dateBackground: dateBackground,
-        //   lineColor: lineColor,
-        //   lineStyle: lineStyle,
-        //   lineWidth: lineWidth,
-        //   lineOffsetX: lineOffsetX,
-        //   lineOffsetY: lineOffsetY,
-        //   dashedWidth: dashedWidth,
-        //   dashedSpace: dashedSpace,
-        // );
+        return MonthlyView(
+          begWeek: begWeek,
+          endWeek: endWeek,
+          weekStep: weekStep,
+          begDay: begDay,
+          endDay: endDay,
+          dateStep: dateStep,
+        );
     }
   }
 
@@ -193,7 +235,34 @@ class Calendar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CalendarSource(
       source: source,
-      child: page,
+      child: ChangeNotifierProvider(
+        create: (context) => CalendarController(view),
+        builder: (context, _) {
+          return CalendarConfig(
+            view: viewConfig,
+            line: lineConfig,
+            header: headerConfig,
+            time: timeConfig,
+            date: dateConfig,
+            week: weekConfig,
+            child: Column(
+                children: [
+                  if (showHeader) Consumer<CalendarController>(
+                    builder: (context, controller, _) => CalendarHeader(
+                        title: controller.title(context),
+                        last: controller.last, 
+                        next: controller.next,
+                        showButtons: showHeaderButtons,
+                    ),
+                  ),
+                  Expanded(
+                    child: viewer,
+                  )
+                ]
+            ),
+          );
+        },
+      ),
     );
   }
 }
