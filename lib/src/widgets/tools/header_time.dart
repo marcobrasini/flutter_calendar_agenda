@@ -1,35 +1,31 @@
 import 'package:calendar/src/config.dart';
 import 'package:calendar/src/context.dart';
-import 'package:calendar/src/mixin.dart';
+import 'package:calendar/src/utils/schemes.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/src/utils/datetime.dart';
 
 
-class TimeHeader extends StatelessWidget with TimeScheme {
+class TimeHeader extends StatelessWidget {
 
   const TimeHeader({
     super.key,
-    required this.begHour,
-    required this.endHour,
-    required this.timeStep,
     this.width,
     this.height,
+    required this.scheme,
   });
 
-  @override final int begHour;
-  @override final int endHour;
-  @override final int timeStep;
   final double? width;
   final double? height;
+  final TimeScheme scheme;
 
   List<Time> get times {
     final timeList = <Time>[];
-    var time = from as DateTime;
-    while (time.isBefore(to)) {
+    var time = scheme.from as DateTime;
+    while (time.isBefore(scheme.to)) {
       timeList.add(time.time);
-      time = time.add(Duration(minutes: timeStep));
+      time = time.add(Duration(minutes: scheme.step.minutes));
     }
-    timeList.add(to);
+    timeList.add(scheme.to);
     return timeList;
   }
 

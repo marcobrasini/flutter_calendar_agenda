@@ -2,31 +2,22 @@ import 'package:flutter/material.dart';
 import '../frames/frame_monthly.dart';
 import '../pages/page_monthly.dart';
 import '../../context.dart';
-import '../../enums.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 
 
-class MonthlyView extends StatelessWidget with WeekScheme, DateScheme {
+class MonthlyView extends StatelessWidget {
 
   const MonthlyView({
     super.key,
-    required this.begWeek,
-    required this.endWeek,
-    required this.weekStep,
-    required this.begDay,
-    required this.endDay,
-    required this.dateStep,
+    required this.dateScheme,
+    required this.weekScheme,
     // Interactive callback
     this.cornerWidget,
   });
 
-  // TimeHeader attributes
-  @override final int begDay;
-  @override final int endDay;
-  @override final int dateStep;
-  @override final int begWeek;
-  @override final int endWeek;
-  @override final int weekStep;
+
+  final DateScheme dateScheme;
+  final WeekScheme weekScheme;
   final Widget? cornerWidget;
 
   void onPageTap(int tappedWeek, int tappedDay) {
@@ -50,24 +41,16 @@ class MonthlyView extends StatelessWidget with WeekScheme, DateScheme {
           height: pageHeight,
           header: headerFrame,
           padding: dateMargin/2,
-          begWeek: begWeek,
-          endWeek: endWeek,
-          weekStep: weekStep,
-          begDay: begDay,
-          endDay: endDay,
-          dateStep: dateStep,
+          dateScheme: dateScheme,
+          weekScheme: weekScheme,
           monthlyTap: onPageTap,
         );
         final monthPage = MonthlyPage(
           width: pageWidth,
           height: pageHeight,
           padding: dateMargin/2,
-          begWeek: begWeek,
-          endWeek: endWeek,
-          weekStep: weekStep,
-          begDay: begDay,
-          endDay: endDay,
-          dateStep: dateStep,
+          dateScheme: dateScheme,
+          weekScheme: weekScheme,
         );
         final monthView = Stack(
             children: [

@@ -2,32 +2,28 @@ import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import '../tools/slot_date.dart';
 import '../../utils/datetime.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 
 
-class WeeklyHeader extends StatelessWidget with DateScheme {
+class WeeklyHeader extends StatelessWidget {
 
   const WeeklyHeader({
     super.key,
     this.width,
     this.height,
     required this.week,
-    required this.begDay,
-    required this.endDay,
-    required this.dateStep,
+    required this.scheme,
   });
 
   final Week week;
   final double? width;
   final double? height;
-  @override final int begDay;
-  @override final int endDay;
-  @override final int dateStep;
+  final DateScheme scheme;
 
   List<Date> get dates {
     final dateList = <Date>[];
-    var date = week.mon + (begDay - 1);
-    for (int i = 0 ; i < days ; i++) {
+    var date = week.mon + (scheme.beg - 1);
+    for (int i = 0 ; i < scheme.beg ; i++) {
       dateList.add(date + i);
     }
     return dateList;

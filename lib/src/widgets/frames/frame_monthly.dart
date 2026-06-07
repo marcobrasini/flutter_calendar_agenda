@@ -2,13 +2,13 @@ import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import '../tools/painter_lines.dart';
 import '../../enums.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 
 
 typedef OnTapCallback = void Function(int week, int day);
 
 
-class MonthlyFrame extends StatelessWidget with DateScheme, WeekScheme {
+class MonthlyFrame extends StatelessWidget {
 
   const MonthlyFrame({
     super.key,
@@ -16,12 +16,8 @@ class MonthlyFrame extends StatelessWidget with DateScheme, WeekScheme {
     required this.height,
     required this.header,
     required this.padding,
-    required this.begWeek,
-    required this.endWeek,
-    required this.weekStep,
-    required this.begDay,
-    required this.endDay,
-    required this.dateStep,
+    required this.weekScheme,
+    required this.dateScheme,
     // Interactive callback
     this.monthlyTap,
   });
@@ -30,14 +26,10 @@ class MonthlyFrame extends StatelessWidget with DateScheme, WeekScheme {
   final double height;
   final Widget header;
   final double padding;
-  @override final int begWeek;
-  @override final int endWeek;
-  @override final int weekStep;
-  double get weekScale => weeks / height;
-  @override final int begDay;
-  @override final int endDay;
-  @override final int dateStep;
-  double get dateScale => days / width;
+  final WeekScheme weekScheme;
+  double get weekScale => weekScheme.scale(height);
+  final DateScheme dateScheme;
+  double get dateScale => dateScheme.scale(width);
   // Interactive callback
   final OnTapCallback? monthlyTap;
 
@@ -55,7 +47,7 @@ class MonthlyFrame extends StatelessWidget with DateScheme, WeekScheme {
     final weekPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: weeks,
+        divisions: weekScheme.count,
         lineStyle: config.line.style,
         lineColor: config.line.color,
         lineWidth: config.line.width,
@@ -68,7 +60,7 @@ class MonthlyFrame extends StatelessWidget with DateScheme, WeekScheme {
     final dayPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: days,
+        divisions: dateScheme.count,
         lineStyle: config.line.style,
         lineColor: config.line.color,
         lineWidth: config.line.width,

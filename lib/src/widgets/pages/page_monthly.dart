@@ -6,37 +6,29 @@ import '../../data/event.dart';
 import '../../controller.dart';
 import '../../config.dart';
 import '../../const.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 import 'page_gesture.dart';
 import 'page_slot.dart';
 
 
-class MonthlyPage extends StatelessWidget with WeekScheme, DateScheme {
+class MonthlyPage extends StatelessWidget {
 
   const MonthlyPage({
     super.key,
     required this.width,
     required this.height,
     required this.padding,
-    required this.begWeek,
-    required this.endWeek,
-    required this.weekStep,
-    required this.begDay,
-    required this.endDay,
-    required this.dateStep,
+    required this.dateScheme,
+    required this.weekScheme,
   });
 
   final double width;
   final double height;
   final double padding;
-  @override final int begDay;
-  @override final int endDay;
-  @override final int dateStep;
-  double get dayScale => days / width;
-  @override final int begWeek;
-  @override final int endWeek;
-  @override final int weekStep;
-  double get weekScale => weeks / height;
+  final DateScheme dateScheme;
+  final WeekScheme weekScheme;
+  double get dateScale => dateScheme.scale(width);
+  double get weekScale => weekScheme.scale(height);
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +39,18 @@ class MonthlyPage extends StatelessWidget with WeekScheme, DateScheme {
     final headerPage = MonthlyHeader(
       month: month,
       width: width,
-      begDay: begDay,
-      endDay: endDay,
-      dateStep: dateStep,
+      scheme: dateScheme,
     );
     final slotPainter = Column(
       children: [
-        for (int i = 0; i < weeks; i++)
+        for (int i = 0; i < weekScheme.count; i++)
           Row(
             children: [
-              for (int j = 0; j < days; j++)
+              for (int j = 0; j < dateScheme.count; j++)
                 SlotPage(
-                  date: start + (i * stepWeek + j) + (begDay - 1),
-                  width: width / days,
-                  height: height / weeks,
+                  date: start + (i * weekScheme.count + j) + (dateScheme.beg - 1),
+                  width: width / dateScheme.count,
+                  height: height / weekScheme.count,
                 ),
             ],
           )

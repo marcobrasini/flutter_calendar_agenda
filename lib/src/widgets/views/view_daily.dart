@@ -5,30 +5,24 @@ import '../pages/page_daily.dart';
 import '../../utils/datetime.dart';
 import '../../context.dart';
 import '../../config.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 
 
-class DailyView extends StatelessWidget with TimeScheme {
+class DailyView extends StatelessWidget {
 
   const DailyView({
     super.key,
-    required this.begHour,
-    required this.endHour,
-    required this.timeStep,
-    required this.timeRatio,
+    required this.timeScheme,
     this.timeRound,
     this.cornerWidget,
   });
 
-  @override final int begHour;
-  @override final int endHour;
-  @override final int timeStep;
-  final double timeRatio;
+  final TimeScheme timeScheme;
   final int? timeRound;
   final Widget? cornerWidget;
 
   void onPageTap(int tapped) {
-    Time time = Time(begHour, tapped);
+    Time time = Time(timeScheme.beg, tapped);
     if (timeRound != null) {
       time = time.round(timeRound!);
     }
@@ -44,9 +38,9 @@ class DailyView extends StatelessWidget with TimeScheme {
         final timeOffset = context.timeOffset();
         final dateOffset = context.dateOffset();
         //
-        final pageHeight = (timeRatio == 0)
+        final pageHeight = (timeScheme.ratio == 0)
             ? constraints.maxHeight - timeMargin - dateOffset
-            : minutes * timeRatio;
+            : timeScheme.minutes * timeScheme.ratio;
         final pageWidth = constraints.maxWidth - timeOffset;
         //
         final cornerFrame = SizedBox(
@@ -61,27 +55,21 @@ class DailyView extends StatelessWidget with TimeScheme {
         final timeHeader = TimeHeader(
           width: timeOffset,
           height: pageHeight,
-          begHour: begHour,
-          endHour: endHour,
-          timeStep: timeStep,
+          scheme: timeScheme,
         );
         final dayFrame = DailyFrame(
           width: pageWidth,
           height: pageHeight,
           header: headerFrame,
           padding: timeMargin/2,
-          begHour: begHour,
-          endHour: endHour,
-          timeStep: timeStep,
+          timeScheme: timeScheme,
           dailyTap: onPageTap,
         );
         final dayPage = DailyPage(
           width: pageWidth,
           height: pageHeight,
           padding: timeMargin/2,
-          begHour: begHour,
-          endHour: endHour,
-          timeStep: timeStep,
+          timeScheme: timeScheme,
         );
         final dayView = Row(
           children: [

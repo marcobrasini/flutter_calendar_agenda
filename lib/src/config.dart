@@ -55,6 +55,7 @@ class ViewConfig{
   final Color? currentColor;
 }
 
+
 class CalendarConfig extends InheritedWidget {
   const CalendarConfig({
     super.key,

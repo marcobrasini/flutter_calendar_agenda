@@ -5,39 +5,29 @@ import '../pages/page_weekly.dart';
 import '../../utils/datetime.dart';
 import '../../context.dart';
 import '../../config.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 
 
-class WeeklyView extends StatelessWidget with DateScheme, TimeScheme {
+class WeeklyView extends StatelessWidget {
 
   const WeeklyView({
     super.key,
-    required this.begDay,
-    required this.endDay,
-    required this.dateStep,
-    required this.begHour,
-    required this.endHour,
-    required this.timeStep,
-    required this.timeRatio,
+    required this.dateScheme,
+    required this.timeScheme,
     this.timeRound,
     //
     this.cornerWidget,
   });
 
   // TimeHeader attributes
-  @override final int begDay;
-  @override final int endDay;
-  @override final int dateStep;
-  @override final int begHour;
-  @override final int endHour;
-  @override final int timeStep;
-  final double timeRatio;
+  final DateScheme dateScheme;
+  final TimeScheme timeScheme;
   final int? timeRound;
   final Widget? cornerWidget;
 
   void onPageTap(int tappedDay, int tappedMinute) {
     // Date date = week.mon + tappedDay;
-    Time time = Time(begHour, tappedMinute);
+    Time time = Time(timeScheme.beg, tappedMinute);
     if (timeRound != null) {
       time = time.round(timeRound!);
     }
@@ -53,9 +43,9 @@ class WeeklyView extends StatelessWidget with DateScheme, TimeScheme {
         final timeOffset = context.timeOffset();
         final dateOffset = context.dateOffset();
         //
-        final pageHeight = (timeRatio == 0)
+        final pageHeight = (timeScheme.ratio == 0)
             ? constraints.maxHeight - timeMargin - dateOffset
-            : minutes * timeRatio;
+            : timeScheme.minutes * timeScheme.ratio;
         final pageWidth = constraints.maxWidth - timeOffset;
         //
         final cornerFrame = SizedBox(
@@ -70,33 +60,23 @@ class WeeklyView extends StatelessWidget with DateScheme, TimeScheme {
         final timeHeader = TimeHeader(
           width: timeOffset,
           height: pageHeight,
-          begHour: begHour,
-          endHour: endHour,
-          timeStep: timeStep,
+          scheme: timeScheme,
         );
         final weekFrame = WeeklyFrame(
           width: pageWidth,
           height: pageHeight,
           header: headerFrame,
           padding: timeMargin/2,
-          begDay: begDay,
-          endDay: endDay,
-          dateStep: dateStep,
-          begHour: begHour,
-          endHour: endHour,
-          timeStep: timeStep,
+          dateScheme: dateScheme,
+          timeScheme: timeScheme,
           weeklyTap: onPageTap,
         );
         final weekPage = WeeklyPage(
           width: pageWidth,
           height: pageHeight,
           padding: timeMargin/2,
-          begDay: begDay,
-          endDay: endDay,
-          dateStep: dateStep,
-          begHour: begHour,
-          endHour: endHour,
-          timeStep: timeStep,
+          dateScheme: dateScheme,
+          timeScheme: timeScheme,
         );
         final weekView = Row(
           children: [

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../tools/painter_lines.dart';
 import '../../config.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 import '../../enums.dart';
 
 
 typedef OnTapCallback = void Function(int day, int minute);
 
 
-class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
+class WeeklyFrame extends StatelessWidget {
 
   const WeeklyFrame({
     super.key,
@@ -16,12 +16,8 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
     required this.height,
     required this.header,
     required this.padding,
-    required this.begHour,
-    required this.endHour,
-    required this.timeStep,
-    required this.begDay,
-    required this.endDay,
-    required this.dateStep,
+    required this.dateScheme,
+    required this.timeScheme,
     // Interactive callback
     this.weeklyTap,
   });
@@ -30,14 +26,10 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
   final double height;
   final Widget header;
   final double padding;
-  @override final int begDay;
-  @override final int endDay;
-  @override final int dateStep;
-  double get dateScale => days / width;
-  @override final int begHour;
-  @override final int endHour;
-  @override final int timeStep;
-  double get timeScale => minutes / height;
+  final DateScheme dateScheme;
+  final TimeScheme timeScheme;
+  double get dateScale => dateScheme.scale(width);
+  double get timeScale => timeScheme.scale(height);
   // Interactive callback
   final OnTapCallback? weeklyTap;
 
@@ -56,7 +48,7 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
     final hourPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: hours,
+        divisions: timeScheme.count,
         lineStyle: config.line.style,
         lineColor: config.line.color,
         lineWidth: config.line.width,
@@ -69,7 +61,7 @@ class WeeklyFrame extends StatelessWidget with TimeScheme, DateScheme {
     final dayPainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: days,
+        divisions: dateScheme.count,
         lineStyle: config.line.style,
         lineColor: config.line.color,
         lineWidth: config.line.width,

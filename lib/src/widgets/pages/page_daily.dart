@@ -4,33 +4,29 @@ import '../tools/header_daily.dart';
 import '../tools/slot_event.dart';
 import '../pages/page_gesture.dart';
 import '../../utils/datetime.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 import '../../config.dart';
 import '../../controller.dart';
 import '../../data/event.dart';
 import '../../data/source.dart';
 
-class DailyPage extends StatelessWidget with TimeScheme {
+class DailyPage extends StatelessWidget {
 
   const DailyPage({
     super.key,
     required this.width,
     required this.height,
     required this.padding,
-    required this.begHour,
-    required this.endHour,
-    required this.timeStep,
+    required this.timeScheme,
   });
 
   final double width;
   final double height;
   final double padding;
-  @override final int begHour;
-  @override final int endHour;
-  @override final int timeStep;
-  double get timeScale => minutes / height;
+  final TimeScheme timeScheme;
+  double get timeScale => timeScheme.scale(height);
 
-  int y(Event event) => event.start.time % Time.fromHour(begHour);
+  int y(Event event) => event.start.time % Time.fromHour(timeScheme.beg);
 
   @override
   Widget build(BuildContext context) {

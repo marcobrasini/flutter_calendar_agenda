@@ -61,7 +61,7 @@ class EventSlot extends StatelessWidget {
           event.subject,
           style: textStyle,
           overflow: TextOverflow.ellipsis,
-          maxLines: eventMaxLines,
+          maxLines: textSlotLines,
         ),
       ),
     );

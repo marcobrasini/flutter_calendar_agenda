@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../tools/painter_lines.dart';
 import '../../config.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 import '../../enums.dart';
 
 
 typedef OnTapCallback = void Function(int minute);
 
 
-class DailyFrame extends StatelessWidget with TimeScheme {
+class DailyFrame extends StatelessWidget {
 
   const DailyFrame({
     super.key,
@@ -16,9 +16,7 @@ class DailyFrame extends StatelessWidget with TimeScheme {
     required this.height,
     required this.header,
     required this.padding,
-    required this.begHour,
-    required this.endHour,
-    required this.timeStep,
+    required this.timeScheme,
     // Interactive callback
     this.dailyTap,
   });
@@ -27,10 +25,8 @@ class DailyFrame extends StatelessWidget with TimeScheme {
   final double height;
   final Widget header;
   final double padding;
-  @override final int begHour;
-  @override final int endHour;
-  @override final int timeStep;
-  double get timeScale => minutes / height;
+  final TimeScheme timeScheme;
+  double get timeScale => timeScheme.scale(height);
   // Interactive callback
   final OnTapCallback? dailyTap;
 
@@ -45,7 +41,7 @@ class DailyFrame extends StatelessWidget with TimeScheme {
     final timePainter = CustomPaint(
       size: Size.infinite,
       painter: LinesPainter(
-        divisions: hours,
+        divisions: timeScheme.hours,
         lineStyle: config.line.style,
         lineColor: config.line.color,
         lineWidth: config.line.width,

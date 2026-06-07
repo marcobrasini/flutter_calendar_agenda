@@ -3,23 +3,20 @@ import 'enums.dart';
 
 const initialHour = 0;
 const finalHour = Duration.hoursPerDay;
-const stepHour = Duration.minutesPerHour;
+const stepHour = TimeStep.minutes60;
 
 const initialDay = DateTime.monday;
 const finalDay = DateTime.sunday;
-const stepDay = 1;
 
 const initialWeek = 0;
 const finalWeek = 6;
-const stepWeek = DateTime.daysPerWeek;
 
 const timeHeaderPadding = 8.0;
-const dateHeaderPadding = 8.0;
-const weekHeaderPadding = 8.0;
 const textHeaderPadding = 0.0;
 const textHeaderMargin = 0.0;
 const textLineSpacing = 1.5;
 const textSlotPadding = 4.0;
+const textSlotLines = 1;
 
 const dailyHeaderFormat = "d MMMM yyyy";
 const dailyHeaderPadding = 0.0;
@@ -41,8 +38,6 @@ const monthlyDatePadding = 0.0;
 const timeHeaderFormat = "HH:mm";
 const timeHeaderRatio = 1.0;
 
-const eventMaxLines = 1;
-
 const lineFrameColor = Color(0xFFE0E0E0);
 const lineFrameStyle = LineStyle.solid;
 const lineFrameOffsetX = 0.0;
@@ -50,9 +45,6 @@ const lineFrameOffsetY = 0.0;
 const lineFrameWidth = 1.0;
 const dashFrameWidth = 4.0;
 const dashFrameSpace = 4.0;
-
-const dayMonthSlots = 7;
-const weekMonthSlots = 6;
 
 const swipeLength = 50;
 const swipeSpeed = 100;

@@ -1,3 +1,4 @@
+import 'package:calendar/src/utils/schemes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'widgets/tools/header_calendar.dart';
@@ -22,10 +23,8 @@ class Calendar extends StatelessWidget {
     this.timeStep = stepHour,
     this.begDay = initialDay,
     this.endDay = finalDay,
-    this.dateStep = stepDay,
     this.begWeek = initialWeek,
     this.endWeek = finalWeek,
-    this.weekStep = stepWeek,
     //
     this.timeRatio = timeHeaderRatio,
     this.timeFormat,
@@ -63,16 +62,14 @@ class Calendar extends StatelessWidget {
 
   final CalendarView view;
   final Source source;
-  final int begHour;
-  final int endHour;
-  final int timeStep;
+
   final int begDay;
   final int endDay;
-  final int dateStep;
   final int begWeek;
   final int endWeek;
-  final int weekStep;
-  //
+  final int begHour;
+  final int endHour;
+  final TimeStep timeStep;
   final double timeRatio;
   final String? timeFormat;
   final double? timePadding;
@@ -105,6 +102,23 @@ class Calendar extends StatelessWidget {
   final double lineOffsetY;
   final double? dashedWidth;
   final double? dashedSpace;
+
+  TimeScheme get timeScheme => TimeScheme(
+    beg: begHour,
+    end: endHour,
+    step: timeStep,
+    ratio: timeRatio,
+  );
+
+  DateScheme get dateScheme => DateScheme(
+    beg: begDay,
+    end: endDay,
+  );
+
+  WeekScheme get weekScheme => WeekScheme(
+    beg: begWeek,
+    end: endWeek,
+  );
 
   TextConfig get headerConfig {
     switch (view) {
@@ -204,29 +218,17 @@ class Calendar extends StatelessWidget {
     switch (view) {
       case CalendarView.daily:
         return DailyView(
-          begHour: begHour,
-          endHour: endHour,
-          timeStep: timeStep,
-          timeRatio: timeRatio,
+          timeScheme: timeScheme,
         );
       case CalendarView.weekly:
         return WeeklyView(
-          begDay: begDay,
-          endDay: endDay,
-          dateStep: dateStep,
-          begHour: begHour,
-          endHour: endHour,
-          timeStep: timeStep,
-          timeRatio: timeRatio,
+          dateScheme: dateScheme,
+          timeScheme: timeScheme,
         );
       case CalendarView.monthly:
         return MonthlyView(
-          begWeek: begWeek,
-          endWeek: endWeek,
-          weekStep: weekStep,
-          begDay: begDay,
-          endDay: endDay,
-          dateStep: dateStep,
+          dateScheme: dateScheme,
+          weekScheme: weekScheme,
         );
     }
   }

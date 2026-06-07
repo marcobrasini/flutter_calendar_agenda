@@ -4,42 +4,34 @@ import '../tools/header_weekly.dart';
 import '../tools/slot_event.dart';
 import '../pages/page_gesture.dart';
 import '../../utils/datetime.dart';
-import '../../mixin.dart';
+import '../../utils/schemes.dart';
 import '../../config.dart';
 import '../../controller.dart';
 import '../../data/event.dart';
 import '../../data/source.dart';
 
 
-class WeeklyPage extends StatelessWidget with DateScheme, TimeScheme {
+class WeeklyPage extends StatelessWidget {
 
   const WeeklyPage({
     super.key,
     required this.width,
     required this.height,
     required this.padding,
-    required this.begHour,
-    required this.endHour,
-    required this.timeStep,
-    required this.begDay,
-    required this.endDay,
-    required this.dateStep,
+    required this.timeScheme,
+    required this.dateScheme,
   });
 
   final double width;
   final double height;
   final double padding;
-  @override final int begDay;
-  @override final int endDay;
-  @override final int dateStep;
-  double get dayScale => days / width;
-  @override final int begHour;
-  @override final int endHour;
-  @override final int timeStep;
-  double get timeScale => minutes / height;
+  final DateScheme dateScheme;
+  final TimeScheme timeScheme;
+  double get dateScale => dateScheme.scale(width);
+  double get timeScale => timeScheme.scale(height);
 
-  int x(Event event) => event.start.weekday - begDay;
-  int y(Event event) => event.start.time % Time.fromHour(begHour);
+  int x(Event event) => event.start.weekday - dateScheme.beg;
+  int y(Event event) => event.start.time % Time.fromHour(timeScheme.beg);
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +43,7 @@ class WeeklyPage extends StatelessWidget with DateScheme, TimeScheme {
     final headerPage = WeeklyHeader(
       week: week,
       width: width,
-      begDay: begDay,
-      endDay: endDay,
-      dateStep: dateStep,
+      scheme: dateScheme,
     );
     return Column(
       children: [
@@ -70,10 +60,10 @@ class WeeklyPage extends StatelessWidget with DateScheme, TimeScheme {
                 for (var event in events)
                   Positioned(
                     top: y(event) / timeScale,
-                    left: x(event) / dayScale,
+                    left: x(event) / dateScale,
                     child: EventSlot(
                       event: event,
-                      width: 1 / dayScale,
+                      width: 1 / dateScale,
                       height: event.duration.inMinutes / timeScale,
                     ),
                   ),

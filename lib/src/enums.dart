@@ -18,3 +18,12 @@ enum SlotDirection {
   horizontal,
   vertical,
 }
+
+enum TimeStep {
+  minutes60(60),
+  minutes30(30),
+  minutes15(15);
+
+  final int minutes;
+  const TimeStep(this.minutes);
+}
