@@ -27,6 +27,7 @@ class Calendar extends StatelessWidget {
     this.endWeek = finalWeek,
     //
     this.timeRatio = timeHeaderRatio,
+    this.timeRound,
     this.timeFormat,
     this.timePadding,
     this.timeTextStyle,
@@ -58,6 +59,9 @@ class Calendar extends StatelessWidget {
     this.dashedWidth,
     this.dashedSpace,
     //
+    this.showIndicator = true,
+    this.indicatorColor,
+    this.swipeDirection,
   });
 
   final CalendarView view;
@@ -69,8 +73,9 @@ class Calendar extends StatelessWidget {
   final int endWeek;
   final int begHour;
   final int endHour;
-  final TimeStep timeStep;
+  final int? timeRound;
   final double timeRatio;
+  final TimeStep timeStep;
   final String? timeFormat;
   final double? timePadding;
   final TextStyle? timeTextStyle;
@@ -102,12 +107,17 @@ class Calendar extends StatelessWidget {
   final double lineOffsetY;
   final double? dashedWidth;
   final double? dashedSpace;
+  //
+  final bool showIndicator;
+  final Color? indicatorColor;
+  final Axis? swipeDirection;
 
   TimeScheme get timeScheme => TimeScheme(
     beg: begHour,
     end: endHour,
     step: timeStep,
     ratio: timeRatio,
+    round: timeRound,
   );
 
   DateScheme get dateScheme => DateScheme(
@@ -174,10 +184,8 @@ class Calendar extends StatelessWidget {
 
   TextConfig? get weekConfig {
     switch (view) {
-      case CalendarView.daily:
-        return null;
-      case CalendarView.weekly:
-        return null;
+      case CalendarView.daily:   return null;
+      case CalendarView.weekly:  return null;
       case CalendarView.monthly:
         return TextConfig(
           format: dateFormat ?? monthlyWeekFormat,
@@ -212,24 +220,20 @@ class Calendar extends StatelessWidget {
 
   ViewConfig get viewConfig => ViewConfig(
     showHeader: showHeaderView,
+    showIndicator: showIndicator,
+    indicatorColor: indicatorColor,
+    swipeDirection: swipeDirection
+        ?? (view == CalendarView.monthly ? Axis.vertical : Axis.horizontal),
   );
 
   Widget get viewer {
     switch (view) {
       case CalendarView.daily:
-        return DailyView(
-          timeScheme: timeScheme,
-        );
+        return DailyView(timeScheme: timeScheme);
       case CalendarView.weekly:
-        return WeeklyView(
-          dateScheme: dateScheme,
-          timeScheme: timeScheme,
-        );
+        return WeeklyView(dateScheme: dateScheme, timeScheme: timeScheme);
       case CalendarView.monthly:
-        return MonthlyView(
-          dateScheme: dateScheme,
-          weekScheme: weekScheme,
-        );
+        return MonthlyView(dateScheme: dateScheme, weekScheme: weekScheme);
     }
   }
 
@@ -238,7 +242,7 @@ class Calendar extends StatelessWidget {
     return CalendarSource(
       source: source,
       child: ChangeNotifierProvider(
-        create: (context) => CalendarController(view),
+        create: (_) => CalendarController(view),
         builder: (context, _) {
           return CalendarConfig(
             view: viewConfig,

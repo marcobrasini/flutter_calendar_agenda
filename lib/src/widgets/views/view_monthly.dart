@@ -1,8 +1,12 @@
+import 'package:calendar/src/config.dart';
+import 'package:calendar/src/widgets/pages/page_viewer.dart';
+import 'package:calendar/src/widgets/tools/header_monthly.dart';
 import 'package:flutter/material.dart';
 import '../frames/frame_monthly.dart';
 import '../pages/page_monthly.dart';
 import '../../context.dart';
 import '../../utils/schemes.dart';
+import '../../utils/datetime.dart';
 
 
 class MonthlyView extends StatelessWidget {
@@ -26,42 +30,40 @@ class MonthlyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final config = CalendarConfig.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
         final dateMargin = context.dateMargin();
         final dateOffset = context.dateOffset();
         final pageHeight = constraints.maxHeight - dateOffset;
         final pageWidth = constraints.maxWidth;
-        final headerFrame = SizedBox(
-          width: pageWidth,
-          height: dateOffset,
+        return Column(
+          children: [
+            if (config.view.showHeader) MonthlyHeader(
+              width: pageWidth,
+              scheme: dateScheme,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  width: pageWidth,
+                  height: pageHeight,
+                  child: ViewerPage(
+                    direction: config.view.swipeDirection,
+                    builder: (datetime) => MonthlyPage(
+                        month: datetime.toMonth,
+                        width: pageWidth,
+                        height: pageHeight,
+                        dateScheme: dateScheme,
+                        weekScheme: weekScheme,
+                      ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
-        final monthFrame = MonthlyFrame(
-          width: pageWidth,
-          height: pageHeight,
-          header: headerFrame,
-          padding: dateMargin/2,
-          dateScheme: dateScheme,
-          weekScheme: weekScheme,
-          monthlyTap: onPageTap,
-        );
-        final monthPage = MonthlyPage(
-          width: pageWidth,
-          height: pageHeight,
-          padding: dateMargin/2,
-          dateScheme: dateScheme,
-          weekScheme: weekScheme,
-        );
-        final monthView = Stack(
-            children: [
-              monthFrame,
-              monthPage,
-            ]
-        );
-        return SingleChildScrollView(
-          child: monthView,
-        );
-      },
+      }
     );
   }
 }

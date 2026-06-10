@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../tools/painter_lines.dart';
-import '../../config.dart';
 import '../../utils/schemes.dart';
+import '../../config.dart';
 import '../../enums.dart';
 
 
@@ -14,8 +14,6 @@ class DailyFrame extends StatelessWidget {
     super.key,
     required this.width,
     required this.height,
-    required this.header,
-    required this.padding,
     required this.timeScheme,
     // Interactive callback
     this.dailyTap,
@@ -23,8 +21,6 @@ class DailyFrame extends StatelessWidget {
 
   final double width;
   final double height;
-  final Widget header;
-  final double padding;
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
   // Interactive callback
@@ -45,7 +41,7 @@ class DailyFrame extends StatelessWidget {
         lineStyle: config.line.style,
         lineColor: config.line.color,
         lineWidth: config.line.width,
-        offset: config.line.offsetX - timeMargin,
+        offset: config.line.offsetX,
         dashedSpace: config.line.dashedSpace,
         dashedWidth: config.line.dashedWidth,
         direction: LineDirection.horizontal,
@@ -70,23 +66,13 @@ class DailyFrame extends StatelessWidget {
         dayPainter,
       ],
     );
-    return Column(
-      children: [
-        if (config.view.showHeader) header,
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: padding,
-          ),
-          child: SizedBox(
-            height: height,
-            width: width,
-            child: GestureDetector(
-              onTapUp: (dailyTap == null) ? null : _onTapUp,
-              child: framePainter,
-            )
-          ),
-        ),
-      ],
+    return SizedBox(
+        height: height,
+        width: width,
+        child: GestureDetector(
+          onTapUp: (dailyTap == null) ? null : _onTapUp,
+          child: framePainter,
+        )
     );
   }
 }

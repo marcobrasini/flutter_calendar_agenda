@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../tools/painter_lines.dart';
-import '../../config.dart';
 import '../../utils/schemes.dart';
+import '../../config.dart';
 import '../../enums.dart';
 
 
@@ -14,8 +14,6 @@ class WeeklyFrame extends StatelessWidget {
     super.key,
     required this.width,
     required this.height,
-    required this.header,
-    required this.padding,
     required this.dateScheme,
     required this.timeScheme,
     // Interactive callback
@@ -24,8 +22,6 @@ class WeeklyFrame extends StatelessWidget {
 
   final double width;
   final double height;
-  final Widget header;
-  final double padding;
   final DateScheme dateScheme;
   final TimeScheme timeScheme;
   double get dateScale => dateScheme.scale(width);
@@ -77,23 +73,13 @@ class WeeklyFrame extends StatelessWidget {
         dayPainter,
       ],
     );
-    return Column(
-      children: [
-        if (config.view.showHeader) header,
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: padding,
-          ),
-          child: SizedBox(
-            height: height,
-            width: width,
-            child: GestureDetector(
-              onTapUp: _onTapUp,
-              child: framePainter,
-            )
-          ),
-        ),
-      ],
+    return SizedBox(
+        height: height,
+        width: width,
+        child: GestureDetector(
+          onTapUp: _onTapUp,
+          child: framePainter,
+        )
     );
   }
 }

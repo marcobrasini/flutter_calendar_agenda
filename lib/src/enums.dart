@@ -4,6 +4,12 @@ enum CalendarView {
   monthly,
 }
 
+enum CalendarSwipe {
+  forward,
+  backward,
+  none,
+}
+
 enum LineStyle {
   solid,
   dashed,

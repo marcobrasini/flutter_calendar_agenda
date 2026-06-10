@@ -45,14 +45,16 @@ class LineConfig{
 
 class ViewConfig{
   const ViewConfig({
+    this.swipeDirection = Axis.horizontal,
     this.showHeader = true,
-    this.showCurrent = true,
-    this.currentColor,
+    this.showIndicator = true,
+    this.indicatorColor,
   });
 
+  final Axis swipeDirection;
   final bool showHeader;
-  final bool showCurrent;
-  final Color? currentColor;
+  final bool showIndicator;
+  final Color? indicatorColor;
 }
 
 

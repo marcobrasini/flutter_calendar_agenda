@@ -14,8 +14,6 @@ class MonthlyFrame extends StatelessWidget {
     super.key,
     required this.width,
     required this.height,
-    required this.header,
-    required this.padding,
     required this.weekScheme,
     required this.dateScheme,
     // Interactive callback
@@ -24,8 +22,6 @@ class MonthlyFrame extends StatelessWidget {
 
   final double width;
   final double height;
-  final Widget header;
-  final double padding;
   final WeekScheme weekScheme;
   double get weekScale => weekScheme.scale(height);
   final DateScheme dateScheme;
@@ -76,23 +72,13 @@ class MonthlyFrame extends StatelessWidget {
         dayPainter,
       ],
     );
-    return Column(
-      children: [
-        if (config.view.showHeader) header,
-        Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: padding,
-          ),
-          child: SizedBox(
-            height: height,
-            width: width,
-            child: GestureDetector(
-              onTapUp: _onTapUp,
-              child: linePainter,
-            )
-          ),
-        ),
-      ],
+    return SizedBox(
+      height: height,
+      width: width,
+      child: GestureDetector(
+        onTapUp: _onTapUp,
+        child: linePainter,
+      )
     );
   }
 }

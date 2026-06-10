@@ -48,3 +48,4 @@ const dashFrameSpace = 4.0;
 
 const swipeLength = 50;
 const swipeSpeed = 100;
+const swipeDuration = Duration(milliseconds: 300);

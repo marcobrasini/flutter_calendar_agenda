@@ -9,11 +9,13 @@ class TimeScheme {
     this.end = finalHour,
     this.step = TimeStep.minutes60,
     this.ratio = 1.0,
+    this.round,
   });
   final int beg;
   final int end;
   final TimeStep step;
   final double ratio;
+  final int? round;
   Time get from   => (beg == initialHour) ? Time.beg : Time(beg, 0);
   Time get to     => (end == finalHour)   ? Time.end : Time(end, 0);
   int get hours   => (end - beg) % (Duration.hoursPerDay + 1);
@@ -41,6 +43,7 @@ class WeekScheme {
   });
   final int beg;
   final int end;
+  static const int step = 7;
   int get count => end - beg;
   double scale(double space) => count / space;
 }

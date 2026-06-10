@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../tools/header_daily.dart';
 import '../tools/header_time.dart';
-import '../frames/frame_daily.dart';
 import '../pages/page_daily.dart';
+import '../pages/page_viewer.dart';
 import '../../utils/datetime.dart';
 import '../../context.dart';
 import '../../config.dart';
@@ -13,25 +14,24 @@ class DailyView extends StatelessWidget {
   const DailyView({
     super.key,
     required this.timeScheme,
-    this.timeRound,
+    //
     this.cornerWidget,
   });
 
   final TimeScheme timeScheme;
-  final int? timeRound;
   final Widget? cornerWidget;
 
-  void onPageTap(int tapped) {
-    Time time = Time(timeScheme.beg, tapped);
-    if (timeRound != null) {
-      time = time.round(timeRound!);
-    }
-    print(time);
-  }
+  // void onPageTap(int tapped) {
+  //   Time time = Time(timeScheme.beg, tapped);
+  //   if (timeScheme.round != null) {
+  //     time = time.round(timeScheme.round!);
+  //   }
+  //   print(time);
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final viewConfig = CalendarConfig.of(context)!.view;
+    final config = CalendarConfig.of(context)!;
     return LayoutBuilder(
       builder: (context, constraints) {
         final timeMargin = context.timeMargin();
@@ -43,57 +43,49 @@ class DailyView extends StatelessWidget {
             : timeScheme.minutes * timeScheme.ratio;
         final pageWidth = constraints.maxWidth - timeOffset;
         //
-        final cornerFrame = SizedBox(
-          width: timeOffset,
-          height: dateOffset,
-          child: cornerWidget,
-        );
-        final headerFrame = SizedBox(
-          width: pageWidth,
-          height: dateOffset,
-        );
-        final timeHeader = TimeHeader(
-          width: timeOffset,
-          height: pageHeight,
-          scheme: timeScheme,
-        );
-        final dayFrame = DailyFrame(
-          width: pageWidth,
-          height: pageHeight,
-          header: headerFrame,
-          padding: timeMargin/2,
-          timeScheme: timeScheme,
-          dailyTap: onPageTap,
-        );
-        final dayPage = DailyPage(
-          width: pageWidth,
-          height: pageHeight,
-          padding: timeMargin/2,
-          timeScheme: timeScheme,
-        );
-        final dayView = Row(
+        return Column(
           children: [
-            Column(
+            if (config.view.showHeader) Row(
               children: [
-                if (viewConfig.showHeader) cornerFrame,
-                timeHeader,
+                SizedBox(
+                  width: timeOffset,
+                  height: dateOffset,
+                  child: cornerWidget,
+                ),
+                DailyHeader(
+                  width: pageWidth,
+                ),
               ],
             ),
             Expanded(
-              child: Stack(
-                children: [
-                  dayFrame,
-                  dayPage,
-                ],
+              child: SingleChildScrollView (
+                child: Row (
+                  children: [
+                    TimeHeader(
+                      width: timeOffset,
+                      height: pageHeight,
+                      scheme: timeScheme,
+                    ),
+                    SizedBox(
+                      width: pageWidth,
+                      height: pageHeight,
+                      child: ViewerPage(
+                        direction: config.view.swipeDirection,
+                        builder: (date) => DailyPage(
+                          date: date.date,
+                          width: pageWidth,
+                          height: pageHeight,
+                          timeScheme: timeScheme,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        );
-        return SingleChildScrollView(
-          child: dayView,
+          ]
         );
       },
     );
   }
 }
-

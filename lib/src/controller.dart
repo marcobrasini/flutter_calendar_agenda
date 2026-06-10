@@ -5,37 +5,56 @@ import 'enums.dart';
 
 
 class CalendarController extends ChangeNotifier {
+
   final CalendarView view;
-  late dynamic _dateTime;
+  late DateTime _datetime;
+  CalendarSwipe? _swipe;
 
   CalendarController(this.view) {
     switch (view) {
-      case CalendarView.daily:   _dateTime = Date.now();
-      case CalendarView.weekly:  _dateTime = Week.now();
-      case CalendarView.monthly: _dateTime = Month.now();
+      case CalendarView.daily:   _datetime = Date.now();
+      case CalendarView.weekly:  _datetime = Week.now();
+      case CalendarView.monthly: _datetime = Month.now();
     }
   }
 
-  dynamic get dateTime => _dateTime;
+  // Getter tipizzati — il cast è in un posto solo
+  Date  get asDate  => _datetime.date;
+  Week  get asWeek  => _datetime.toWeek;
+  Month get asMonth => _datetime.toMonth;
+
+  // Mantenuto per retrocompatibilità
+  DateTime get datetime => _datetime;
+  CalendarSwipe? get swipe => _swipe;
+
+  void next([bool callback = true]) {
+    _datetime = (_datetime as dynamic) + 1;
+    if (callback) notifyListeners();
+  }
+
+  void last([bool callback = true]) {
+    _datetime = (_datetime as dynamic) - 1;
+    if (callback) notifyListeners();
+  }
+
+  // void goTo(DateTime target) {
+  //   if (_datetime == target) return;
+  //   _swipe = (target.isAfter(_datetime))
+  //       ? CalendarSwipe.forward
+  //       : CalendarSwipe.backward;
+  //   _datetime = target;
+  //   notifyListeners();
+  // }
 
   String title(BuildContext context) {
     final header = CalendarConfig.of(context)!.header;
     switch (view) {
       case CalendarView.weekly:
-        final start = dateTime.mon;
-        final stop = dateTime.sun;
-        return "${start.format(header.format)} ─ ${stop.format(header.format)}";
+        final week = asWeek;
+        return "${week.mon.format(header.format)} "
+            "─ ${week.sun.format(header.format)}";
       default:
-        return dateTime.format(header.format);
+        return datetime.format(header.format);
     }
-  }
-
-  void next() {
-    _dateTime += 1;
-    notifyListeners();
-  }
-  void last() {
-    _dateTime -= 1;
-    notifyListeners();
   }
 }

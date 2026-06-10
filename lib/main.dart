@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final now = Date.now() & Time(9, 15);
+    final now = Date.now() & Time(9, 0);
     return MaterialApp(
       title: 'Demo Griglia 2x2',
       theme: ThemeData(
@@ -31,6 +31,8 @@ class MyApp extends StatelessWidget {
             view: CalendarView.monthly,
             begHour: 6,
             endHour: 22,
+            begDay: 1,
+            endDay: 6,
             // showHeaderView: false,
             source: Source([
               Event(
@@ -41,10 +43,17 @@ class MyApp extends StatelessWidget {
                 subject: "Event",
               ),
               Event(
-                id: "event3",
-                start: now.add(Duration(hours: -36)),
-                stop: now.add(Duration(hours: 36)),
-                color:  Colors.blue,
+                id: "event1",
+                start: now.add(Duration(hours: 26)),
+                stop: now.add(Duration(hours: 27)),
+                color:  Colors.yellow,
+                subject: "Event",
+              ),
+              Event(
+                id: "event1",
+                start: now.add(Duration(hours: -23)),
+                stop: now.add(Duration(hours: -22)),
+                color:  Colors.deepOrange,
                 subject: "Event",
               ),
               Event(
@@ -52,7 +61,7 @@ class MyApp extends StatelessWidget {
                 start: now.add(Duration(days:-2)),
                 stop: now.add(Duration(days:-2, hours: 1)),
                 color:  Colors.pink,
-                subject: "Events",
+                subject: "Rec",
                 pattern: Pattern.fromICSString(
                     now.add(Duration(days:-2, hours: 1)),
                     "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=MO,FR;"

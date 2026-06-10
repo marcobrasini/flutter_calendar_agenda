@@ -11,11 +11,9 @@ class MonthlyHeader extends StatelessWidget {
     super.key,
     this.width,
     this.height,
-    required this.month,
     required this.scheme,
   });
 
-  final Month month;
   final DateScheme scheme;
   final double? width;
   final double? height;
