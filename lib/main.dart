@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         body: Padding(
           padding: EdgeInsets.all(16.0),
           child: Calendar(
-            view: CalendarView.monthly,
+            view: CalendarView.daily,
             begHour: 6,
             endHour: 22,
             begDay: 1,
@@ -43,21 +43,21 @@ class MyApp extends StatelessWidget {
                 subject: "Event",
               ),
               Event(
-                id: "event1",
+                id: "event2",
                 start: now.add(Duration(hours: 26)),
                 stop: now.add(Duration(hours: 27)),
                 color:  Colors.yellow,
                 subject: "Event",
               ),
               Event(
-                id: "event1",
+                id: "event3",
                 start: now.add(Duration(hours: -23)),
                 stop: now.add(Duration(hours: -22)),
                 color:  Colors.deepOrange,
                 subject: "Event",
               ),
               Event(
-                id: "event2",
+                id: "event4",
                 start: now.add(Duration(days:-2)),
                 stop: now.add(Duration(days:-2, hours: 1)),
                 color:  Colors.pink,

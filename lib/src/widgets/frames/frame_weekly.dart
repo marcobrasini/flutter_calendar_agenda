@@ -3,9 +3,7 @@ import '../tools/painter_lines.dart';
 import '../../utils/schemes.dart';
 import '../../config.dart';
 import '../../enums.dart';
-
-
-typedef OnTapCallback = void Function(int day, int minute);
+import '../../const.dart';
 
 
 class WeeklyFrame extends StatelessWidget {
@@ -17,7 +15,9 @@ class WeeklyFrame extends StatelessWidget {
     required this.dateScheme,
     required this.timeScheme,
     // Interactive callback
-    this.weeklyTap,
+    this.onTap,
+    this.onDoubleTap,
+    this.onLongPress,
   });
 
   final double width;
@@ -27,58 +27,64 @@ class WeeklyFrame extends StatelessWidget {
   double get dateScale => dateScheme.scale(width);
   double get timeScale => timeScheme.scale(height);
   // Interactive callback
-  final OnTapCallback? weeklyTap;
+  final FrameCallback? onTap;
+  final FrameCallback? onDoubleTap;
+  final FrameCallback? onLongPress;
 
-  void _onTapUp(TapUpDetails details) {
-    if (weeklyTap == null) return;
-    final day = (details.localPosition.dx * dateScale).toInt();
-    final minutes = (details.localPosition.dy * timeScale).toInt();
-    weeklyTap!(day, minutes);
-  }
+  int minutes(Offset position) => (position.dy * timeScale).toInt();
+  int days(Offset position) => (position.dx * dateScale).toInt();
 
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
     final timeMargin = (config.time?.padding ?? 0.0) / 2;
     final dateMargin = (config.date?.padding ?? 0.0) / 2;
-    final hourPainter = CustomPaint(
-      size: Size.infinite,
-      painter: LinesPainter(
-        divisions: timeScheme.count,
-        lineStyle: config.line.style,
-        lineColor: config.line.color,
-        lineWidth: config.line.width,
-        offset: config.line.offsetX - timeMargin,
-        dashedSpace: config.line.dashedSpace,
-        dashedWidth: config.line.dashedWidth,
-        direction: LineDirection.horizontal,
-      ),
-    );
-    final dayPainter = CustomPaint(
-      size: Size.infinite,
-      painter: LinesPainter(
-        divisions: dateScheme.count,
-        lineStyle: config.line.style,
-        lineColor: config.line.color,
-        lineWidth: config.line.width,
-        offset: config.line.offsetY - dateMargin,
-        dashedSpace: config.line.dashedSpace,
-        dashedWidth: config.line.dashedWidth,
-        direction: LineDirection.vertical,
-      ),
-    );
-    final framePainter = Stack(
-      children: [
-        hourPainter,
-        dayPainter,
-      ],
-    );
     return SizedBox(
         height: height,
         width: width,
         child: GestureDetector(
-          onTapUp: _onTapUp,
-          child: framePainter,
+          onTapUp: (details) => onTap?.call(
+              days(details.localPosition),
+              minutes(details.localPosition),
+          ),
+          onLongPressDown: (details) => onLongPress?.call(
+              days(details.localPosition),
+              minutes(details.localPosition),
+          ),
+          onDoubleTapDown: (details) => onDoubleTap?.call(
+              days(details.localPosition),
+              minutes(details.localPosition),
+          ),
+          child: Stack(
+            children: [
+              CustomPaint(
+                size: Size.infinite,
+                painter: LinesPainter(
+                  divisions: timeScheme.count,
+                  lineStyle: config.line.style,
+                  lineColor: config.line.color,
+                  lineWidth: config.line.width,
+                  offset: config.line.offsetX - timeMargin,
+                  dashedSpace: config.line.dashedSpace,
+                  dashedWidth: config.line.dashedWidth,
+                  direction: LineDirection.horizontal,
+                ),
+              ),
+              CustomPaint(
+                size: Size.infinite,
+                painter: LinesPainter(
+                  divisions: dateScheme.count,
+                  lineStyle: config.line.style,
+                  lineColor: config.line.color,
+                  lineWidth: config.line.width,
+                  offset: config.line.offsetY - dateMargin,
+                  dashedSpace: config.line.dashedSpace,
+                  dashedWidth: config.line.dashedWidth,
+                  direction: LineDirection.vertical,
+                ),
+              ),
+            ],
+          ),
         )
     );
   }

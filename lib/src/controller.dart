@@ -27,24 +27,21 @@ class CalendarController extends ChangeNotifier {
   DateTime get datetime => _datetime;
   CalendarSwipe? get swipe => _swipe;
 
-  void next([bool callback = true]) {
+  void next([bool animate = true]) {
     _datetime = (_datetime as dynamic) + 1;
-    if (callback) notifyListeners();
+    _swipe = animate ? CalendarSwipe.forward : null;
+    notifyListeners();
   }
 
-  void last([bool callback = true]) {
+  void last([bool animate = true]) {
     _datetime = (_datetime as dynamic) - 1;
-    if (callback) notifyListeners();
+    _swipe = animate ? CalendarSwipe.backward : null;
+    notifyListeners();
   }
 
-  // void goTo(DateTime target) {
-  //   if (_datetime == target) return;
-  //   _swipe = (target.isAfter(_datetime))
-  //       ? CalendarSwipe.forward
-  //       : CalendarSwipe.backward;
-  //   _datetime = target;
-  //   notifyListeners();
-  // }
+  void clear() {
+    _swipe = null;
+  }
 
   String title(BuildContext context) {
     final header = CalendarConfig.of(context)!.header;

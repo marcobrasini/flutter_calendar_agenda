@@ -62,6 +62,13 @@ class Calendar extends StatelessWidget {
     this.showIndicator = true,
     this.indicatorColor,
     this.swipeDirection,
+    //
+    this.onEventTap,
+    this.onEventDoubleTap,
+    this.onEventLongPress,
+    this.onFrameTap,
+    this.onFrameDoubleTap,
+    this.onFrameLongPress,
   });
 
   final CalendarView view;
@@ -111,6 +118,22 @@ class Calendar extends StatelessWidget {
   final bool showIndicator;
   final Color? indicatorColor;
   final Axis? swipeDirection;
+  //
+  final EventCallback? onEventTap;
+  final EventCallback? onEventDoubleTap;
+  final EventCallback? onEventLongPress;
+  final FrameCallback? onFrameTap;
+  final FrameCallback? onFrameDoubleTap;
+  final FrameCallback? onFrameLongPress;
+
+  CallbackScheme get callbacks => CallbackScheme(
+    onEventTap: onEventTap,
+    onEventDoubleTap: onEventDoubleTap,
+    onEventLongPress: onEventLongPress,
+    onFrameTap: onFrameTap,
+    onFrameDoubleTap: onFrameDoubleTap,
+    onFrameLongPress: onFrameLongPress,
+  );
 
   TimeScheme get timeScheme => TimeScheme(
     beg: begHour,
@@ -128,6 +151,24 @@ class Calendar extends StatelessWidget {
   WeekScheme get weekScheme => WeekScheme(
     beg: begWeek,
     end: endWeek,
+  );
+
+  LineConfig get lineConfig => LineConfig(
+    style: lineStyle,
+    color: lineColor,
+    width: lineWidth,
+    offsetX: lineOffsetX,
+    offsetY: lineOffsetY,
+    dashedWidth: dashedWidth,
+    dashedSpace: dashedSpace,
+  );
+
+  ViewConfig get viewConfig => ViewConfig(
+    showHeader: showHeaderView,
+    showIndicator: showIndicator,
+    indicatorColor: indicatorColor,
+    swipeDirection: swipeDirection
+        ?? (view == CalendarView.monthly ? Axis.vertical : Axis.horizontal),
   );
 
   TextConfig get headerConfig {
@@ -152,6 +193,18 @@ class Calendar extends StatelessWidget {
           padding: datePadding ?? monthlyHeaderPadding,
           textStyle: dateTextStyle,
           background: dateBackground,
+        );
+    }
+  }
+
+  TextConfig get timeConfig {
+    switch (view) {
+      default:
+        return TextConfig(
+          format: timeFormat ?? timeHeaderFormat,
+          padding: timePadding ?? timeHeaderPadding,
+          textStyle: timeTextStyle,
+          background: timeBackground,
         );
     }
   }
@@ -196,44 +249,25 @@ class Calendar extends StatelessWidget {
     }
   }
 
-  TextConfig get timeConfig {
-    switch (view) {
-      default:
-        return TextConfig(
-          format: timeFormat ?? timeHeaderFormat,
-          padding: timePadding ?? timeHeaderPadding,
-          textStyle: timeTextStyle,
-          background: timeBackground,
-        );
-    }
-  }
-
-  LineConfig get lineConfig => LineConfig(
-    style: lineStyle,
-    color: lineColor,
-    width: lineWidth,
-    offsetX: lineOffsetX,
-    offsetY: lineOffsetY,
-    dashedWidth: dashedWidth,
-    dashedSpace: dashedSpace,
-  );
-
-  ViewConfig get viewConfig => ViewConfig(
-    showHeader: showHeaderView,
-    showIndicator: showIndicator,
-    indicatorColor: indicatorColor,
-    swipeDirection: swipeDirection
-        ?? (view == CalendarView.monthly ? Axis.vertical : Axis.horizontal),
-  );
-
   Widget get viewer {
     switch (view) {
       case CalendarView.daily:
-        return DailyView(timeScheme: timeScheme);
+        return DailyView(
+          timeScheme: timeScheme,
+          callbacks: callbacks,
+        );
       case CalendarView.weekly:
-        return WeeklyView(dateScheme: dateScheme, timeScheme: timeScheme);
+        return WeeklyView(
+          dateScheme: dateScheme,
+          timeScheme: timeScheme,
+          callbacks: callbacks,
+        );
       case CalendarView.monthly:
-        return MonthlyView(dateScheme: dateScheme, weekScheme: weekScheme);
+        return MonthlyView(
+          dateScheme: dateScheme,
+          weekScheme: weekScheme,
+          callbacks: callbacks,
+        );
     }
   }
 
@@ -252,19 +286,19 @@ class Calendar extends StatelessWidget {
             date: dateConfig,
             week: weekConfig,
             child: Column(
-                children: [
-                  if (showHeader) Consumer<CalendarController>(
-                    builder: (context, controller, _) => CalendarHeader(
-                        title: controller.title(context),
-                        last: controller.last, 
-                        next: controller.next,
-                        showButtons: showHeaderButtons,
-                    ),
+              children: [
+                if (showHeader) Consumer<CalendarController>(
+                  builder: (context, controller, _) => CalendarHeader(
+                      title: controller.title(context),
+                      last: controller.last,
+                      next: controller.next,
+                      showButtons: showHeaderButtons,
                   ),
-                  Expanded(
-                    child: viewer,
-                  )
-                ]
+                ),
+                Expanded(
+                  child: viewer,
+                )
+              ]
             ),
           );
         },

@@ -14,20 +14,14 @@ class DailyView extends StatelessWidget {
   const DailyView({
     super.key,
     required this.timeScheme,
+    required this.callbacks,
     //
     this.cornerWidget,
   });
 
   final TimeScheme timeScheme;
+  final CallbackScheme callbacks;
   final Widget? cornerWidget;
-
-  // void onPageTap(int tapped) {
-  //   Time time = Time(timeScheme.beg, tapped);
-  //   if (timeScheme.round != null) {
-  //     time = time.round(timeScheme.round!);
-  //   }
-  //   print(time);
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +70,7 @@ class DailyView extends StatelessWidget {
                           width: pageWidth,
                           height: pageHeight,
                           timeScheme: timeScheme,
+                          callbacks: callbacks,
                         ),
                       ),
                     ),

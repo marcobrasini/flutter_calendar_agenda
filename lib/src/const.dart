@@ -1,5 +1,12 @@
 import 'dart:ui';
+import 'package:calendar/src/data/fixture.dart';
+
+import 'data/event.dart';
 import 'enums.dart';
+
+typedef EventCallback = void Function(Event);
+typedef FrameCallback = void Function(int, [int]);
+typedef DragCallback = void Function(Event, Fixture);
 
 const initialHour = 0;
 const finalHour = Duration.hoursPerDay;
@@ -49,3 +56,5 @@ const dashFrameSpace = 4.0;
 const swipeLength = 50;
 const swipeSpeed = 100;
 const swipeDuration = Duration(milliseconds: 300);
+const dragEdgeSpace = 50.0;
+const dragEdgeDelay = Duration(milliseconds: 500);

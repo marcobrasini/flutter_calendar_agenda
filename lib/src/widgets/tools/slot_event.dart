@@ -3,9 +3,6 @@ import 'package:calendar/src/data/event.dart';
 import 'package:flutter/material.dart';
 
 
-typedef EventTapCallback = void Function(Event event);
-
-
 class EventSlot extends StatelessWidget {
 
   const EventSlot({
@@ -27,43 +24,38 @@ class EventSlot extends StatelessWidget {
   final double radius;
   final double padding;
   final TextStyle? textStyle;
-  final EventTapCallback? onTap;
-  final EventTapCallback? onDoubleTap;
-  final EventTapCallback? onLongPress;
+  final EventCallback? onTap;
+  final EventCallback? onDoubleTap;
+  final EventCallback? onLongPress;
 
-  // List<Event> overlapping(Event event) => events.where((e) =>
-  // e != event &&
-  //     e.start.time < event.stop.time &&
-  //     e.stop.time > event.start.time
-  // ).toList();
-  //
-  // // Larghezza relativa considerando le sovrapposizioni (0.0 - 1.0)
-  // double widthFactor(Event event) {
-  //   final group = overlapping(event);
-  //   return group.isEmpty ? 1.0 : 1.0 / (group.length + 1);
-  // }
+  Widget content() => Text(
+    event.subject,
+    style: textStyle,
+    overflow: TextOverflow.ellipsis,
+    maxLines: textSlotLines,
+  );
+
+  Widget slot([double transparency = 1.0]) => Container(
+    height: height,
+    width: width,
+    padding: EdgeInsets.all(padding),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(radius),
+      color: event.color.withAlpha((transparency * 255).toInt()),
+    ),
+    child: content(),
+  );
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap == null ? null : () => onTap!(event),
-      onDoubleTap: onDoubleTap == null ? null : () => onDoubleTap!(event),
-      onLongPress: onLongPress == null ? null : () => onLongPress!(event),
-      child: Container(
-        height: height,
-        width: width,
-        padding: EdgeInsets.all(padding),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
-          color: event.color,
-        ),
-        child: Text(
-          event.subject,
-          style: textStyle,
-          overflow: TextOverflow.ellipsis,
-          maxLines: textSlotLines,
-        ),
+    return Draggable<Event>(
+      data: event,
+      childWhenDragging: slot(0.5),
+      feedback: Material(
+        color: Colors.transparent,
+        child: slot(),
       ),
+      child: slot(),
     );
   }
 }

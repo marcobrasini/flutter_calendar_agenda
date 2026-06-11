@@ -18,6 +18,7 @@ class MonthlyPage extends StatelessWidget {
     required this.height,
     required this.dateScheme,
     required this.weekScheme,
+    required this.callbacks,
   });
 
   final Month month;
@@ -25,6 +26,7 @@ class MonthlyPage extends StatelessWidget {
   final double height;
   final DateScheme dateScheme;
   final WeekScheme weekScheme;
+  final CallbackScheme callbacks;
   double get dateScale => dateScheme.scale(width);
   double get weekScale => weekScheme.scale(height);
 
@@ -56,6 +58,9 @@ class MonthlyPage extends StatelessWidget {
             height: height,
             weekScheme: weekScheme,
             dateScheme: dateScheme,
+            onTap: callbacks.onFrameTap,
+            onDoubleTap: callbacks.onFrameDoubleTap,
+            onLongPress: callbacks.onFrameLongPress,
           ),
           slotPainter,
         ],

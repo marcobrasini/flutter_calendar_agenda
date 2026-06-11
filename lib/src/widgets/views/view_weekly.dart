@@ -15,23 +15,15 @@ class WeeklyView extends StatelessWidget {
     super.key,
     required this.dateScheme,
     required this.timeScheme,
+    required this.callbacks,
     //
     this.cornerWidget,
   });
 
-  // TimeHeader attributes
   final DateScheme dateScheme;
   final TimeScheme timeScheme;
+  final CallbackScheme callbacks;
   final Widget? cornerWidget;
-
-  // void onPageTap(int tappedDay, int tappedMinute) {
-  //   // Date date = week.mon + tappedDay;
-  //   Time time = Time(timeScheme.beg, tappedMinute);
-  //   if (timeScheme.round != null) {
-  //     time = time.round(timeScheme.round!);
-  //   }
-  //   print(time);
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +74,7 @@ class WeeklyView extends StatelessWidget {
                           height: pageHeight,
                           timeScheme: timeScheme,
                           dateScheme: dateScheme,
+                          callbacks: callbacks,
                         ),
                       ),
                     )

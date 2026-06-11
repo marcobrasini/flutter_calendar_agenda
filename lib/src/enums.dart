@@ -7,7 +7,6 @@ enum CalendarView {
 enum CalendarSwipe {
   forward,
   backward,
-  none,
 }
 
 enum LineStyle {

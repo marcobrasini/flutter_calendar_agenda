@@ -15,6 +15,7 @@ class MonthlyView extends StatelessWidget {
     super.key,
     required this.dateScheme,
     required this.weekScheme,
+    required this.callbacks,
     // Interactive callback
     this.cornerWidget,
   });
@@ -22,6 +23,7 @@ class MonthlyView extends StatelessWidget {
 
   final DateScheme dateScheme;
   final WeekScheme weekScheme;
+  final CallbackScheme callbacks;
   final Widget? cornerWidget;
 
   void onPageTap(int tappedWeek, int tappedDay) {
@@ -56,6 +58,7 @@ class MonthlyView extends StatelessWidget {
                         height: pageHeight,
                         dateScheme: dateScheme,
                         weekScheme: weekScheme,
+                        callbacks: callbacks,
                       ),
                   ),
                 ),

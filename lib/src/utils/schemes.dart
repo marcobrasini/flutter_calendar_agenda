@@ -47,3 +47,22 @@ class WeekScheme {
   int get count => end - beg;
   double scale(double space) => count / space;
 }
+
+class CallbackScheme {
+  const CallbackScheme({
+    this.onEventTap,
+    this.onEventDoubleTap,
+    this.onEventLongPress,
+    this.onFrameTap,
+    this.onFrameDoubleTap,
+    this.onFrameLongPress,
+    this.onDragAccepted,
+  });
+  final EventCallback? onEventTap;
+  final EventCallback? onEventDoubleTap;
+  final EventCallback? onEventLongPress;
+  final FrameCallback? onFrameTap;
+  final FrameCallback? onFrameDoubleTap;
+  final FrameCallback? onFrameLongPress;
+  final DragCallback? onDragAccepted;
+}
