@@ -73,7 +73,7 @@ class DailyFrame extends StatelessWidget {
               CustomPaint(
                 size: Size.infinite,
                 painter: LinesPainter(
-                  positions: [0.0],
+                  positions: [config.view.indicatorRadius],
                   lineStyle: config.line.style,
                   lineColor: config.line.color,
                   lineWidth: config.line.width,

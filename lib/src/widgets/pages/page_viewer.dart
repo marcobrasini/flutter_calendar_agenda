@@ -103,8 +103,6 @@ class _ViewerPageState extends State<ViewerPage> {
       _onAnimate(controller.swipe!);
       controller.clear();
     }
-    // NON sincronizzare _datetime qui — viene aggiornato solo
-    // dopo il completamento dell'animazione (vedi _onAnimate/_onScroll)
     return PageView.builder(
       scrollDirection: config.view.swipeDirection,
       controller: _pageController,

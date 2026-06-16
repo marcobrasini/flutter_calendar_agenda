@@ -56,10 +56,10 @@ class CallbackScheme {
     this.onFrameTap,
     this.onFrameDoubleTap,
     this.onFrameLongPress,
-    this.onEventCreate,
+    this.onEventCreated,
     this.onEventDragged,
     this.onEventResized,
-    this.onEventDelete,
+    this.onEventDeleted,
   });
   final EventCallback? onEventTap;
   final EventCallback? onEventDoubleTap;
@@ -67,8 +67,8 @@ class CallbackScheme {
   final FrameCallback? onFrameTap;
   final FrameCallback? onFrameDoubleTap;
   final FrameCallback? onFrameLongPress;
-  final CreateCallback? onEventCreate;
+  final CreateCallback? onEventCreated;
   final ModifyCallback? onEventDragged;
   final ModifyCallback? onEventResized;
-  final DeleteCallback? onEventDelete;
+  final DeleteCallback? onEventDeleted;
 }

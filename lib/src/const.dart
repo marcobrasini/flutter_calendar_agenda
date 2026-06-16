@@ -27,7 +27,6 @@ const finalDay = DateTime.sunday;
 const initialWeek = 0;
 const finalWeek = 6;
 
-const timeHeaderPadding = 8.0;
 const textHeaderPadding = 0.0;
 const textHeaderMargin = 0.0;
 const textLineSpacing = 1.5;
@@ -53,6 +52,7 @@ const monthlyDatePadding = 0.0;
 
 const timeHeaderFormat = "HH:mm";
 const timeHeaderRatio = 1.0;
+const timeHeaderPadding = 4.0;
 
 const lineFrameColor = Color(0xFFE0E0E0);
 const lineFrameStyle = LineStyle.solid;

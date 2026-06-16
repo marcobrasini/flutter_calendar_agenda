@@ -62,6 +62,7 @@ class DailyPage extends StatelessWidget {
     final config = CalendarConfig.of(context)!;
     final source = CalendarSource.of(context);
     final events = source.forDate(date);
+    final offset = config.view.indicatorRadius;
     return SizedBox(
         width: width,
         height: height,
@@ -76,18 +77,21 @@ class DailyPage extends StatelessWidget {
               onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(_dateTime(local)),
               onCreate: (local, [_]) => _onTapped(context, local),
             ),
-            DailySlot(
-              events: events,
-              width: width,
-              height: height,
-              timeScheme: timeScheme,
-              callbacks: callbacks,
-              onDropped: (Offset global, [Event? event]) {
-                if (event == null) return;
-                final box = context.findRenderObject() as RenderBox;
-                final local = box.globalToLocal(global);
-                _onDropped(context, event, local);
-              },
+            Positioned(
+              left: offset,
+              child: DailySlot(
+                events: events,
+                width: width - offset,
+                height: height,
+                timeScheme: timeScheme,
+                callbacks: callbacks,
+                onDropped: (Offset global, [Event? event]) {
+                  if (event == null) return;
+                  final box = context.findRenderObject() as RenderBox;
+                  final local = box.globalToLocal(global);
+                  _onDropped(context, event, local);
+                },
+              ),
             ),
             if (config.view.showIndicator) TimeIndicator(
               date: date,

@@ -27,6 +27,7 @@ class TimeIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
+    final offset = config.view.indicatorRadius;
     final color = config.view.indicatorColor
         ?? Theme.of(context).primaryColor;
     return TimerBuilder.periodic(
@@ -41,29 +42,25 @@ class TimeIndicator extends StatelessWidget {
           child: Stack(
             children: [
               Positioned(
-                left: day * length,
+                left: offset + day * length,
                 top: time / timeScale,
                 height: 0.0,
-                width: length,
-                child: SizedBox(
-                  width: width,
-                  height: height,
-                  child: CustomPaint(
-                    size: Size.infinite,
-                    painter: LinesPainter(
-                      positions: [0.0],
-                      lineStyle: LineStyle.solid,
-                      lineColor: color,
-                      lineWidth: config.view.indicatorWidth,
-                      direction: LineDirection.horizontal,
-                      points: [
-                        PointPainter(
-                          offset: Offset.zero,
-                          radius: config.view.indicatorRadius,
-                          color: color,
-                        )
-                      ],
-                    ),
+                width: length - offset,
+                child: CustomPaint(
+                  size: Size.infinite,
+                  painter: LinesPainter(
+                    positions: [0.0],
+                    lineStyle: LineStyle.solid,
+                    lineColor: color,
+                    lineWidth: config.view.indicatorWidth,
+                    direction: LineDirection.horizontal,
+                    points: [
+                      PointPainter(
+                        offset: Offset.zero,
+                        radius: config.view.indicatorRadius,
+                        color: color,
+                      )
+                    ],
                   ),
                 ),
               ),
