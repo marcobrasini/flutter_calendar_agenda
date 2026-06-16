@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../enums.dart';
+import 'painter_point.dart';
 
 
 /// Paints 24 hour lines.
@@ -16,6 +17,7 @@ class LinesPainter extends CustomPainter {
     this.length,
     this.dashedWidth,
     this.dashedSpace,
+    this.points,
   });
 
   final int divisions;
@@ -27,6 +29,7 @@ class LinesPainter extends CustomPainter {
   final double? length;
   final double? dashedWidth;
   final double? dashedSpace;
+  final List<PointPainter>? points;
   final LineDirection direction;
   bool get isVertical => direction == LineDirection.vertical;
   bool get isHorizontal => direction == LineDirection.horizontal;
@@ -73,7 +76,8 @@ class LinesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..strokeWidth = lineWidth
-      ..color = lineColor;
+      ..color = lineColor
+      ..style = PaintingStyle.fill;
     final beg = offset;
     final end = beg + (length ?? ((isHorizontal) ? size.width : size.height) - beg);
     for (var fix in linePositions(size)) {
@@ -84,6 +88,11 @@ class LinesPainter extends CustomPainter {
         case LineStyle.dashed:
           paintDashed(paint, canvas, size, fix, beg, end);
           break;
+      }
+    }
+    if (points != null) {
+      for (PointPainter point in points!) {
+        point.paint(canvas, size);
       }
     }
   }

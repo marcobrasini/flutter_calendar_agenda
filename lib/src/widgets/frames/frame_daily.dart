@@ -33,7 +33,7 @@ class DailyFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
-    final timeMargin = (config.time?.padding ?? 0.0) / 2;
+    // final timeMargin = (config.time?.padding ?? 0.0) / 2;
     //
     return SizedBox(
         height: height,

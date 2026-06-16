@@ -1,11 +1,13 @@
-import 'package:calendar/src/data/fixture.dart';
-import 'package:calendar/src/widgets/slots/slot_daily.dart';
 import 'package:flutter/material.dart';
 import '../frames/frame_daily.dart';
+import '../tools/indicator_time.dart';
+import '../slots/slot_daily.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
 import '../../data/source.dart';
 import '../../data/event.dart';
+import '../../data/fixture.dart';
+import '../../config.dart';
 
 
 class DailyPage extends StatelessWidget {
@@ -27,7 +29,8 @@ class DailyPage extends StatelessWidget {
   final CallbackScheme callbacks;
 
   DateTime _startEvent(Event event, Offset local) {
-    final minutes = (local.dy * timeScale).round();
+    final step = timeScheme.round ?? 1;
+    final minutes = (local.dy * timeScale / step).round() * step;
     final time = Time.fromHour(timeScheme.beg) + minutes;
     return date & time;
   }
@@ -35,7 +38,7 @@ class DailyPage extends StatelessWidget {
   void _onDrop(BuildContext context, Event event, Offset local) {
     final start = _startEvent(event, local);
     if (start == event.start) return;
-    callbacks.onDragAccepted?.call(
+    callbacks.onEventDragged?.call(
       event,
       Fixture(
         start: start,
@@ -46,6 +49,7 @@ class DailyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final config = CalendarConfig.of(context)!;
     final source = CalendarSource.of(context);
     final events = source.forDate(date);
     return SizedBox(
@@ -72,6 +76,12 @@ class DailyPage extends StatelessWidget {
                 final local = box.globalToLocal(global);
                 _onDrop(context, event, local);
               }
+            ),
+            if (config.view.showIndicator) TimeIndicator(
+              date: date,
+              width: width,
+              height: height,
+              timeScheme: timeScheme,
             ),
           ],
         ),

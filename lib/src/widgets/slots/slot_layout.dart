@@ -26,6 +26,8 @@ class SlotLayout {
     this.span = 0,
   });
 
+  bool get isExpanded => level == 0 && order == 0 && split == 1 && span == 0;
+
   double get top => container.top;
   double get height => container.height;
   double get left => (expanded)

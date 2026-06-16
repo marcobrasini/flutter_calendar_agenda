@@ -24,6 +24,12 @@ enum SlotDirection {
   vertical,
 }
 
+enum SlotAction {
+  none,
+  dragging,
+  resizing,
+}
+
 enum TimeStep {
   minutes60(60),
   minutes30(30),

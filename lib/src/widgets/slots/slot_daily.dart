@@ -93,9 +93,9 @@ class _DailySlotState extends State<DailySlot> {
   void _expand(SlotLayout layout, [SlotAction action = SlotAction.none]) {
     if (action == SlotAction.resizing) layout.expanded = true;
     setState(() {
-      _expanded = layout;
-      _selected = null;
       _action = action;
+      _expanded = layout;
+      _selected = layout.isExpanded ? layout.event : null;
     });
   }
 

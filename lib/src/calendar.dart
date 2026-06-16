@@ -69,6 +69,8 @@ class Calendar extends StatelessWidget {
     this.eventTextStyle,
     this.eventTextMaxLines,
     this.eventTextOverflow,
+    this.draggableEvent = true,
+    this.resizableEvent = true,
     //
     this.onEventTap,
     this.onEventDoubleTap,
@@ -76,6 +78,8 @@ class Calendar extends StatelessWidget {
     this.onFrameTap,
     this.onFrameDoubleTap,
     this.onFrameLongPress,
+    this.onEventDragged,
+    this.onEventResized,
   });
 
   final CalendarView view;
@@ -132,6 +136,8 @@ class Calendar extends StatelessWidget {
   final double eventRounded;
   final int? eventTextMaxLines;
   final TextOverflow? eventTextOverflow;
+  final bool draggableEvent;
+  final bool resizableEvent;
   //
   final EventCallback? onEventTap;
   final EventCallback? onEventDoubleTap;
@@ -139,6 +145,8 @@ class Calendar extends StatelessWidget {
   final FrameCallback? onFrameTap;
   final FrameCallback? onFrameDoubleTap;
   final FrameCallback? onFrameLongPress;
+  final ModifyCallback? onEventDragged;
+  final ModifyCallback? onEventResized;
 
   CallbackScheme get callbacks => CallbackScheme(
     onEventTap: onEventTap,
@@ -147,6 +155,8 @@ class Calendar extends StatelessWidget {
     onFrameTap: onFrameTap,
     onFrameDoubleTap: onFrameDoubleTap,
     onFrameLongPress: onFrameLongPress,
+    onEventDragged: draggableEvent ? onEventDragged : null,
+    onEventResized: resizableEvent ? onEventResized : null,
   );
 
   TimeScheme get timeScheme => TimeScheme(
@@ -189,7 +199,8 @@ class Calendar extends StatelessWidget {
     builder: eventBuilder,
     padding: eventPadding,
     rounded: eventRounded,
-    resizeDelay: eventResizeDelay,
+    draggable: draggableEvent,
+    resizable: resizableEvent,
   );
 
   TextConfig get headerConfig {

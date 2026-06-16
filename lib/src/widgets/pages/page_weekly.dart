@@ -1,11 +1,13 @@
-import 'package:calendar/src/data/fixture.dart';
 import 'package:flutter/material.dart';
 import '../frames/frame_weekly.dart';
+import '../tools/indicator_time.dart';
 import '../slots/slot_daily.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
 import '../../data/source.dart';
 import '../../data/event.dart';
+import '../../data/fixture.dart';
+import '../../config.dart';
 
 
 class WeeklyPage extends StatelessWidget {
@@ -50,19 +52,12 @@ class WeeklyPage extends StatelessWidget {
     );
   }
 
-  List<Date> get dates {
-    final dateList = <Date>[];
-    var date = week.mon + (dateScheme.beg - 1);
-    for (int i = 0 ; i < dateScheme.end ; i++) {
-      dateList.add(date + i);
-    }
-    return dateList;
-  }
-
   @override
   Widget build(BuildContext context) {
+    final config = CalendarConfig.of(context)!;
     final source = CalendarSource.of(context);
-    // final events = source.forWeek(week);
+    final space = width / dateScheme.count;
+    final date = week.mon + (dateScheme.beg - 1);
     return SizedBox(
       width: width,
       height: height,
@@ -77,10 +72,13 @@ class WeeklyPage extends StatelessWidget {
             onDoubleTap: callbacks.onFrameDoubleTap,
             onLongPress: callbacks.onFrameLongPress,
           ),
-          for (Date date in dates)
-            DailySlot(
-                events: source.forDate(date),
-                width: width/dateScheme.count,
+          for (int i = 0 ; i < dateScheme.count ; i++)
+            Positioned(
+              left: i * space,
+              width: space,
+              child: DailySlot(
+                events: source.forDate(date + i),
+                width: space,
                 height: height,
                 timeScheme: timeScheme,
                 callbacks: callbacks,
@@ -88,8 +86,16 @@ class WeeklyPage extends StatelessWidget {
                   final box = context.findRenderObject() as RenderBox;
                   final local = box.globalToLocal(global);
                   onDrop(context, event, local);
-                }
+                },
+              ),
             ),
+          if (config.view.showIndicator) TimeIndicator(
+            date: date,
+            width: width,
+            height: height,
+            timeScheme: timeScheme,
+            length: width/dateScheme.count,
+          ),
         ],
       ),
     );

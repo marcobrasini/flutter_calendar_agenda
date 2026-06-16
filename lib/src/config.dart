@@ -48,19 +48,26 @@ class ViewConfig{
     this.swipeDirection = Axis.horizontal,
     this.showHeader = true,
     this.showIndicator = true,
+    this.indicatorPeriod = timeIndicatorPeriod,
+    this.indicatorRadius = timeIndicatorPointRadius,
+    this.indicatorWidth = timeIndicatorLineWidth,
     this.indicatorColor,
   });
 
   final Axis swipeDirection;
   final bool showHeader;
   final bool showIndicator;
+  final Duration indicatorPeriod;
+  final double indicatorRadius;
+  final double indicatorWidth;
   final Color? indicatorColor;
 }
 
 class EventConfig{
   const EventConfig({
     this.builder,
-    required this.resizeDelay,
+    required this.draggable,
+    required this.resizable,
     required this.padding,
     required this.rounded,
     this.textStyle,
@@ -69,7 +76,8 @@ class EventConfig{
   });
 
   final EventBuilder? builder;
-  final Duration resizeDelay;
+  final bool draggable;
+  final bool resizable;
   final double padding;
   final double rounded;
   final TextStyle? textStyle;

@@ -38,6 +38,7 @@ dependencies:
   rrule: ^0.2.18
   provider: ^6.1.5+1
   linked_scroll_controller: ^0.2.0
+  timer_builder: ^2.0.0
 
 dev_dependencies:
   flutter_test:

@@ -23,30 +23,34 @@ class CalendarHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final header = CalendarConfig.of(context)!.header;
+    final color = header.background ?? Theme.of(context).primaryColor;
+    final style = header.textStyle ?? TextStyle(
+      color: Colors.white,
+    );
     return Container(
-      color: Theme.of(context).primaryColorLight,
+      color: color,
       child: Row(
         children: [
           if (showButtons) IconButton(
               onPressed: last,
               icon: Icon(Icons.arrow_left,
-                color: header.textStyle?.color,
-                size: header.textStyle?.fontSize,
+                color: style.color,
+                size: style.fontSize,
               )
           ),
           Expanded(
             child: Center(
                 child: Text(
                   title,
-                  style: header.textStyle,
+                  style: style,
                 )
             ),
           ),
           if (showButtons) IconButton(
               onPressed: next,
               icon: Icon(Icons.arrow_right,
-                color: header.textStyle?.color,
-                size: header.textStyle?.fontSize,
+                color: style.color,
+                size: style.fontSize,
               )
           ),
         ],
