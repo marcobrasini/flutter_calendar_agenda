@@ -4,39 +4,18 @@ import 'package:flutter/material.dart';
 import 'data/event.dart';
 import 'enums.dart';
 
+//
 typedef EventCallback = void Function(Event);
-typedef FrameCallback = void Function(int, [int]);
-typedef LayoutCallback = void Function(Event, Offset);
+typedef FrameCallback = void Function(DateTime);
+//
+typedef LayoutCallback = void Function(Offset, [Event?]);
+//
+typedef CreateCallback = void Function(Fixture);
 typedef ModifyCallback = void Function(Event, Fixture);
+typedef DeleteCallback = void Function(Event);
+//
 typedef EventBuilder = Widget Function(Event);
 
-
-// class Sized extends StatelessWidget {
-//   const Sized({
-//     super.key,
-//     this.top = 0.0,
-//     this.left = 0.0,
-//     required this.width,
-//     required this.height,
-//     this.child,
-//   });
-//   final double top;
-//   final double left;
-//   final double width;
-//   final double height;
-//   final Widget? child;
-//
-//   Rect get box => Rect.fromLTWH(0.0, 0.0, width, height);
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return SizedBox(
-//       width: width,
-//       height: height,
-//       child: child,
-//     );
-//   }
-// }
 
 const initialHour = 0;
 const finalHour = Duration.hoursPerDay;
@@ -100,3 +79,4 @@ const eventResizableLineWidth = 2.5;
 const eventDraggableSlotAlpha = 127;
 const eventSlotPadding = 4.0;
 const eventSlotRounded = 4.0;
+const eventDefaultDuration = Duration(minutes: 60);

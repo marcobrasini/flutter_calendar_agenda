@@ -17,6 +17,7 @@ class DailyFrame extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.onCreate,
   });
 
   final double width;
@@ -24,24 +25,36 @@ class DailyFrame extends StatelessWidget {
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
   // Interactive callback
-  final FrameCallback? onTap;
-  final FrameCallback? onDoubleTap;
-  final FrameCallback? onLongPress;
-
-  int minutes(Offset position) => (position.dy * timeScale).toInt();
+  final LayoutCallback? onTap;
+  final LayoutCallback? onDoubleTap;
+  final LayoutCallback? onLongPress;
+  final LayoutCallback? onCreate;
 
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
-    // final timeMargin = (config.time?.padding ?? 0.0) / 2;
-    //
     return SizedBox(
         height: height,
         width: width,
         child: GestureDetector(
-          onTapUp: (details) => onTap?.call(minutes(details.localPosition)),
-          onLongPressDown: (details) => onLongPress?.call(minutes(details.localPosition)),
-          onDoubleTapDown: (details) => onDoubleTap?.call(minutes(details.localPosition)),
+          onTapUp: (details)  {
+            if (config.event.createAt == GestureType.tap) {
+              onCreate?.call(details.localPosition);
+            }
+            onTap?.call(details.localPosition);
+          },
+          onLongPressDown: (details) {
+            if (config.event.createAt == GestureType.longPress) {
+              onCreate?.call(details.localPosition);
+            }
+            onLongPress?.call(details.localPosition);
+          },
+          onDoubleTapDown: (details) {
+            if (config.event.createAt == GestureType.doubleTap) {
+              onCreate?.call(details.localPosition);
+            }
+            onDoubleTap?.call(details.localPosition);
+          },
           child: Stack(
             children: [
               CustomPaint(

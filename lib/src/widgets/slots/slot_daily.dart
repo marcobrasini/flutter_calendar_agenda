@@ -18,7 +18,7 @@ class DailySlot extends StatefulWidget {
     required this.events,
     required this.timeScheme,
     required this.callbacks,
-    required this.onDrop,
+    required this.onDropped,
   });
 
   final double width;
@@ -27,7 +27,7 @@ class DailySlot extends StatefulWidget {
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
   final CallbackScheme callbacks;
-  final LayoutCallback onDrop;
+  final LayoutCallback onDropped;
 
   List<SlotLayout> get layouts {
     final containers = <SlotLayout>[];
@@ -126,14 +126,17 @@ class _DailySlotState extends State<DailySlot> {
                 onDoubleTap: () => _expand(layout, SlotAction.resizing),
                 onLongPressStart: (_) => _expand(layout, SlotAction.dragging),
                 onLongPressEnd: (_) => _reset(),
-                onTap: () => _reset(),
+                onTap: () {
+                  widget.callbacks.onEventTap?.call(layout.event);
+                  _reset();
+                },
                 child: SlotDraggable(
                   key: ValueKey(layout.event),
                   layout: layout,
                   draggable: config.event.draggable && (_selected == layout.event),
                   resizable: config.event.resizable,
                   onDragEnd: (position) {
-                    widget.onDrop(layout.event, position);
+                    widget.onDropped(position, layout.event);
                     layout.expanded = false;
                     _reset();
                   },

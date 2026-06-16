@@ -27,12 +27,9 @@ class MonthlyFrame extends StatelessWidget {
   final DateScheme dateScheme;
   double get dateScale => dateScheme.scale(width);
   // Interactive callback
-  final FrameCallback? onTap;
-  final FrameCallback? onDoubleTap;
-  final FrameCallback? onLongPress;
-
-  int weeks(Offset position) => (position.dy * weekScale).toInt();
-  int days(Offset position) => (position.dx * dateScale).toInt();
+  final LayoutCallback? onTap;
+  final LayoutCallback? onDoubleTap;
+  final LayoutCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -42,18 +39,9 @@ class MonthlyFrame extends StatelessWidget {
       height: height,
       width: width,
       child: GestureDetector(
-        onTapUp: (details) => onTap?.call(
-          weeks(details.localPosition),
-          days(details.localPosition),
-        ),
-        onLongPressDown: (details) => onLongPress?.call(
-          weeks(details.localPosition),
-          days(details.localPosition),
-        ),
-        onDoubleTapDown: (details) => onDoubleTap?.call(
-          weeks(details.localPosition),
-          days(details.localPosition),
-        ),
+        onTapUp: (details) => onTap?.call(details.localPosition),
+        onLongPressDown: (details) => onLongPress?.call(details.localPosition),
+        onDoubleTapDown: (details) => onDoubleTap?.call(details.localPosition),
         child: Stack(
           children: [
             CustomPaint(

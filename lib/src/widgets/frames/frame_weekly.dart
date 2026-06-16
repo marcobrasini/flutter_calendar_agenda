@@ -18,6 +18,7 @@ class WeeklyFrame extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.onCreate,
   });
 
   final double width;
@@ -27,34 +28,37 @@ class WeeklyFrame extends StatelessWidget {
   double get dateScale => dateScheme.scale(width);
   double get timeScale => timeScheme.scale(height);
   // Interactive callback
-  final FrameCallback? onTap;
-  final FrameCallback? onDoubleTap;
-  final FrameCallback? onLongPress;
-
-  int minutes(Offset position) => (position.dy * timeScale).toInt();
-  int days(Offset position) => (position.dx * dateScale).toInt();
+  final LayoutCallback? onTap;
+  final LayoutCallback? onDoubleTap;
+  final LayoutCallback? onLongPress;
+  final LayoutCallback? onCreate;
 
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
-    // final timeMargin = (config.time?.padding ?? 0.0) / 2;
     final dateMargin = (config.date?.padding ?? 0.0) / 2;
     return SizedBox(
         height: height,
         width: width,
         child: GestureDetector(
-          onTapUp: (details) => onTap?.call(
-              days(details.localPosition),
-              minutes(details.localPosition),
-          ),
-          onLongPressDown: (details) => onLongPress?.call(
-              days(details.localPosition),
-              minutes(details.localPosition),
-          ),
-          onDoubleTapDown: (details) => onDoubleTap?.call(
-              days(details.localPosition),
-              minutes(details.localPosition),
-          ),
+          onTapUp: (details)  {
+            if (config.event.createAt == GestureType.tap) {
+              onCreate?.call(details.localPosition);
+            }
+            onTap?.call(details.localPosition);
+          },
+          onLongPressDown: (details) {
+            if (config.event.createAt == GestureType.longPress) {
+              onCreate?.call(details.localPosition);
+            }
+            onLongPress?.call(details.localPosition);
+          },
+          onDoubleTapDown: (details) {
+            if (config.event.createAt == GestureType.doubleTap) {
+              onCreate?.call(details.localPosition);
+            }
+            onDoubleTap?.call(details.localPosition);
+          },
           child: Stack(
             children: [
               CustomPaint(

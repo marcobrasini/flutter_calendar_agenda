@@ -65,8 +65,8 @@ class MyApp extends StatelessWidget {
               ),
               Event(
                 id: "event3",
-                start: now.add(Duration(hours: 2)),
-                stop: now.add(Duration(hours: 4)),
+                start: now.add(Duration(hours: 24 +2)),
+                stop: now.add(Duration(hours: 24 +4)),
                 color:  Colors.yellow,
                 subject: "Case",
               ),
@@ -79,8 +79,18 @@ class MyApp extends StatelessWidget {
               ),
             ]),
             onEventDragged: (event, fixture) {
-              print("$event -> $fixture");
-            }
+              print("dragged $event -> $fixture");
+            },
+            onEventResized:  (event, fixture) {
+              print("resized $event -> $fixture");
+            },
+            onEventCreate: (fixture) {
+              print("create $fixture");
+            },
+            onEventTap: (Event event) {
+              print("tap $event");
+            },
+            // showIndicator: false,
           ),
         )
       ),

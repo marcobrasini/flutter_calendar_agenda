@@ -1,10 +1,10 @@
-import 'package:calendar/src/utils/schemes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'widgets/tools/header_calendar.dart';
 import 'widgets/views/view_daily.dart';
 import 'widgets/views/view_weekly.dart';
 import 'widgets/views/view_monthly.dart';
+import 'utils/schemes.dart';
 import 'data/source.dart';
 import 'enums.dart';
 import 'const.dart';
@@ -64,6 +64,7 @@ class Calendar extends StatelessWidget {
     this.swipeDirection,
     //
     this.eventBuilder,
+    this.eventDuration = eventDefaultDuration,
     this.eventPadding = eventSlotPadding,
     this.eventRounded = eventSlotRounded,
     this.eventTextStyle,
@@ -80,6 +81,7 @@ class Calendar extends StatelessWidget {
     this.onFrameLongPress,
     this.onEventDragged,
     this.onEventResized,
+    this.onEventCreate,
   });
 
   final CalendarView view;
@@ -136,6 +138,7 @@ class Calendar extends StatelessWidget {
   final double eventRounded;
   final int? eventTextMaxLines;
   final TextOverflow? eventTextOverflow;
+  final Duration eventDuration;
   final bool draggableEvent;
   final bool resizableEvent;
   //
@@ -147,6 +150,7 @@ class Calendar extends StatelessWidget {
   final FrameCallback? onFrameLongPress;
   final ModifyCallback? onEventDragged;
   final ModifyCallback? onEventResized;
+  final CreateCallback? onEventCreate;
 
   CallbackScheme get callbacks => CallbackScheme(
     onEventTap: onEventTap,
@@ -157,6 +161,7 @@ class Calendar extends StatelessWidget {
     onFrameLongPress: onFrameLongPress,
     onEventDragged: draggableEvent ? onEventDragged : null,
     onEventResized: resizableEvent ? onEventResized : null,
+    onEventCreate: onEventCreate,
   );
 
   TimeScheme get timeScheme => TimeScheme(
@@ -199,6 +204,7 @@ class Calendar extends StatelessWidget {
     builder: eventBuilder,
     padding: eventPadding,
     rounded: eventRounded,
+    duration: eventDuration,
     draggable: draggableEvent,
     resizable: resizableEvent,
   );

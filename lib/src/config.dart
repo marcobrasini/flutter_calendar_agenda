@@ -66,6 +66,7 @@ class ViewConfig{
 class EventConfig{
   const EventConfig({
     this.builder,
+    required this.duration,
     required this.draggable,
     required this.resizable,
     required this.padding,
@@ -73,9 +74,11 @@ class EventConfig{
     this.textStyle,
     this.overflow,
     this.maxLines,
+    this.createAt = GestureType.doubleTap,
   });
 
   final EventBuilder? builder;
+  final Duration duration;
   final bool draggable;
   final bool resizable;
   final double padding;
@@ -83,6 +86,7 @@ class EventConfig{
   final TextStyle? textStyle;
   final TextOverflow? overflow;
   final int? maxLines;
+  final GestureType createAt;
 }
 
 

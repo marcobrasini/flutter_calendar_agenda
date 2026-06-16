@@ -30,6 +30,12 @@ enum SlotAction {
   resizing,
 }
 
+enum GestureType {
+  tap,
+  doubleTap,
+  longPress,
+}
+
 enum TimeStep {
   minutes60(60),
   minutes30(30),

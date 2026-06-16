@@ -43,12 +43,13 @@ class TimeIndicator extends StatelessWidget {
               Positioned(
                 left: day * length,
                 top: time / timeScale,
+                height: 0.0,
                 width: length,
                 child: SizedBox(
                   width: width,
                   height: height,
                   child: CustomPaint(
-                    size: Size.zero,
+                    size: Size.infinite,
                     painter: LinesPainter(
                       positions: [0.0],
                       lineStyle: LineStyle.solid,

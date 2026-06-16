@@ -26,6 +26,13 @@ class MonthlyPage extends StatelessWidget {
   double get dateScale => dateScheme.scale(width);
   double get weekScale => weekScheme.scale(height);
 
+  DateTime _date(Offset local) {
+    final weeks = (local.dy * weekScale).toInt();
+    final days = (local.dx * dateScale).toInt();
+    final date = month.weekStart.date;
+    return date + weeks * 7 + days;
+  }
+
   @override
   Widget build(BuildContext context) {
     final start = month.weekStart.date;
@@ -54,9 +61,9 @@ class MonthlyPage extends StatelessWidget {
             height: height,
             weekScheme: weekScheme,
             dateScheme: dateScheme,
-            onTap: callbacks.onFrameTap,
-            onDoubleTap: callbacks.onFrameDoubleTap,
-            onLongPress: callbacks.onFrameLongPress,
+            onTap: (local, [_]) => callbacks.onFrameTap?.call(_date(local)),
+            onDoubleTap: (local, [_]) => callbacks.onFrameDoubleTap?.call(_date(local)),
+            onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(_date(local)),
           ),
           slotPainter,
         ],

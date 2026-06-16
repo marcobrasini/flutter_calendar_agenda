@@ -28,21 +28,31 @@ class DailyPage extends StatelessWidget {
   double get timeScale => timeScheme.scale(height);
   final CallbackScheme callbacks;
 
-  DateTime _startEvent(Event event, Offset local) {
+  DateTime _dateTime(Offset local) {
     final step = timeScheme.round ?? 1;
     final minutes = (local.dy * timeScale / step).round() * step;
     final time = Time.fromHour(timeScheme.beg) + minutes;
     return date & time;
   }
 
-  void _onDrop(BuildContext context, Event event, Offset local) {
-    final start = _startEvent(event, local);
+  void _onDropped(BuildContext context, Event event, Offset local) {
+    final start = _dateTime(local);
     if (start == event.start) return;
     callbacks.onEventDragged?.call(
       event,
       Fixture(
         start: start,
         stop: start.add(event.duration),
+      ),
+    );
+  }
+
+  void _onTapped(BuildContext context, Offset local) {
+    final config = CalendarConfig.of(context)!;
+    final start = _dateTime(local);
+    callbacks.onEventCreate?.call(Fixture(
+        start: start,
+        stop: start.add(config.event.duration),
       ),
     );
   }
@@ -61,9 +71,10 @@ class DailyPage extends StatelessWidget {
               width: width,
               height: height,
               timeScheme: timeScheme,
-              onTap: callbacks.onFrameTap,
-              onDoubleTap: callbacks.onFrameDoubleTap,
-              onLongPress: callbacks.onFrameLongPress,
+              onTap: (local, [_]) => callbacks.onFrameTap?.call(_dateTime(local)),
+              onDoubleTap: (local, [_]) => callbacks.onFrameDoubleTap?.call(_dateTime(local)),
+              onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(_dateTime(local)),
+              onCreate: (local, [_]) => _onTapped(context, local),
             ),
             DailySlot(
               events: events,
@@ -71,11 +82,12 @@ class DailyPage extends StatelessWidget {
               height: height,
               timeScheme: timeScheme,
               callbacks: callbacks,
-              onDrop: (Event event, Offset global) {
+              onDropped: (Offset global, [Event? event]) {
+                if (event == null) return;
                 final box = context.findRenderObject() as RenderBox;
                 final local = box.globalToLocal(global);
-                _onDrop(context, event, local);
-              }
+                _onDropped(context, event, local);
+              },
             ),
             if (config.view.showIndicator) TimeIndicator(
               date: date,
