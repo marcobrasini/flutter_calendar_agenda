@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../tools/header_monthly.dart';
 import '../frames/frame_monthly.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import '../../controller.dart';
-import '../../config.dart';
 import 'page_slot.dart';
 
 

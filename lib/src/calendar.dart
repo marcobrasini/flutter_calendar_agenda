@@ -63,6 +63,13 @@ class Calendar extends StatelessWidget {
     this.indicatorColor,
     this.swipeDirection,
     //
+    this.eventBuilder,
+    this.eventPadding = eventSlotPadding,
+    this.eventRounded = eventSlotRounded,
+    this.eventTextStyle,
+    this.eventTextMaxLines,
+    this.eventTextOverflow,
+    //
     this.onEventTap,
     this.onEventDoubleTap,
     this.onEventLongPress,
@@ -119,6 +126,13 @@ class Calendar extends StatelessWidget {
   final Color? indicatorColor;
   final Axis? swipeDirection;
   //
+  final EventBuilder? eventBuilder;
+  final TextStyle? eventTextStyle;
+  final double eventPadding;
+  final double eventRounded;
+  final int? eventTextMaxLines;
+  final TextOverflow? eventTextOverflow;
+  //
   final EventCallback? onEventTap;
   final EventCallback? onEventDoubleTap;
   final EventCallback? onEventLongPress;
@@ -169,6 +183,13 @@ class Calendar extends StatelessWidget {
     indicatorColor: indicatorColor,
     swipeDirection: swipeDirection
         ?? (view == CalendarView.monthly ? Axis.vertical : Axis.horizontal),
+  );
+
+  EventConfig get eventConfig => EventConfig(
+    builder: eventBuilder,
+    padding: eventPadding,
+    rounded: eventRounded,
+    resizeDelay: eventResizeDelay,
   );
 
   TextConfig get headerConfig {
@@ -281,6 +302,7 @@ class Calendar extends StatelessWidget {
           return CalendarConfig(
             view: viewConfig,
             line: lineConfig,
+            event: eventConfig,
             header: headerConfig,
             time: timeConfig,
             date: dateConfig,

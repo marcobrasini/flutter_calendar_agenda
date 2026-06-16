@@ -1,9 +1,9 @@
-import 'package:calendar/src/const.dart';
 import 'package:flutter/material.dart';
 import '../tools/painter_lines.dart';
 import '../../utils/schemes.dart';
 import '../../config.dart';
 import '../../enums.dart';
+import '../../const.dart';
 
 
 class DailyFrame extends StatelessWidget {

@@ -57,6 +57,26 @@ class ViewConfig{
   final Color? indicatorColor;
 }
 
+class EventConfig{
+  const EventConfig({
+    this.builder,
+    required this.resizeDelay,
+    required this.padding,
+    required this.rounded,
+    this.textStyle,
+    this.overflow,
+    this.maxLines,
+  });
+
+  final EventBuilder? builder;
+  final Duration resizeDelay;
+  final double padding;
+  final double rounded;
+  final TextStyle? textStyle;
+  final TextOverflow? overflow;
+  final int? maxLines;
+}
+
 
 class CalendarConfig extends InheritedWidget {
   const CalendarConfig({
@@ -64,6 +84,7 @@ class CalendarConfig extends InheritedWidget {
     required super.child,
     required this.view,
     required this.line,
+    required this.event,
     required this.header,
     this.time,
     this.date,
@@ -72,6 +93,7 @@ class CalendarConfig extends InheritedWidget {
 
   final ViewConfig view;
   final LineConfig line;
+  final EventConfig event;
   final TextConfig header;
   final TextConfig? time;
   final TextConfig? date;

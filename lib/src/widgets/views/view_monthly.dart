@@ -2,7 +2,6 @@ import 'package:calendar/src/config.dart';
 import 'package:calendar/src/widgets/pages/page_viewer.dart';
 import 'package:calendar/src/widgets/tools/header_monthly.dart';
 import 'package:flutter/material.dart';
-import '../frames/frame_monthly.dart';
 import '../pages/page_monthly.dart';
 import '../../context.dart';
 import '../../utils/schemes.dart';
@@ -26,9 +25,7 @@ class MonthlyView extends StatelessWidget {
   final CallbackScheme callbacks;
   final Widget? cornerWidget;
 
-  void onPageTap(int tappedWeek, int tappedDay) {
-    print("$tappedWeek $tappedDay");
-  }
+  void onPageTap(int tappedWeek, int tappedDay) {}
 
   @override
   Widget build(BuildContext context) {

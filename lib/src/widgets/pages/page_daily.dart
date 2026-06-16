@@ -1,13 +1,11 @@
 import 'package:calendar/src/data/fixture.dart';
+import 'package:calendar/src/widgets/slots/slot_daily.dart';
 import 'package:flutter/material.dart';
 import '../frames/frame_daily.dart';
-import '../pages/page_drag.dart';
-import '../tools/slot_event.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import '../../data/event.dart';
 import '../../data/source.dart';
-import '../../config.dart';
+import '../../data/event.dart';
 
 
 class DailyPage extends StatelessWidget {
@@ -21,28 +19,28 @@ class DailyPage extends StatelessWidget {
     required this.callbacks,
   });
 
-  final Date date;       // <-- passata esplicitamente, non letta dal controller
+  final Date date;
   final double width;
   final double height;
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
   final CallbackScheme callbacks;
 
-  int _yOf(Event event) => event.start.time % Time.fromHour(timeScheme.beg);
-
-  DateTime _startFromOffset(Offset localPosition, Event event) {
-    final minutes = (localPosition.dy * timeScale).round();
+  DateTime _startEvent(Event event, Offset local) {
+    final minutes = (local.dy * timeScale).round();
     final time = Time.fromHour(timeScheme.beg) + minutes;
     return date & time;
   }
 
-  void _onDrop(BuildContext context, Event event, Offset localPosition) {
-    final start = _startFromOffset(localPosition, event);
+  void _onDrop(BuildContext context, Event event, Offset local) {
+    final start = _startEvent(event, local);
     if (start == event.start) return;
     callbacks.onDragAccepted?.call(
-        event, Fixture(
-            start: start,
-            stop: start.add(event.duration))
+      event,
+      Fixture(
+        start: start,
+        stop: start.add(event.duration),
+      ),
     );
   }
 
@@ -63,23 +61,17 @@ class DailyPage extends StatelessWidget {
               onDoubleTap: callbacks.onFrameDoubleTap,
               onLongPress: callbacks.onFrameLongPress,
             ),
-            for (var event in events)
-              Positioned(
-                top: _yOf(event) / timeScale,
-                child: EventSlot(
-                  event: event,
-                  width: width,
-                  height: event.duration.inMinutes / timeScale,
-                  onTap: callbacks.onEventTap,
-                  onDoubleTap: callbacks.onEventDoubleTap,
-                  onLongPress: callbacks.onEventLongPress,
-                ),
-              ),
-            Positioned.fill(
-              child: DragPage(
-                onAccept: (event, localPosition) =>
-                    _onDrop(context, event, localPosition),
-              ),
+            DailySlot(
+              events: events,
+              width: width,
+              height: height,
+              timeScheme: timeScheme,
+              callbacks: callbacks,
+              onDrop: (Event event, Offset global) {
+                final box = context.findRenderObject() as RenderBox;
+                final local = box.globalToLocal(global);
+                _onDrop(context, event, local);
+              }
             ),
           ],
         ),

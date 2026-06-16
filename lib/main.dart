@@ -1,5 +1,4 @@
 import 'package:calendar/src/data/event.dart';
-import 'package:calendar/src/data/pattern.dart';
 import 'package:calendar/src/data/source.dart';
 import 'package:calendar/src/enums.dart';
 import 'package:calendar/src/calendar.dart';
@@ -28,45 +27,54 @@ class MyApp extends StatelessWidget {
         body: Padding(
           padding: EdgeInsets.all(16.0),
           child: Calendar(
-            view: CalendarView.daily,
+            view: CalendarView.weekly,
             begHour: 6,
             endHour: 22,
             begDay: 1,
             endDay: 6,
-            // showHeaderView: false,
             source: Source([
+              Event(
+                id: "event2",
+                start: now,
+                stop: now.add(Duration(hours: 1)),
+                color:  Colors.blue,
+                subject: "Occurrence",
+              ),
+              Event(
+                id: "event",
+                start: now,
+                stop: now.add(Duration(minutes: 30)),
+                color:  Colors.blue,
+                subject: "Occurrence",
+              ),
+              Event(
+                id: "event",
+                start: now.add(Duration(minutes: 30)),
+                stop: now.add(Duration(hours: 1)),
+                color:  Colors.pink,
+                subject: "Other",
+              ),
               Event(
                 id: "event1",
                 start: now,
-                stop: now.add(Duration(hours: 1)),
+                stop: now.add(Duration(hours: 3)),
                 color:  Colors.green,
-                subject: "Event",
-              ),
-              Event(
-                id: "event2",
-                start: now.add(Duration(hours: 26)),
-                stop: now.add(Duration(hours: 27)),
-                color:  Colors.yellow,
-                subject: "Event",
+                subject: "Occurrence",
               ),
               Event(
                 id: "event3",
-                start: now.add(Duration(hours: -23)),
-                stop: now.add(Duration(hours: -22)),
-                color:  Colors.deepOrange,
-                subject: "Event",
+                start: now.add(Duration(hours: 2)),
+                stop: now.add(Duration(hours: 4)),
+                color:  Colors.yellow,
+                subject: "Case",
               ),
               Event(
                 id: "event4",
-                start: now.add(Duration(days:-2)),
-                stop: now.add(Duration(days:-2, hours: 1)),
-                color:  Colors.pink,
-                subject: "Rec",
-                pattern: Pattern.fromICSString(
-                    now.add(Duration(days:-2, hours: 1)),
-                    "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=MO,FR;"
-                ),
-              )
+                start: now.add(Duration(hours: 3, minutes: 30)),
+                stop: now.add(Duration(hours: 4, minutes: 30)),
+                color:  Colors.grey,
+                subject: "Case",
+              ),
             ]),
           ),
         )

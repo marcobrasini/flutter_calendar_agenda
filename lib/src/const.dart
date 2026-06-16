@@ -1,5 +1,5 @@
-import 'dart:ui';
 import 'package:calendar/src/data/fixture.dart';
+import 'package:flutter/material.dart';
 
 import 'data/event.dart';
 import 'enums.dart';
@@ -7,6 +7,35 @@ import 'enums.dart';
 typedef EventCallback = void Function(Event);
 typedef FrameCallback = void Function(int, [int]);
 typedef DragCallback = void Function(Event, Fixture);
+typedef EventBuilder = Sized Function(Event);
+
+
+class Sized extends StatelessWidget {
+  const Sized({
+    super.key,
+    this.top = 0.0,
+    this.left = 0.0,
+    required this.width,
+    required this.height,
+    this.child,
+  });
+  final double top;
+  final double left;
+  final double width;
+  final double height;
+  final Widget? child;
+
+  Rect get box => Rect.fromLTWH(0.0, 0.0, width, height);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: child,
+    );
+  }
+}
 
 const initialHour = 0;
 const finalHour = Duration.hoursPerDay;
@@ -58,3 +87,11 @@ const swipeSpeed = 100;
 const swipeDuration = Duration(milliseconds: 300);
 const dragEdgeSpace = 50.0;
 const dragEdgeDelay = Duration(milliseconds: 500);
+
+const eventOffset = 20.0;
+const eventResizeDelay = Duration(milliseconds: 200);
+const eventResizableLineDimmed = 0.25;
+const eventResizableLineWidth = 2.5;
+const eventDraggableSlotAlpha = 127;
+const eventSlotPadding = 4.0;
+const eventSlotRounded = 4.0;

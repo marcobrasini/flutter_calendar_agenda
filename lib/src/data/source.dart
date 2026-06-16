@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 
 
 class Source extends ChangeNotifier {
+  final int cacheRange;
   final List<Event> _events;
-  final Map<String, List<Event>> _cache = {}; // solo chiavi 'd:yyyy-MM-dd'
-  final int prefetchWindow;
+  final Map<String, List<Event>> _cache = {};
 
-  Source(this._events, {this.prefetchWindow = 1});
+  Source(this._events, {this.cacheRange = 1});
 
   // ── Cache per giorno ──────────────────────────────────────────────────────
 
@@ -17,7 +17,12 @@ class Source extends ChangeNotifier {
   List<Event> _forDate(Date date) {
     return _cache.putIfAbsent(
       _key(date),
-          () => _events.expand((e) => e.expand(date, date + 1)).toList(),
+          () => _events.expand((e) => e.expand(date, date + 1)).toList()
+            ..sort((a, b) {
+              final startSort = a.start.compareTo(b.start);
+              if (startSort != 0) return startSort;
+              return b.duration.compareTo(a.duration);
+            }),
     );
   }
 
@@ -25,7 +30,7 @@ class Source extends ChangeNotifier {
 
   List<Event> forDate(Date date) {
     final result = _forDate(date);
-    _prefetch([date - 1, date + 1]);
+    _prefetch([date - cacheRange, date + cacheRange]);
     return result;
   }
 

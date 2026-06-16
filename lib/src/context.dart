@@ -4,6 +4,9 @@ import 'utils/datetime.dart';
 
 
 extension CalendarMetrics on BuildContext {
+
+  CalendarConfig get config => CalendarConfig.of(this)!;
+
   double timeMargin() {
     final timeConfig = CalendarConfig.of(this)!.time;
     if (timeConfig == null) return 0.0;

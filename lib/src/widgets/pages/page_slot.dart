@@ -1,9 +1,9 @@
-import 'package:calendar/src/config.dart';
-import 'package:calendar/src/data/source.dart';
-import 'package:calendar/src/utils/datetime.dart';
-import 'package:calendar/src/widgets/tools/slot_date.dart';
-import 'package:calendar/src/widgets/tools/tile_event.dart';
 import 'package:flutter/material.dart';
+import '../tools/slot_date.dart';
+import '../tools/tile_event.dart';
+import '../../utils/datetime.dart';
+import '../../data/source.dart';
+import '../../config.dart';
 
 
 class SlotPage extends StatelessWidget {

@@ -2,8 +2,7 @@ import 'package:intl/intl.dart';
 
 
 class Time extends DateTime {
-  Time._(int year, int month, int day, int hour, int minute)
-      : super(year, month, day, hour, minute);
+  Time._(super.year, super.month, super.day, super.hour, super.minute);
 
   factory Time(int hour, int minute) => Time._(1, 1, 1, hour, minute);
   factory Time.fromHour(int hours) => Time(hours, 0);

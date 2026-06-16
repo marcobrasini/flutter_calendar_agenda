@@ -1,13 +1,11 @@
 import 'package:calendar/src/data/fixture.dart';
 import 'package:flutter/material.dart';
 import '../frames/frame_weekly.dart';
-import '../pages/page_drag.dart';
-import '../tools/slot_event.dart';
+import '../slots/slot_daily.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import '../../data/event.dart';
 import '../../data/source.dart';
-import '../../config.dart';
+import '../../data/event.dart';
 
 
 class WeeklyPage extends StatelessWidget {
@@ -31,31 +29,40 @@ class WeeklyPage extends StatelessWidget {
   double get timeScale => timeScheme.scale(height);
   final CallbackScheme callbacks;
 
-  int _xOf(Event event) => event.start.weekday - dateScheme.beg;
-  int _yOf(Event event) => event.start.time % Time.fromHour(timeScheme.beg);
-
-  DateTime _startFromOffset(Offset localPosition, Event event) {
-    final days = (localPosition.dx * dateScale).round();
-    final minutes = (localPosition.dy * timeScale).round();
+  DateTime _startEvent(Event event, Offset local) {
+    final step = timeScheme.round ?? 1;
+    final minutes = (local.dy * timeScale / step).round() * step;
+    final days = (local.dx * dateScale).round();
     final date = week.mon + (dateScheme.beg - 1) + days;
     final time = Time.fromHour(timeScheme.beg) + minutes;
     return date & time;
   }
 
-  void _onDrop(BuildContext context, Event event, Offset localPosition) {
-    final start = _startFromOffset(localPosition, event);
+  void onDrop(BuildContext context, Event event, Offset local) {
+    final start = _startEvent(event, local);
     if (start == event.start) return;
-    callbacks.onDragAccepted?.call(
-        event, Fixture(
+    callbacks.onEventDragged?.call(
+      event,
+      Fixture(
         start: start,
-        stop: start.add(event.duration))
+        stop: start.add(event.duration),
+      ),
     );
+  }
+
+  List<Date> get dates {
+    final dateList = <Date>[];
+    var date = week.mon + (dateScheme.beg - 1);
+    for (int i = 0 ; i < dateScheme.end ; i++) {
+      dateList.add(date + i);
+    }
+    return dateList;
   }
 
   @override
   Widget build(BuildContext context) {
     final source = CalendarSource.of(context);
-    final events = source.forWeek(week);
+    // final events = source.forWeek(week);
     return SizedBox(
       width: width,
       height: height,
@@ -70,25 +77,19 @@ class WeeklyPage extends StatelessWidget {
             onDoubleTap: callbacks.onFrameDoubleTap,
             onLongPress: callbacks.onFrameLongPress,
           ),
-          for (var event in events)
-            Positioned(
-              top: _yOf(event) / timeScale,
-              left: _xOf(event) / dateScale,
-              child: EventSlot(
-                event: event,
-                width: 1 / dateScale,
-                height: event.duration.inMinutes / timeScale,
-                onTap: callbacks.onEventTap,
-                onDoubleTap: callbacks.onEventDoubleTap,
-                onLongPress: callbacks.onEventLongPress,
-              ),
+          for (Date date in dates)
+            DailySlot(
+                events: source.forDate(date),
+                width: width/dateScheme.count,
+                height: height,
+                timeScheme: timeScheme,
+                callbacks: callbacks,
+                onDrop: (Event event, Offset global) {
+                  final box = context.findRenderObject() as RenderBox;
+                  final local = box.globalToLocal(global);
+                  onDrop(context, event, local);
+                }
             ),
-          Positioned.fill(
-            child: DragPage(
-              onAccept: (event, localPosition) =>
-                  _onDrop(context, event, localPosition),
-            ),
-          ),
         ],
       ),
     );

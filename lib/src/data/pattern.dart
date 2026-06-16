@@ -132,7 +132,7 @@ class PatternIterator implements Iterator<DateTime> {
   PatternIterator(this.pattern) : current = pattern.since, index = 0;
 
   final Pattern pattern;
-  DateTime current;
+  @override DateTime current;
   int index;
   int _i = 0;
 

@@ -60,11 +60,11 @@ class WeeklyFrame extends StatelessWidget {
               CustomPaint(
                 size: Size.infinite,
                 painter: LinesPainter(
-                  divisions: timeScheme.count,
+                  divisions: timeScheme.hours,
                   lineStyle: config.line.style,
                   lineColor: config.line.color,
                   lineWidth: config.line.width,
-                  offset: config.line.offsetX - timeMargin,
+                  offset: config.line.offsetX,
                   dashedSpace: config.line.dashedSpace,
                   dashedWidth: config.line.dashedWidth,
                   direction: LineDirection.horizontal,
