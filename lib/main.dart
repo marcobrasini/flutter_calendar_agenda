@@ -27,19 +27,26 @@ class MyApp extends StatelessWidget {
         body: Padding(
           padding: EdgeInsets.all(16.0),
           child: Calendar(
-            view: CalendarView.weekly,
+            view: CalendarView.daily,
             timeRatio: 0.0,
             timeRound: 15,
-            // begHour: 6,
-            // endHour: 23,
+            begHour: 6,
+            endHour: 22,
             begDay: 1,
-            endDay: 6,
+            endDay: 7,
             source: Source([
               Event(
                 id: "event2",
                 start: now,
                 stop: now.add(Duration(hours: 1)),
                 color:  Colors.blue,
+                subject: "Occurrence",
+              ),
+              Event(
+                id: "event2",
+                start: now.add(Duration(minutes: 45)),
+                stop: now.add(Duration(hours: 2, minutes: 45)),
+                color:  Colors.pink,
                 subject: "Occurrence",
               ),
               Event(
@@ -84,13 +91,15 @@ class MyApp extends StatelessWidget {
             onEventResized:  (event, fixture) {
               print("resized $event -> $fixture");
             },
-            onEventCreate: (fixture) {
-              print("create $fixture");
+            onEventCreated: (fixture) {
+              print("created $fixture");
             },
-            onEventTap: (Event event) {
+            onEventTap: (event) {
               print("tap $event");
             },
             // showIndicator: false,
+            // timeBackground: Colors.grey.shade200,
+            // dateBackground: Colors.grey.shade200,
           ),
         )
       ),

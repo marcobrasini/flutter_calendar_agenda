@@ -70,32 +70,32 @@ void main() {
       //
       result = fixture.set(fixTillDay.get());
       expect(result, isA<Fixture>());
-      expect(result.start, start);
+      expect(result.dragStart, start);
       expect(result.stop, start.tomorrow);
       //
       result = fixture.set(fixAllDay.get());
       expect(result, isA<Fixture>());
-      expect(result.start, start.date);
+      expect(result.dragStart, start.date);
       expect(result.stop, start.tomorrow);
       //
       result = fixture.set(fixMinute.get());
       expect(result, isA<Fixture>());
-      expect(result.start, start);
+      expect(result.dragStart, start);
       expect(result.stop, afterMinute);
       //
       result = fixture.set(fixHour.get());
       expect(result, isA<Fixture>());
-      expect(result.start, start);
+      expect(result.dragStart, start);
       expect(result.stop, afterHour);
       //
       result = fixture.set(fixDay.get());
       expect(result, isA<Fixture>());
-      expect(result.start, start);
+      expect(result.dragStart, start);
       expect(result.stop, afterDay);
       //
       result = fixture.set(fixWeek.get());
       expect(result, isA<Fixture>());
-      expect(result.start, start);
+      expect(result.dragStart, start);
       expect(result.stop, afterWeek);
     });
 

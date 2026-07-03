@@ -1,3 +1,4 @@
+import 'package:calendar/src/modifier.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'widgets/tools/header_calendar.dart';
@@ -81,7 +82,7 @@ class Calendar extends StatelessWidget {
     this.onFrameLongPress,
     this.onEventDragged,
     this.onEventResized,
-    this.onEventCreate,
+    this.onEventCreated,
   });
 
   final CalendarView view;
@@ -150,7 +151,7 @@ class Calendar extends StatelessWidget {
   final FrameCallback? onFrameLongPress;
   final ModifyCallback? onEventDragged;
   final ModifyCallback? onEventResized;
-  final CreateCallback? onEventCreate;
+  final CreateCallback? onEventCreated;
 
   CallbackScheme get callbacks => CallbackScheme(
     onEventTap: onEventTap,
@@ -161,7 +162,7 @@ class Calendar extends StatelessWidget {
     onFrameLongPress: onFrameLongPress,
     onEventDragged: draggableEvent ? onEventDragged : null,
     onEventResized: resizableEvent ? onEventResized : null,
-    onEventCreate: onEventCreate,
+    onEventCreated: onEventCreated,
   );
 
   TimeScheme get timeScheme => TimeScheme(
@@ -313,8 +314,14 @@ class Calendar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CalendarSource(
       source: source,
-      child: ChangeNotifierProvider(
-        create: (_) => CalendarController(view),
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => CalendarController(view)),
+          ChangeNotifierProvider(create: (_) => CalendarModifier(
+            onEventDragged: callbacks.onEventDragged,
+            onEventResized: callbacks.onEventResized,
+          ))
+        ],
         builder: (context, _) {
           return CalendarConfig(
             view: viewConfig,
@@ -326,13 +333,8 @@ class Calendar extends StatelessWidget {
             week: weekConfig,
             child: Column(
               children: [
-                if (showHeader) Consumer<CalendarController>(
-                  builder: (context, controller, _) => CalendarHeader(
-                      title: controller.title(context),
-                      last: controller.last,
-                      next: controller.next,
-                      showButtons: showHeaderButtons,
-                  ),
+                CalendarHeader(
+                    showButtons: showHeaderButtons,
                 ),
                 Expanded(
                   child: viewer,

@@ -65,14 +65,14 @@ const dashFrameSpace = 4.0;
 const swipeLength = 50;
 const swipeSpeed = 100;
 const swipeDuration = Duration(milliseconds: 300);
-const dragEdgeSpace = 50.0;
-const dragEdgeDelay = Duration(milliseconds: 500);
+const swipeDelay = Duration(milliseconds: 500);
+const swipeMargin = 30.0;
 
 const timeIndicatorPeriod = Duration(minutes: 1);
 const timeIndicatorLineWidth = 1.5;
 const timeIndicatorPointRadius = 4.5;
 
-const eventOffset = 20.0;
+const eventSlotOffset = 20.0;
 const eventResizeDelay = Duration(milliseconds: 200);
 const eventResizableLineDimmed = 0.25;
 const eventResizableLineWidth = 2.5;

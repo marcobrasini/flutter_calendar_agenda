@@ -1,13 +1,13 @@
-import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
 import '../../data/event.dart';
+import '../../modifier.dart';
 import '../../enums.dart';
-import '../../const.dart';
 import 'slot_layout.dart';
 import 'slot_string.dart';
-import 'slot_draggable.dart';
+import 'slot_event.dart';
 
 
 class DailySlot extends StatefulWidget {
@@ -18,7 +18,6 @@ class DailySlot extends StatefulWidget {
     required this.events,
     required this.timeScheme,
     required this.callbacks,
-    required this.onDropped,
   });
 
   final double width;
@@ -27,7 +26,6 @@ class DailySlot extends StatefulWidget {
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
   final CallbackScheme callbacks;
-  final LayoutCallback onDropped;
 
   List<SlotLayout> get layouts {
     final containers = <SlotLayout>[];
@@ -71,45 +69,24 @@ class DailySlot extends StatefulWidget {
 
 class _DailySlotState extends State<DailySlot> {
   late final List<SlotLayout> _layouts;
-  SlotAction _action = SlotAction.none;
-  SlotLayout? _expanded;
-  Event? _selected;
 
   @override
   void initState() {
     super.initState();
     _layouts = widget.layouts;
   }
+  
+  bool isDragging(CalendarModifier modifier, SlotLayout layout) =>
+      modifier.layout == layout && modifier.drawing 
+          && modifier.action == SlotAction.dragging;
 
-  void _reset() {
-    _layouts.map((l) => l.expanded = false);
-    setState(() {
-      _expanded = null;
-      _selected = null;
-      _action = SlotAction.none;
-    });
-  }
-
-  void _expand(SlotLayout layout, [SlotAction action = SlotAction.none]) {
-    if (action == SlotAction.resizing) layout.expanded = true;
-    setState(() {
-      _action = action;
-      _expanded = layout;
-      _selected = layout.isExpanded ? layout.event : null;
-    });
-  }
-
-  void _modify(SlotLayout layout) {
-    if (_expanded == layout && _selected == null) {
-      setState(() {
-        _selected = layout.event;
-      });
-    }
-  }
+  bool isResizing(CalendarModifier modifier, SlotLayout layout) =>
+      modifier.layout == layout && modifier.drawing
+          && modifier.action == SlotAction.resizing;
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context)!;
+    final modifier = context.watch<CalendarModifier>();
     return SizedBox(
       width: widget.width,
       height: widget.height,
@@ -119,29 +96,30 @@ class _DailySlotState extends State<DailySlot> {
             AnimatedPositioned(
               duration: const Duration(milliseconds: 200),
               top: layout.top,
-              left: (_expanded == layout) ? 0.0 : layout.left,
-              width: (_expanded == layout) ? widget.width : layout.width,
-              onEnd: () => _modify(layout),
+              left: (modifier.layout == layout) ? 0.0 : layout.left,
+              width: (modifier.layout == layout) ? widget.width : layout.width,
+              onEnd: () => modifier.modify(),
               child: GestureDetector(
-                onDoubleTap: () => _expand(layout, SlotAction.resizing),
-                onLongPressStart: (_) => _expand(layout, SlotAction.dragging),
-                onLongPressEnd: (_) => _reset(),
+                onDoubleTap: () {
+                  widget.callbacks.onEventDoubleTap?.call(layout.event);
+                  modifier.take(layout, SlotAction.resizing);
+                  if (layout.isExpanded) modifier.modify();
+                },
+                onLongPress: () {
+                  widget.callbacks.onEventLongPress?.call(layout.event);
+                  modifier.take(layout, SlotAction.dragging);
+                  if (layout.isExpanded) modifier.modify();
+                },
                 onTap: () {
                   widget.callbacks.onEventTap?.call(layout.event);
-                  _reset();
+                  modifier.reset();
                 },
-                child: SlotDraggable(
-                  key: ValueKey(layout.event),
-                  layout: layout,
-                  draggable: config.event.draggable && (_selected == layout.event),
-                  resizable: config.event.resizable,
-                  onDragEnd: (position) {
-                    widget.onDropped(position, layout.event);
-                    layout.expanded = false;
-                    _reset();
-                  },
-                  onDragCancel: () => _reset(),
-                )
+                child: (isResizing(modifier, layout))
+                    ? SizedBox.shrink()
+                    : EventSlot(
+                      layout: layout,
+                      dragging: isDragging(modifier, layout),
+                    ),
               ),
             ),
         ],

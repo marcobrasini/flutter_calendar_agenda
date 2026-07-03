@@ -1,98 +1,97 @@
-import 'dart:async';
+import 'package:calendar/src/modifier.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../data/event.dart';
-import '../../controller.dart';
-import '../../const.dart';
-import '../../config.dart';
+import '../slots/slot_event.dart';
+import '../slots/slot_layout.dart';
 
 
-typedef DragOffsetCallback = void Function(Event event, Offset localPosition);
-
-
-class DragPage extends StatefulWidget {
-
-  const DragPage({
+class DropPage extends StatefulWidget {
+  const DropPage({
     super.key,
-    required this.onAccept,
-    this.edgeDelay = dragEdgeDelay,
-    this.edgeSpace = dragEdgeSpace,
+    required this.width,
+    required this.height,
   });
 
-  final DragOffsetCallback onAccept;
-  final Duration edgeDelay;
-  final double edgeSpace;
+  final double width;
+  final double height;
 
   @override
-  State<DragPage> createState() => _DragPageState();
+  State<DropPage> createState() => _DropPageState();
 }
 
-class _DragPageState extends State<DragPage> {
-  Timer? _edgeTimer;
-  int? _activeEdge;
+class _DropPageState extends State<DropPage> {
+  final GlobalKey _boxKey = GlobalKey();
 
   @override
-  void dispose() {
-    _edgeTimer?.cancel();
-    super.dispose();
-  }
-
-  Offset position(DragTargetDetails<Event> details) {
-    final box = context.findRenderObject() as RenderBox;
-    return box.globalToLocal(details.offset);
-  }
-
-  int? _onEdge(Offset position, BoxConstraints constraints) {
-    final config = CalendarConfig.of(context)!;
-    switch (config.view.swipeDirection) {
-      case Axis.vertical:
-        if (position.dy <= widget.edgeSpace) return -1;
-        if (position.dy >= constraints.maxHeight - widget.edgeSpace) return 1;
-        break;
-      case Axis.horizontal:
-        if (position.dx <= widget.edgeSpace) return -1;
-        if (position.dx >= constraints.maxWidth - widget.edgeSpace) return 1;
-        break;
-    }
-    return null;
-  }
-
-  void _onMove(DragTargetDetails<Event> details, BoxConstraints constraints) {
-    final edge = _onEdge(position(details), constraints);
-    if (edge == _activeEdge) return;
-    _edgeTimer?.cancel();
-    _activeEdge = edge;
-    if (edge != null) {
-      _edgeTimer = Timer(widget.edgeDelay, () {
-        final controller = context.read<CalendarController>();
-        (edge < 0) ? controller.last() : controller.next();
-        _activeEdge = null;
-      });
-    }
-  }
-
-  void _onLeave() {
-    _edgeTimer?.cancel();
-    _activeEdge = null;
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final modifier = context.read<CalendarModifier>();
+      modifier.attachRenderer(
+            () => _boxKey.currentContext?.findRenderObject() as RenderBox?,
+      );
+      modifier.reset();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return DragTarget<Event>(
-          builder: (context, candidateData, rejectedData)
-              => const SizedBox.expand(),
-          onMove: (details) => _onMove(details, constraints),
-          onLeave: (_) => _onLeave(),
-          onAcceptWithDetails: (details) {
-            _onLeave();
-            final box = context.findRenderObject() as RenderBox;
-            final localPosition = box.globalToLocal(details.offset);
-            widget.onAccept(details.data, localPosition);
-          },
-        );
-      },
+    final modifier = context.watch<CalendarModifier>();
+    return SizedBox(
+      key: _boxKey,
+      width: widget.width,
+      height: widget.height,
+      child: (!modifier.drawing)
+          ? const SizedBox.shrink()
+          : IgnorePointer(
+        child: _Feedback(
+          boxKey: _boxKey,
+          layout: modifier.layout!,
+          globalPosition: modifier.globalOffset!,
+          grabOffset: modifier.localOffset!,
+        ),
+      ),
+    );
+  }
+}
+
+class _Feedback extends StatelessWidget {
+  const _Feedback({
+    required this.boxKey,
+    required this.layout,
+    required this.globalPosition,
+    required this.grabOffset,
+  });
+
+  final GlobalKey boxKey;
+  final SlotLayout layout;
+  final Offset globalPosition;
+  final Offset grabOffset;
+
+  @override
+  Widget build(BuildContext context) {
+    final box = boxKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.attached || !box.hasSize) {
+      return const SizedBox.shrink();
+    }
+    final local = box.globalToLocal(globalPosition - grabOffset);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          left: local.dx - layout.left,
+          top: local.dy,
+          width: layout.container.width,
+          height: layout.container.height,
+          child: Material(
+            child: EventSlot(
+                layout: layout,
+                resizing: true,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

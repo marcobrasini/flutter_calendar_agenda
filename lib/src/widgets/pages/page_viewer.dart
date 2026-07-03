@@ -1,6 +1,7 @@
 import 'package:calendar/src/config.dart';
 import 'package:calendar/src/const.dart';
 import 'package:calendar/src/enums.dart';
+import 'package:calendar/src/modifier.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controller.dart';
@@ -39,7 +40,6 @@ class _ViewerPageState extends State<ViewerPage> {
     super.initState();
     _pageController = PageController(
       initialPage: 1,
-      keepPage: false,
     )..addListener(_onScroll);
     _datetime = context.read<CalendarController>().datetime;
   }
@@ -99,6 +99,7 @@ class _ViewerPageState extends State<ViewerPage> {
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
     final controller = context.watch<CalendarController>();
+    final modifier = context.watch<CalendarModifier>();
     if (controller.swipe != null) {
       _onAnimate(controller.swipe!);
       controller.clear();
@@ -108,6 +109,7 @@ class _ViewerPageState extends State<ViewerPage> {
       controller: _pageController,
       itemCount: 3,
       itemBuilder: (context, index) => widget.builder(_datetime + index-1),
+      physics: (modifier.isResizing) ? NeverScrollableScrollPhysics() : null,
     );
   }
 }

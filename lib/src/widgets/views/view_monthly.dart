@@ -1,11 +1,11 @@
-import 'package:calendar/src/config.dart';
-import 'package:calendar/src/widgets/pages/page_viewer.dart';
-import 'package:calendar/src/widgets/tools/header_monthly.dart';
 import 'package:flutter/material.dart';
+import '../tools/header_monthly.dart';
+import '../pages/page_viewer.dart';
 import '../pages/page_monthly.dart';
-import '../../context.dart';
-import '../../utils/schemes.dart';
 import '../../utils/datetime.dart';
+import '../../utils/schemes.dart';
+import '../../context.dart';
+import '../../config.dart';
 
 
 class MonthlyView extends StatelessWidget {

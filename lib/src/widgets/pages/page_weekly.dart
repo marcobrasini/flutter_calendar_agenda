@@ -40,22 +40,22 @@ class WeeklyPage extends StatelessWidget {
     return date & time;
   }
 
-  void _onDropped(BuildContext context, Event event, Offset local) {
-    final start = _dateTime(local);
-    if (start == event.start) return;
-    callbacks.onEventDragged?.call(
-      event,
-      Fixture(
-        start: start,
-        stop: start.add(event.duration),
-      ),
-    );
-  }
+  // void _onDropped(BuildContext context, Event event, Offset local) {
+  //   final start = _dateTime(local);
+  //   if (start == event.start) return;
+  //   callbacks.onEventDragged?.call(
+  //     event,
+  //     Fixture(
+  //       start: start,
+  //       stop: start.add(event.duration),
+  //     ),
+  //   );
+  // }
 
   void _onTapped(BuildContext context, Offset local) {
     final config = CalendarConfig.of(context)!;
     final start = _dateTime(local);
-    callbacks.onEventCreate?.call(Fixture(
+    callbacks.onEventCreated?.call(Fixture(
       start: start,
       stop: start.add(config.event.duration),
     ),
@@ -93,12 +93,6 @@ class WeeklyPage extends StatelessWidget {
                 height: height,
                 timeScheme: timeScheme,
                 callbacks: callbacks,
-                onDropped: (Offset global, [Event? event]) {
-                  if (event == null) return;
-                  final box = context.findRenderObject() as RenderBox;
-                  final local = box.globalToLocal(global);
-                  _onDropped(context, event, local);
-                },
               ),
             ),
           if (config.view.showIndicator) TimeIndicator(

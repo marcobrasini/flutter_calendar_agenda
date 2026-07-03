@@ -1,12 +1,12 @@
-import 'package:calendar/src/widgets/pages/page_viewer.dart';
-import 'package:calendar/src/widgets/tools/header_weekly.dart';
 import 'package:flutter/material.dart';
+import '../tools/header_weekly.dart';
 import '../tools/header_time.dart';
+import '../pages/page_viewer.dart';
 import '../pages/page_weekly.dart';
 import '../../utils/datetime.dart';
+import '../../utils/schemes.dart';
 import '../../context.dart';
 import '../../config.dart';
-import '../../utils/schemes.dart';
 
 
 class WeeklyView extends StatelessWidget {
