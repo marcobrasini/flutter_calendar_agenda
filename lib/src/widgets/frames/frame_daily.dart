@@ -25,10 +25,10 @@ class DailyFrame extends StatelessWidget {
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
   // Interactive callback
-  final LayoutCallback? onTap;
-  final LayoutCallback? onDoubleTap;
-  final LayoutCallback? onLongPress;
-  final LayoutCallback? onCreate;
+  final FrameCallback? onTap;
+  final FrameCallback? onDoubleTap;
+  final FrameCallback? onLongPress;
+  final FrameCallback? onCreate;
 
   @override
   Widget build(BuildContext context) {

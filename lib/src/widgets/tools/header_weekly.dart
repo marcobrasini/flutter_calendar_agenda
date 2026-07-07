@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../tools/slot_date.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import '../../controller.dart';
+import '../../viewer.dart';
 import '../../config.dart';
 
 
@@ -33,9 +33,9 @@ class WeeklyHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateConfig = CalendarConfig.of(context)!.date!;
-    final controller = context.watch<CalendarController>();
+    final viewer = context.watch<CalendarViewer>();
     final widgets = <Widget>[];
-    for (Date date in dates(controller.asWeek)) {
+    for (Date date in dates(viewer.asWeek)) {
       widgets.add(Expanded(
           child: DateSlot(
             date: date,

@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../tools/indicator_time.dart';
 import '../tools/header_daily.dart';
 import '../tools/header_time.dart';
 import '../pages/page_viewer.dart';
 import '../pages/page_daily.dart';
-import '../pages/page_drag.dart';
+import '../slots/slot_modify.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import '../../controller.dart';
 import '../../modifier.dart';
 import '../../context.dart';
 import '../../config.dart';
 
 
-class DailyView extends StatelessWidget {
-
+class DailyView extends StatefulWidget {
   const DailyView({
     super.key,
     required this.timeScheme,
@@ -27,27 +26,43 @@ class DailyView extends StatelessWidget {
   final CallbackScheme callbacks;
   final Widget? cornerWidget;
 
-  // DateTime _dateTime(CalendarController controller, double timeScale, Offset local) {
-  //   final step = timeScheme.round ?? 1;
-  //   final minutes = (local.dy * timeScale / step).round() * step;
-  //   final time = Time.fromHour(timeScheme.beg) + minutes;
-  //   return controller.asDate & time;
-  // }
+  @override
+  State<DailyView> createState() => _DailyViewState();
+}
+
+class _DailyViewState extends State<DailyView> {
+  final _viewer = PageController(initialPage: 1);
+  final _scroller = ScrollController();
+  final _keyScroll = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final modifier = context.read<CalendarModifier>();
+      final renderer = _keyScroll.currentContext?.findRenderObject() as RenderBox;
+      modifier.attachSlider(_scroller);
+      modifier.attachRenderer(renderer);
+      modifier.reset();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
-    final controller = context.read<CalendarController>();
-
+    final offset = config.view.indicatorRadius;
+    final modifier = context.watch<CalendarModifier>();
     return LayoutBuilder(
       builder: (context, constraints) {
         final timeMargin = context.timeMargin();
         final timeOffset = context.timeOffset();
         final dateOffset = context.dateOffset();
         //
-        final pageHeight = (timeScheme.ratio == 0)
+        final pageHeight = (widget.timeScheme.ratio == 0)
             ? constraints.maxHeight - timeMargin - dateOffset
-            : timeScheme.minutes * timeScheme.ratio;
+            : widget.timeScheme.minutes * widget.timeScheme.ratio;
         final pageWidth = constraints.maxWidth - timeOffset;
         //
         return Column(
@@ -57,7 +72,7 @@ class DailyView extends StatelessWidget {
                 SizedBox(
                   width: timeOffset,
                   height: dateOffset,
-                  child: cornerWidget,
+                  child: widget.cornerWidget,
                 ),
                 DailyHeader(
                   width: pageWidth,
@@ -66,44 +81,45 @@ class DailyView extends StatelessWidget {
             ),
             Expanded(
               child: SingleChildScrollView (
+                key: _keyScroll,
+                controller: _scroller,
                 child: Row (
                   children: [
                     TimeHeader(
                       width: timeOffset,
                       height: pageHeight,
-                      scheme: timeScheme,
+                      scheme: widget.timeScheme,
                     ),
                     SizedBox(
                       width: pageWidth,
                       height: pageHeight,
-                      child: Consumer<CalendarModifier>(
-                        builder: (context, modifier, _) {
-                          modifier.attachConverter((Offset local) {
-                            final step = timeScheme.round ?? 1;
-                            final timeScale = timeScheme.scale(pageHeight);
-                            final minutes = (local.dy * timeScale / step).round() * step;
-                            final time = Time.fromHour(timeScheme.beg) + minutes;
-                            return controller.asDate & time;
-                          });
-                          return Stack(
-                            children: [
-                              ViewerPage(
-                                direction: config.view.swipeDirection,
-                                builder: (date) => DailyPage(
-                                  date: date.date,
-                                  width: pageWidth,
-                                  height: pageHeight,
-                                  timeScheme: timeScheme,
-                                  callbacks: callbacks,
-                                ),
-                              ),
-                              DropPage(
-                                width: pageWidth,
-                                height: pageHeight,
-                              ),
-                            ],
-                          );
-                        },
+                      child: Stack(
+                        children: [
+                          ViewerPage(
+                            controller: _viewer,
+                            direction: config.view.swipeDirection,
+                            builder: (date) => DailyPage(
+                              date: date.date,
+                              width: pageWidth,
+                              height: pageHeight,
+                              timeScheme: widget.timeScheme,
+                              callbacks: widget.callbacks,
+                            ),
+                          ),
+                          TimeIndicator(
+                            width: pageWidth,
+                            height: pageHeight,
+                            timeScheme: widget.timeScheme,
+                            length: pageWidth - offset,
+                          ),
+                          SizedBox(
+                            width: pageWidth,
+                            height: pageHeight,
+                            child: (modifier.editing)
+                                ? EditableSlot(layout: modifier.layout!)
+                                : SizedBox.shrink(),
+                          )
+                        ],
                       ),
                     ),
                   ],

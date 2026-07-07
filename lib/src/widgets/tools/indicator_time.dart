@@ -1,4 +1,7 @@
+import 'package:calendar/src/timer.dart';
+import 'package:calendar/src/viewer.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:timer_builder/timer_builder.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
@@ -7,17 +10,16 @@ import '../../enums.dart';
 import 'painter_lines.dart';
 import 'painter_point.dart';
 
+
 class TimeIndicator extends StatelessWidget {
   const TimeIndicator({
     super.key,
-    required this.date,
     required this.width,
     required this.height,
     required this.timeScheme,
     double? length,
   }) : length = length ?? width;
 
-  final Date date;
   final double width;
   final double height;
   final TimeScheme timeScheme;
@@ -26,6 +28,9 @@ class TimeIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final timer = context.watch<CalendarTimer>();
+    final viewer = context.watch<CalendarViewer>();
+    final date = viewer.asDate;
     final config = CalendarConfig.of(context)!;
     final offset = config.view.indicatorRadius;
     final color = config.view.indicatorColor
@@ -42,10 +47,10 @@ class TimeIndicator extends StatelessWidget {
           child: Stack(
             children: [
               Positioned(
-                left: offset + day * length,
+                left: offset + day * length - timer.scroll * (width-offset),
                 top: time / timeScale,
                 height: 0.0,
-                width: length - offset,
+                width: length,
                 child: CustomPaint(
                   size: Size.infinite,
                   painter: LinesPainter(

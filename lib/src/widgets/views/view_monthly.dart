@@ -47,17 +47,18 @@ class MonthlyView extends StatelessWidget {
                 child: SizedBox(
                   width: pageWidth,
                   height: pageHeight,
-                  child: ViewerPage(
-                    direction: config.view.swipeDirection,
-                    builder: (datetime) => MonthlyPage(
-                        month: datetime.toMonth,
-                        width: pageWidth,
-                        height: pageHeight,
-                        dateScheme: dateScheme,
-                        weekScheme: weekScheme,
-                        callbacks: callbacks,
-                      ),
-                  ),
+                  // child: ViewerPage(
+                  //   controller: _viewer,
+                  //   direction: config.view.swipeDirection,
+                  //   builder: (datetime) => MonthlyPage(
+                  //       month: datetime.toMonth,
+                  //       width: pageWidth,
+                  //       height: pageHeight,
+                  //       dateScheme: dateScheme,
+                  //       weekScheme: weekScheme,
+                  //       callbacks: callbacks,
+                  //     ),
+                  // ),
                 ),
               ),
             ),

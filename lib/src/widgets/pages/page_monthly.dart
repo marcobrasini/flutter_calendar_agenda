@@ -41,12 +41,12 @@ class MonthlyPage extends StatelessWidget {
         for (int i = 0; i < weekScheme.count; i++)
           Row(
             children: [
-              for (int j = 0; j < dateScheme.count; j++)
-                SlotPage(
-                  date: start + (i * WeekScheme.step + j) + (dateScheme.beg - 1),
-                  width: width / dateScheme.count,
-                  height: height / weekScheme.count,
-                ),
+              // for (int j = 0; j < dateScheme.count; j++)
+              //   SlotPage(
+              //     date: start + (i * WeekScheme.step + j) + (dateScheme.beg - 1),
+              //     width: width / dateScheme.count,
+              //     height: height / weekScheme.count,
+              //   ),
             ],
           )
       ],

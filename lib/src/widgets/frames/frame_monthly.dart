@@ -27,9 +27,9 @@ class MonthlyFrame extends StatelessWidget {
   final DateScheme dateScheme;
   double get dateScale => dateScheme.scale(width);
   // Interactive callback
-  final LayoutCallback? onTap;
-  final LayoutCallback? onDoubleTap;
-  final LayoutCallback? onLongPress;
+  final FrameCallback? onTap;
+  final FrameCallback? onDoubleTap;
+  final FrameCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {

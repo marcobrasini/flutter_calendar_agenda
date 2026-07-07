@@ -5,10 +5,9 @@ import 'data/event.dart';
 import 'enums.dart';
 
 //
-typedef EventCallback = void Function(Event);
-typedef FrameCallback = void Function(DateTime);
-//
-typedef LayoutCallback = void Function(Offset, [Event?]);
+typedef SlotCallback = void Function(Event);
+typedef PageCallback = void Function(DateTime);
+typedef FrameCallback = void Function(Offset, [Event?]);
 //
 typedef CreateCallback = void Function(Fixture);
 typedef ModifyCallback = void Function(Event, Fixture);
@@ -51,6 +50,7 @@ const monthlyDateFormat = "d";
 const monthlyDatePadding = 0.0;
 
 const timeHeaderFormat = "HH:mm";
+const timeHeaderRound = 15;
 const timeHeaderRatio = 1.0;
 const timeHeaderPadding = 4.0;
 
@@ -61,22 +61,20 @@ const lineFrameOffsetY = 0.0;
 const lineFrameWidth = 1.0;
 const dashFrameWidth = 4.0;
 const dashFrameSpace = 4.0;
-
-const swipeLength = 50;
-const swipeSpeed = 100;
-const swipeDuration = Duration(milliseconds: 300);
-const swipeDelay = Duration(milliseconds: 500);
-const swipeMargin = 30.0;
+//
+const viewSwipeDelay = Duration(milliseconds: 500);
+const viewSwipeMargin = 20.0;
+const viewSlideMargin = 40.0;
 
 const timeIndicatorPeriod = Duration(minutes: 1);
 const timeIndicatorLineWidth = 1.5;
 const timeIndicatorPointRadius = 4.5;
 
 const eventSlotOffset = 20.0;
-const eventResizeDelay = Duration(milliseconds: 200);
-const eventResizableLineDimmed = 0.25;
-const eventResizableLineWidth = 2.5;
+const eventSlotOffsetRatio = 8;
+const eventSlotLineDimmed = 0.25;
+const eventSlotLineWidth = 2.5;
 const eventDraggableSlotAlpha = 127;
 const eventSlotPadding = 4.0;
 const eventSlotRounded = 4.0;
-const eventDefaultDuration = Duration(minutes: 60);
+const eventSlotDuration = Duration(minutes: 200);

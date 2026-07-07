@@ -1,12 +1,12 @@
+import 'package:calendar/src/modifier.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../frames/frame_weekly.dart';
-import '../tools/indicator_time.dart';
-import '../slots/slot_daily.dart';
+import '../slots/slot_weekly.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import '../../data/source.dart';
-import '../../data/event.dart';
 import '../../data/fixture.dart';
+import '../../source.dart';
 import '../../config.dart';
 
 
@@ -31,30 +31,18 @@ class WeeklyPage extends StatelessWidget {
   double get timeScale => timeScheme.scale(height);
   final CallbackScheme callbacks;
 
-  DateTime _dateTime(Offset local) {
-    final step = timeScheme.round ?? 1;
+  DateTime converter(Offset local) {
+    final step = timeScheme.round;
     final minutes = (local.dy * timeScale / step).round() * step;
-    final days = (local.dx * dateScale).round();
+    final days = (local.dx * dateScale).floor();
     final date = week.mon + (dateScheme.beg - 1) + days;
     final time = Time.fromHour(timeScheme.beg) + minutes;
     return date & time;
   }
 
-  // void _onDropped(BuildContext context, Event event, Offset local) {
-  //   final start = _dateTime(local);
-  //   if (start == event.start) return;
-  //   callbacks.onEventDragged?.call(
-  //     event,
-  //     Fixture(
-  //       start: start,
-  //       stop: start.add(event.duration),
-  //     ),
-  //   );
-  // }
-
   void _onTapped(BuildContext context, Offset local) {
     final config = CalendarConfig.of(context)!;
-    final start = _dateTime(local);
+    final start = converter(local);
     callbacks.onEventCreated?.call(Fixture(
       start: start,
       stop: start.add(config.event.duration),
@@ -64,9 +52,10 @@ class WeeklyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<CalendarModifier>().attachConverter(converter);
+    final source = context.watch<CalendarSource>();
     final config = CalendarConfig.of(context)!;
-    final source = CalendarSource.of(context);
-    final space = width / dateScheme.count;
+    final offset = config.view.indicatorRadius;
     final date = week.mon + (dateScheme.beg - 1);
     return SizedBox(
       width: width,
@@ -78,29 +67,24 @@ class WeeklyPage extends StatelessWidget {
             height: height,
             dateScheme: dateScheme,
             timeScheme: timeScheme,
-            onTap: (local, [_]) => callbacks.onFrameTap?.call(_dateTime(local)),
-            onDoubleTap: (local, [_]) => callbacks.onFrameDoubleTap?.call(_dateTime(local)),
-            onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(_dateTime(local)),
+            onTap: (local, [_]) => callbacks.onFrameTap?.call(converter(local)),
+            onDoubleTap: (local, [_]) => callbacks.onFrameDoubleTap?.call(converter(local)),
+            onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(converter(local)),
             onCreate: (local, [_]) => _onTapped(context, local),
           ),
-          for (int i = 0 ; i < dateScheme.count ; i++)
-            Positioned(
-              left: i * space,
-              width: space,
-              child: DailySlot(
-                events: source.forDate(date + i),
-                width: space,
-                height: height,
-                timeScheme: timeScheme,
-                callbacks: callbacks,
-              ),
+          Positioned(
+            left: offset,
+            child: WeeklySlot(
+              events: [
+                for (int i = 0 ; i < dateScheme.count ; i++)
+                  source.forDate(date + i),
+              ],
+              width: width - offset,
+              height: height,
+              timeScheme: timeScheme,
+              dateScheme: dateScheme,
+              callbacks: callbacks,
             ),
-          if (config.view.showIndicator) TimeIndicator(
-            date: date,
-            width: width,
-            height: height,
-            timeScheme: timeScheme,
-            length: width/dateScheme.count,
           ),
         ],
       ),

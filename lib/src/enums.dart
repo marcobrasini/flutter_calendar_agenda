@@ -30,6 +30,12 @@ enum SlotAction {
   resizing,
 }
 
+enum ResizeSide {
+  before,
+  after,
+  none,
+}
+
 enum GestureType {
   tap,
   doubleTap,

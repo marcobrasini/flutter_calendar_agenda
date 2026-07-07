@@ -4,13 +4,14 @@ import 'utils/datetime.dart';
 import 'enums.dart';
 
 
-class CalendarController extends ChangeNotifier {
+class CalendarViewer extends ChangeNotifier {
 
   final CalendarView view;
   late DateTime _datetime;
-  CalendarSwipe? _swipe;
+  CalendarSwipe? _swiping;
+  double offset = 0.0;
 
-  CalendarController(this.view) {
+  CalendarViewer(this.view) {
     switch (view) {
       case CalendarView.daily:   _datetime = Date.now();
       case CalendarView.weekly:  _datetime = Week.now();
@@ -25,22 +26,27 @@ class CalendarController extends ChangeNotifier {
 
   // Mantenuto per retrocompatibilità
   DateTime get datetime => _datetime;
-  CalendarSwipe? get swipe => _swipe;
+  CalendarSwipe? get swiping => _swiping;
 
-  void next([bool animate = true]) {
+  void next([bool swiping = false]) {
     _datetime = (_datetime as dynamic) + 1;
-    _swipe = animate ? CalendarSwipe.forward : null;
+    if (swiping) return swipe(CalendarSwipe.forward);
     notifyListeners();
   }
 
-  void last([bool animate = true]) {
+  void last([bool swiping = false]) {
     _datetime = (_datetime as dynamic) - 1;
-    _swipe = animate ? CalendarSwipe.backward : null;
+    if (swiping) return swipe(CalendarSwipe.backward);
+    notifyListeners();
+  }
+
+  void swipe(CalendarSwipe swipe) {
+    _swiping = swipe;
     notifyListeners();
   }
 
   void clear() {
-    _swipe = null;
+    _swiping = null;
   }
 
   String title(BuildContext context) {

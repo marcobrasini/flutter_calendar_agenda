@@ -1,4 +1,6 @@
 import 'package:calendar/src/modifier.dart';
+import 'package:calendar/src/source.dart';
+import 'package:calendar/src/timer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'widgets/tools/header_calendar.dart';
@@ -6,11 +8,11 @@ import 'widgets/views/view_daily.dart';
 import 'widgets/views/view_weekly.dart';
 import 'widgets/views/view_monthly.dart';
 import 'utils/schemes.dart';
-import 'data/source.dart';
+import 'data/event.dart';
 import 'enums.dart';
 import 'const.dart';
 import 'config.dart';
-import 'controller.dart';
+import 'viewer.dart';
 
 
 class Calendar extends StatelessWidget {
@@ -28,7 +30,7 @@ class Calendar extends StatelessWidget {
     this.endWeek = finalWeek,
     //
     this.timeRatio = timeHeaderRatio,
-    this.timeRound,
+    this.timeRound = timeHeaderRound,
     this.timeFormat,
     this.timePadding,
     this.timeTextStyle,
@@ -65,7 +67,7 @@ class Calendar extends StatelessWidget {
     this.swipeDirection,
     //
     this.eventBuilder,
-    this.eventDuration = eventDefaultDuration,
+    this.eventDuration = eventSlotDuration,
     this.eventPadding = eventSlotPadding,
     this.eventRounded = eventSlotRounded,
     this.eventTextStyle,
@@ -86,7 +88,7 @@ class Calendar extends StatelessWidget {
   });
 
   final CalendarView view;
-  final Source source;
+  final CalendarSource source;
 
   final int begDay;
   final int endDay;
@@ -94,7 +96,7 @@ class Calendar extends StatelessWidget {
   final int endWeek;
   final int begHour;
   final int endHour;
-  final int? timeRound;
+  final int timeRound;
   final double timeRatio;
   final TimeStep timeStep;
   final String? timeFormat;
@@ -143,12 +145,12 @@ class Calendar extends StatelessWidget {
   final bool draggableEvent;
   final bool resizableEvent;
   //
-  final EventCallback? onEventTap;
-  final EventCallback? onEventDoubleTap;
-  final EventCallback? onEventLongPress;
-  final FrameCallback? onFrameTap;
-  final FrameCallback? onFrameDoubleTap;
-  final FrameCallback? onFrameLongPress;
+  final SlotCallback? onEventTap;
+  final SlotCallback? onEventDoubleTap;
+  final SlotCallback? onEventLongPress;
+  final PageCallback? onFrameTap;
+  final PageCallback? onFrameDoubleTap;
+  final PageCallback? onFrameLongPress;
   final ModifyCallback? onEventDragged;
   final ModifyCallback? onEventResized;
   final CreateCallback? onEventCreated;
@@ -312,38 +314,37 @@ class Calendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CalendarSource(
-      source: source,
-      child: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => CalendarController(view)),
-          ChangeNotifierProvider(create: (_) => CalendarModifier(
-            onEventDragged: callbacks.onEventDragged,
-            onEventResized: callbacks.onEventResized,
-          ))
-        ],
-        builder: (context, _) {
-          return CalendarConfig(
-            view: viewConfig,
-            line: lineConfig,
-            event: eventConfig,
-            header: headerConfig,
-            time: timeConfig,
-            date: dateConfig,
-            week: weekConfig,
-            child: Column(
-              children: [
-                CalendarHeader(
-                    showButtons: showHeaderButtons,
-                ),
-                Expanded(
-                  child: viewer,
-                )
-              ]
-            ),
-          );
-        },
-      ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => source),
+        ChangeNotifierProvider(create: (_) => CalendarViewer(view)),
+        ChangeNotifierProvider(create: (_) => CalendarTimer()),
+        ChangeNotifierProvider(create: (_) => CalendarModifier(
+          onEventDragged: callbacks.onEventDragged,
+          onEventResized: callbacks.onEventResized,
+        ))
+      ],
+      builder: (context, _) {
+        return CalendarConfig(
+          view: viewConfig,
+          line: lineConfig,
+          event: eventConfig,
+          header: headerConfig,
+          time: timeConfig,
+          date: dateConfig,
+          week: weekConfig,
+          child: Column(
+            children: [
+              CalendarHeader(
+                  showButtons: showHeaderButtons,
+              ),
+              Expanded(
+                child: viewer,
+              )
+            ]
+          ),
+        );
+      },
     );
   }
 }

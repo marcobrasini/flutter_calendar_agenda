@@ -9,13 +9,13 @@ class TimeScheme {
     this.end = finalHour,
     this.step = TimeStep.minutes60,
     this.ratio = 1.0,
-    this.round,
+    this.round = 1,
   });
   final int beg;
   final int end;
   final TimeStep step;
   final double ratio;
-  final int? round;
+  final int round;
   Time get from   => (beg == initialHour) ? Time.beg : Time(beg, 0);
   Time get to     => (end == finalHour)   ? Time.end : Time(end, 0);
   int get hours   => (end - beg) % (Duration.hoursPerDay + 1);
@@ -61,12 +61,12 @@ class CallbackScheme {
     this.onEventResized,
     this.onEventDeleted,
   });
-  final EventCallback? onEventTap;
-  final EventCallback? onEventDoubleTap;
-  final EventCallback? onEventLongPress;
-  final FrameCallback? onFrameTap;
-  final FrameCallback? onFrameDoubleTap;
-  final FrameCallback? onFrameLongPress;
+  final SlotCallback? onEventTap;
+  final SlotCallback? onEventDoubleTap;
+  final SlotCallback? onEventLongPress;
+  final PageCallback? onFrameTap;
+  final PageCallback? onFrameDoubleTap;
+  final PageCallback? onFrameLongPress;
   final CreateCallback? onEventCreated;
   final ModifyCallback? onEventDragged;
   final ModifyCallback? onEventResized;

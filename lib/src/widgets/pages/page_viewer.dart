@@ -1,10 +1,11 @@
-import 'package:calendar/src/config.dart';
-import 'package:calendar/src/const.dart';
-import 'package:calendar/src/enums.dart';
-import 'package:calendar/src/modifier.dart';
+import 'package:calendar/src/timer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../controller.dart';
+import '../../modifier.dart';
+import '../../viewer.dart';
+import '../../config.dart';
+import '../../const.dart';
+import '../../enums.dart';
 
 
 typedef PageBuilder = Widget Function(DateTime date);
@@ -18,10 +19,12 @@ class ViewerPage extends StatefulWidget {
 
   const ViewerPage({
     super.key,
+    required this.controller,
     required this.builder,
     required this.direction,
   });
 
+  final PageController controller;
   final PageBuilder builder;
   final Axis direction;
 
@@ -31,65 +34,59 @@ class ViewerPage extends StatefulWidget {
 
 
 class _ViewerPageState extends State<ViewerPage> {
-  late final PageController _pageController;
   dynamic _datetime;
-  bool _settling = false;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(
-      initialPage: 1,
-    )..addListener(_onScroll);
-    _datetime = context.read<CalendarController>().datetime;
+    widget.controller.addListener(_onScroll);
+    _datetime = context.read<CalendarViewer>().datetime;
   }
 
   @override
   void dispose() {
-    _pageController.removeListener(_onScroll);
-    _pageController.dispose();
+    widget.controller.removeListener(_onScroll);
+    widget.controller.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    if (!_pageController.hasClients || _settling) return;
-    final page = _pageController.page!;
-    if (page == 0.0 || page == 2.0) {
+    if (!widget.controller.hasClients) return;
+    final timer = context.read<CalendarTimer>();
+    final page = widget.controller.page!;
+    timer.swipe(page - 1.0);
+    if ((page == 0.0 || page == 2.0)) {
       final index = page.round();
-      _settling = true;
       if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final controller = context.read<CalendarController>();
-        if (index == 0) controller.last(false);
-        if (index == 2) controller.next(false);
+        final controller = context.read<CalendarViewer>();
+        if (index == 0) controller.last();
+        if (index == 2) controller.next();
         setState(() {
           _datetime = controller.datetime;
         });
-        _pageController.jumpToPage(1);
-        _settling = false;
+        widget.controller.jumpToPage(1);
+        timer.swipe(0.0);
       });
     }
   }
 
-  void _onAnimate(CalendarSwipe swipe) {
-    if (_settling || !_pageController.hasClients) return;
-    final page = ViewerPage.pages[swipe];
+  void _onAnimate(CalendarViewer viewer) {
+    if (!widget.controller.hasClients) return;
+    final page = ViewerPage.pages[viewer.swiping!];
     if (page != null) {
-      _settling = true;
       if (!mounted) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _pageController.animateToPage(
-          page,
-          duration: swipeDuration,
-          curve: Curves.easeInOut,
-        ).then((_) {
+      widget.controller.animateToPage(
+        page,
+        duration: viewSwipeDelay,
+        curve: Curves.easeInOut,
+      ).then((_) {
+        setState(() {
+          _datetime = viewer.datetime;
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          final controller = context.read<CalendarController>();
-          setState(() {
-            _datetime = controller.datetime;
-          });
-          _pageController.jumpToPage(1);
-          _settling = false;
+          widget.controller.jumpToPage(1);
         });
       });
     }
@@ -98,15 +95,16 @@ class _ViewerPageState extends State<ViewerPage> {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
-    final controller = context.watch<CalendarController>();
+    final viewer = context.watch<CalendarViewer>();
     final modifier = context.watch<CalendarModifier>();
-    if (controller.swipe != null) {
-      _onAnimate(controller.swipe!);
-      controller.clear();
+    modifier.attachSwiper(viewer);
+    if (viewer.swiping != null) {
+      _onAnimate(viewer);
+      viewer.clear();
     }
     return PageView.builder(
       scrollDirection: config.view.swipeDirection,
-      controller: _pageController,
+      controller: widget.controller,
       itemCount: 3,
       itemBuilder: (context, index) => widget.builder(_datetime + index-1),
       physics: (modifier.isResizing) ? NeverScrollableScrollPhysics() : null,

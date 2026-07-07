@@ -28,15 +28,17 @@ class WeeklyFrame extends StatelessWidget {
   double get dateScale => dateScheme.scale(width);
   double get timeScale => timeScheme.scale(height);
   // Interactive callback
-  final LayoutCallback? onTap;
-  final LayoutCallback? onDoubleTap;
-  final LayoutCallback? onLongPress;
-  final LayoutCallback? onCreate;
+  final FrameCallback? onTap;
+  final FrameCallback? onDoubleTap;
+  final FrameCallback? onLongPress;
+  final FrameCallback? onCreate;
 
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
+    final offset = config.view.indicatorRadius;
     final dateMargin = (config.date?.padding ?? 0.0) / 2;
+    final space = (width - offset) / dateScheme.count;
     return SizedBox(
         height: height,
         width: width,
@@ -77,7 +79,10 @@ class WeeklyFrame extends StatelessWidget {
               CustomPaint(
                 size: Size.infinite,
                 painter: LinesPainter(
-                  divisions: dateScheme.count,
+                  positions: [
+                    for (int i = 0; i < dateScheme.count; i++)
+                      offset + i * space
+                  ],
                   lineStyle: config.line.style,
                   lineColor: config.line.color,
                   lineWidth: config.line.width,

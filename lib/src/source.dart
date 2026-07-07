@@ -1,28 +1,30 @@
-import 'event.dart';
-import '../utils/datetime.dart';
+import 'data/event.dart';
+import 'utils/datetime.dart';
 import 'package:flutter/material.dart';
 
 
-class Source extends ChangeNotifier {
-  final int cacheRange;
-  final List<Event> _events;
-  final Map<String, List<Event>> _cache = {};
+class CalendarSource extends ChangeNotifier {
+  CalendarSource(this._events, {
+    this.cacheRange = 1
+  });
 
-  Source(this._events, {this.cacheRange = 1});
+  final List<Event> _events;
+  final Map<String, List<Event>> cache = {};
+  final int cacheRange;
 
   // ── Cache per giorno ──────────────────────────────────────────────────────
 
   String _key(Date date) => 'd:$date';
 
   List<Event> _forDate(Date date) {
-    return _cache.putIfAbsent(
+    return cache.putIfAbsent(
       _key(date),
           () => _events.expand((e) => e.expand(date, date + 1)).toList()
-            ..sort((a, b) {
-              final startSort = a.start.compareTo(b.start);
-              if (startSort != 0) return startSort;
-              return b.duration.compareTo(a.duration);
-            }),
+        ..sort((a, b) {
+          final startSort = a.start.compareTo(b.start);
+          if (startSort != 0) return startSort;
+          return b.duration.compareTo(a.duration);
+        }),
     );
   }
 
@@ -54,7 +56,7 @@ class Source extends ChangeNotifier {
   void _prefetch(List<Date> dates) {
     Future.microtask(() {
       for (final date in dates) {
-        _cache.putIfAbsent(
+        cache.putIfAbsent(
           _key(date),
               () => _events.expand((e) => e.expand(date, date + 1)).toList(),
         );
@@ -69,11 +71,11 @@ class Source extends ChangeNotifier {
     final stop = event.stop.date;
     final days = stop % start;
     for (int i = 0; i <= days; i++) {
-      _cache.remove(_key(start + i));
+      cache.remove(_key(start + i));
     }
   }
 
-  void invalidateAll() => _cache.clear();
+  void invalidateAll() => cache.clear();
 
   // ── Mutazioni ─────────────────────────────────────────────────────────────
 
@@ -97,19 +99,5 @@ class Source extends ChangeNotifier {
     _events[i].set(data);
     _invalidate(_events[i]);
     notifyListeners();
-  }
-}
-
-class CalendarSource extends InheritedNotifier<Source> {
-  const CalendarSource({
-    super.key,
-    required Source source,
-    required super.child,
-  }) : super(notifier: source);
-
-  static Source of(BuildContext context) {
-    final s = context.dependOnInheritedWidgetOfExactType<CalendarSource>();
-    assert(s != null, 'No InheritedSource found in context');
-    return s!.notifier!;
   }
 }

@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'package:calendar/src/enums.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'widgets/slots/slot_layout.dart';
 import 'widgets/slots/slot_event.dart';
-import 'controller.dart';
-import 'const.dart';
-import 'data/event.dart';
 import 'data/fixture.dart';
+import 'viewer.dart';
+import 'enums.dart';
+import 'const.dart';
 
 
 class CalendarModifier extends ChangeNotifier {
@@ -15,279 +14,349 @@ class CalendarModifier extends ChangeNotifier {
   CalendarModifier({
     this.onEventDragged,
     this.onEventResized,
-    this.onDragStart,
-    this.onDragMove,
-    this.onDragEnd,
-    this.onDragCancel,
-    this.onResizeStart,
-    this.onResizeMove,
-    this.onResizeEnd,
-    this.onResizeCancel,
-  }) : _action = SlotAction.none;
+    DragCallback? onDragStart,
+    DragCallback? onDragMove,
+    DragCallback? onDragEnd,
+    VoidCallback? onDragCancel,
+    DragCallback? onResizeStart,
+    DragCallback? onResizeMove,
+    DragCallback? onResizeEnd,
+    VoidCallback? onResizeCancel,
+    this.swipingDirection = Axis.horizontal,
+    this.slidingDirection = Axis.vertical,
+    this.swipeMargin = viewSwipeMargin,
+    this.slideMargin = viewSlideMargin,
+  }) : _startCallbacks = {
+    SlotAction.dragging: onDragStart,
+    SlotAction.resizing: onResizeStart,
+  },
+  _moveCallbacks = {
+    SlotAction.dragging: onDragMove,
+    SlotAction.resizing: onResizeMove,
+  },
+  _endCallbacks = {
+    SlotAction.dragging: onDragEnd,
+    SlotAction.resizing: onResizeEnd,
+  },
+  _cancelCallbacks = {
+    SlotAction.dragging: onDragCancel,
+    SlotAction.resizing: onResizeCancel,
+  };
 
   final ModifyCallback? onEventDragged;
   final ModifyCallback? onEventResized;
-  final DragCallback? onDragStart;
-  final DragCallback? onDragMove;
-  final DragCallback? onDragEnd;
-  final VoidCallback? onDragCancel;
-  final DragCallback? onResizeStart;
-  final DragCallback? onResizeMove;
-  final DragCallback? onResizeEnd;
-  final VoidCallback? onResizeCancel;
+  final Map<SlotAction, DragCallback?> _startCallbacks;
+  final Map<SlotAction, DragCallback?> _moveCallbacks;
+  final Map<SlotAction, DragCallback?> _endCallbacks;
+  final Map<SlotAction, VoidCallback?> _cancelCallbacks;
 
+  //
   int? _pointer;
-  SlotAction _action;
+  SlotAction _action = SlotAction.none;
+  ResizeSide _resize = ResizeSide.none;
   SlotLayout? _layout;
-  Offset? _globalOffset;
+  Offset? _initialOffset;
+  Offset? _actualOffset;
   Offset? _localOffset;
-  bool _drawing = false;
-  bool get drawing => _drawing && _layout != null
-      && _globalOffset != null && _localOffset != null;
+  bool _editing = false;
+  Rect _container = Rect.zero;
+
   SlotAction get action => _action;
   SlotLayout? get layout => _layout;
-  Event? get event => _layout?.event;
-  Offset? get globalOffset => _globalOffset;
+  Rect get container => _container;
+  Offset? get initialOffset => _initialOffset;
+  Offset? get actualOffset => _actualOffset;
   Offset? get localOffset => _localOffset;
-  bool get isRecording => _pointer != null && _globalOffset != null && _localOffset != null;
-  bool get isModifying => _layout != null && _action != SlotAction.none && isRecording;
+  Offset get dragged => (_actualOffset != null && _initialOffset != null)
+      ? _actualOffset! - _initialOffset!
+      : Offset.zero;
+  bool get editing => _editing
+      && _layout != null
+      && _initialOffset != null
+      && _actualOffset != null
+      && _localOffset != null;
+  bool get isRecording => _pointer != null
+      && _initialOffset != null
+      && _actualOffset != null
+      && _localOffset != null;
+  bool get isModifying => _layout != null
+      && _action != SlotAction.none
+      && isRecording;
   bool get isResizing => isModifying && _action == SlotAction.resizing;
   bool get isDragging => isModifying && _action == SlotAction.dragging;
 
-  CalendarController? _controller;
-  DateTime Function(Offset)? _converter;
-  RenderBox? Function()? _renderer;
-  RenderBox? get renderer {
-    final box = _renderer?.call();
-    return (box != null && box.attached && box.hasSize) ? box : null;
-  }
-
-  int? _swipeEdge;
+  //
+  CalendarViewer? _viewer;
+  final Axis swipingDirection;
+  final double swipeMargin;
   Timer? _swipeTimer;
-  final _swipeMargin = swipeMargin;
-  final _swipeDirection = Axis.horizontal;
-  int? _scrollEdge;
-  final _scrollMargin = 0.0;
-  final _scrollDirection = Axis.vertical;
+  int _swipeStep = 0;
+  void attachSwiper(CalendarViewer viewer) => _viewer = viewer;
+  bool get hasViewer => (_viewer != null) ? true : false;
+  //
+  ScrollController? _slider;
+  final Axis slidingDirection;
+  final double slideMargin;
+  Timer? _slideTimer;
+  double _slideSpace = 0;
+  double _slideStart = 0;
+  void attachSlider(ScrollController slider) => _slider = slider;
+  bool get hasSlider => (_slider != null) ? _slider!.hasClients : false;
+  double get slided => (hasSlider) ? _slider!.offset - _slideStart : 0.0;
+  //
+  RenderBox?  _renderer;
+  void attachRenderer(RenderBox? renderer) => _renderer = renderer;
+  bool get hasRenderer => (_renderer != null)
+      ? (_renderer!.attached && _renderer!.hasSize)
+      : false;
 
-  void attachController(CalendarController controller) {
-    _controller = controller;
-  }
-  void attachRenderer(RenderBox? Function() renderer) {
-    _renderer = renderer;
-  }
-  void attachConverter(DateTime Function(Offset) converter) {
-    _converter = converter;
-  }
-
-  void reset({bool notify = true}) {
-    clear();
-    free();
-    _removeDraggingRoute();
-    _removeResizingRoute();
-    if (notify) notifyListeners();
+  DateTime Function(Offset)? _converter;
+  void attachConverter(DateTime Function(Offset) converter) => _converter = converter;
+  bool get hasConverter => _converter != null;
+  Fixture get convert {
+    return Fixture(
+      start: _converter!(_container.topCenter),
+      stop: _converter!(_container.bottomCenter),
+    );
   }
 
+  //
   void enter(int pointer, Offset global, Offset local) {
     _pointer = pointer;
-    _globalOffset = global;
+    _initialOffset = global;
+    _actualOffset = global;
     _localOffset = local;
   }
+
+  void take(SlotLayout layout, SlotAction action, [ResizeSide side = ResizeSide.none]) {
+    _layout = layout;
+    _action = action;
+    _resize = side;
+    notifyListeners();
+  }
+
   void clear() {
     _pointer = null;
-    _globalOffset = null;
+    _initialOffset = null;
+    _actualOffset = null;
     _localOffset = null;
   }
 
-  void take(SlotLayout layout, SlotAction action) {
-    _action = action;
-    _layout = layout;
-    _drawing = false;
-    notifyListeners();
-  }
   void free() {
-    _action = SlotAction.none;
     _layout = null;
-    _drawing = false;
+    _action = SlotAction.none;
+    _resize = ResizeSide.none;
     notifyListeners();
   }
 
-  void modify() {
+  void reset() {
+    free();
+    clear();
+    _slidingStop();
+    _swipingStop();
+    _removePointerRoutes();
+  }
+
+  //
+  double _slidingEdge() {
+    double space = 0;
+    switch (slidingDirection) {
+      case Axis.vertical:
+        final height = _renderer!.constraints.maxHeight;
+        final local = _renderer!.globalToLocal(_actualOffset!);
+        final offset = (isDragging) ? _localOffset! : Offset.zero;
+        final delta = (isDragging) ? _container.height : 0.0;
+        final top = (local - offset).dy;
+        final bottom = top + delta;
+        if (top < slideMargin) {
+          space = -(slideMargin - top);
+        } else if (bottom > height - slideMargin) {
+          space = bottom - (height - slideMargin);
+        }
+        case Axis.horizontal:
+        final width = _renderer!.constraints.maxWidth;
+        final local = _renderer!.globalToLocal(_actualOffset!);
+        final left = (local - _localOffset!).dx;
+        final right = left + _container.width;
+        if (left < slideMargin) {
+          space = -(slideMargin - left);
+        }
+        else if (right > width - slideMargin) {
+          space = right - (width - slideMargin);
+        }
+    }
+    return space;
+  }
+
+  void _sliding() {
+    if (hasRenderer) {
+      _slideSpace = _slidingEdge();
+      (_slideSpace != 0) ? _slidingStart() : _slidingStop();
+    }
+  }
+
+  void _slidingStart() {
+    if (_slideTimer != null) return;
+    _slideTimer = Timer.periodic(Duration(milliseconds: 50), (_) {
+      final position = _slider!.position;
+      final offset = (position.pixels + _slideSpace);
+      _slider!.jumpTo(offset.clamp(0.0, position.maxScrollExtent));
+      set(_layout!.container);
+      notifyListeners();
+    });
+  }
+
+  void _slidingStop() {
+    _slideTimer?.cancel();
+    _slideTimer = null;
+    _slideSpace = 0.0;
+  }
+
+  //
+  int swipingEdge() {
+    final local = _renderer!.globalToLocal(_actualOffset!);
+    switch (swipingDirection) {
+      case Axis.horizontal:
+        final width = _renderer!.constraints.maxWidth;
+        if (local.dx <= swipeMargin) return -1;
+        if (local.dx >= width - swipeMargin) return 1;
+      case Axis.vertical:
+        final height = _renderer!.constraints.maxHeight;
+        if (local.dy <= swipeMargin) return -1;
+        if (local.dy >= height - swipeMargin) return 1;
+    }
+    return 0;
+  }
+
+  void _swiping() {
+    if (hasRenderer) {
+      _swipeStep = swipingEdge();
+      (_swipeStep != 0) ? _swipingStart() : _swipingStop();
+    }
+  }
+
+  void _swipingStart() {
+    if (_swipeTimer != null) return;
+    _swipeTimer = Timer.periodic(viewSwipeDelay * 2, (_) {
+      _viewer!.swipe((_swipeStep < 0)
+          ? CalendarSwipe.backward
+          : CalendarSwipe.forward
+      );
+    });
+  }
+
+  void _swipingStop() {
+    _swipeTimer?.cancel();
+    _swipeTimer = null;
+    _swipeStep = 0;
+  }
+
+  //
+  void start() {
+    if (_action == SlotAction.none) return;
+    if (isRecording) {
+      _startCallbacks[_action]?.call(_layout!.event);
+      _container = _layout!.container;
+      if (hasSlider) _slideStart = hasSlider ? _slider!.offset : 0;
+      _attachPointerRoutes();
+      notifyListeners();
+    }
+  }
+
+  void move() {
+    set(_layout!.container);
+    if (hasViewer) _swiping();
+    if (hasSlider) _sliding();
+    notifyListeners();
+  }
+
+  void end() {
+    final fixture = convert;
     switch (_action) {
       case SlotAction.dragging:
-        draggingStart();
+        onEventDragged?.call(_layout!.event, fixture);
         break;
       case SlotAction.resizing:
-        resizingStart();
+        onEventResized?.call(_layout!.event, fixture);
         break;
+      default:
+        break;
+    }
+    reset();
+    notifyListeners();
+  }
+
+  void set(Rect container) {
+    switch (_action) {
+      case SlotAction.dragging:
+        _container = container.translate(dragged.dx, dragged.dy + slided);
+      case SlotAction.resizing:
+        final delta = dragged.dy + slided;
+        switch (_resize) {
+          case ResizeSide.before:
+            _container = Rect.fromLTWH(
+              container.left ,
+              container.top + delta,
+              container.width,
+              container.height - delta,
+            );
+          case ResizeSide.after:
+            _container = Rect.fromLTWH(
+              container.left,
+              container.top,
+              container.width,
+              container.height + delta,
+            );
+          default:
+            return;
+        }
       default:
         return;
     }
-    _drawing = true;
-    notifyListeners();
-  }
-  
-  void _attachDraggingRoute() {
-    if (_pointer != null) {
-      GestureBinding.instance.pointerRouter.addRoute(
-        _pointer!, _draggingPointerRoutes,
-      );
-    }
   }
 
-  void _removeDraggingRoute() {
-    if (_pointer != null) {
-      GestureBinding.instance.pointerRouter.removeRoute(
-          _pointer!, _draggingPointerRoutes,
-      );
-    }
-    _swipeTimer?.cancel();
-    _swipeTimer = null;
-    _swipeEdge = null;
-  }
-
-  void _attachResizingRoute() {
-    if (_pointer != null) {
-      GestureBinding.instance.pointerRouter.addRoute(
-        _pointer!, _resizingPointerRoutes,
-      );
-    }
-  }
-
-  void _removeResizingRoute() {
-    if (_pointer != null) {
-      GestureBinding.instance.pointerRouter.removeRoute(
-        _pointer!, _resizingPointerRoutes,
-      );
-    }
-  }
-
-  void _resizingPointerRoutes(PointerEvent event) {
+  //
+  void _pointerRoutes(PointerEvent event) {
     if (event is PointerMoveEvent) {
-      _globalOffset = event.position;
-      resizingMove();
+      _actualOffset = event.position;
+      _moveCallbacks[_action]?.call(_layout!.event);
+      move();
     } else if (event is PointerUpEvent) {
-      _globalOffset = event.position;
-      resizingEnd();
+      _actualOffset = event.position;
+      _endCallbacks[_action]?.call(_layout!.event);
+      end();
     } else if (event is PointerCancelEvent) {
-      onResizeCancel?.call();
+      _cancelCallbacks[_action]?.call();
       reset();
     }
   }
 
-  void _draggingPointerRoutes(PointerEvent event) {
-    if (event is PointerMoveEvent) {
-      _globalOffset = event.position;
-      draggingMove();
-    } else if (event is PointerUpEvent) {
-      _globalOffset = event.position;
-      draggingEnd();
-    } else if (event is PointerCancelEvent) {
-      onDragCancel?.call();
-      reset();
+  void _attachPointerRoutes() {
+    _editing = true;
+    if (_pointer != null) {
+      GestureBinding.instance.pointerRouter.addRoute(
+        _pointer!, _pointerRoutes,
+      );
     }
   }
 
-  void draggingStart() {
-    _attachDraggingRoute();
-    onDragStart?.call(_layout!.event);
-    notifyListeners();
-  }
-
-  void draggingSwipe() {
-    final box = renderer;
-    if (box != null) {
-      final edge = swipingEdge(box);
-      if (edge != _swipeEdge) {
-        _swipeTimer?.cancel();
-        _swipeEdge = edge;
-        if (edge != null) {
-          final resolvedEdge = edge;
-          _swipeTimer = Timer(swipeDelay, () {
-            (resolvedEdge < 0) ? _controller!.last() : _controller!.next();
-            _swipeEdge = null;
-          });
-        }
-      }
+  void _removePointerRoutes() {
+    _editing = false;
+    if (_pointer != null) {
+      GestureBinding.instance.pointerRouter.removeRoute(
+        _pointer!, _pointerRoutes,
+      );
     }
   }
 
-  void draggingScroll() {}
-
-  void draggingMove() {
-    if (_swipeMargin > 0) draggingSwipe();
-    if (_scrollMargin > 0) draggingScroll();
-    onDragMove?.call(_layout!.event);
-    notifyListeners();
-  }
-
-  void draggingEnd() {
-    final box = renderer;
-    if (isDragging && box != null) {
-      final local = box.globalToLocal(_globalOffset! - _localOffset!);
-      final start = _converter?.call(local);
-      final event = _layout!.event;
-      if (start != null && start != event.start) {
-        onEventDragged?.call(
-          event,
-          Fixture(start: start, stop: start.add(event.duration)),
-        );
-      }
-      onDragEnd?.call(_layout!.event);
-      notifyListeners();
-    }
-    reset();
-  }
-
-  int? swipingEdge(RenderBox box) {
-    final local = box.globalToLocal(_globalOffset!);
-    switch (_swipeDirection) {
-      case Axis.horizontal:
-        if (local.dx <= _swipeMargin) return -1;
-        if (local.dx >= box.constraints.maxWidth - _swipeMargin) return 1;
-      case Axis.vertical:
-        if (local.dy <= _swipeMargin) return -1;
-        if (local.dy >= box.constraints.maxHeight - _swipeMargin) return 1;
-    }
-    return null;
-  }
-
-  void resizingStart() {
-    _attachResizingRoute();
-    onResizeStart?.call(_layout!.event);
-    notifyListeners();
-  }
-
-  void resizingMove() {
-    if (_scrollMargin > 0) resizingScroll();
-    onResizeMove?.call(_layout!.event);
-    notifyListeners();
-  }
-
-  void resizingScroll() {}
-
-  void resizingEnd() {
-    final box = renderer;
-    if (isResizing && box != null) {
-      final local = box.globalToLocal(_globalOffset! - _localOffset!);
-      final start = _converter?.call(local);
-      final event = _layout!.event;
-      if (start != null && start != event.start) {
-        onEventDragged?.call(
-          event,
-          Fixture(start: start, stop: start.add(event.duration)),
-        );
-      }
-      onResizeEnd?.call(_layout!.event);
-      notifyListeners();
-    }
-    reset();
-  }
-
+  //
   @override
   void dispose() {
-    _removeDraggingRoute();
-    _removeResizingRoute();
+    _removePointerRoutes();
+    _slidingStop();
+    _slider?.dispose();
+    _swipingStop();
+    _viewer?.dispose();
     super.dispose();
   }
 }
