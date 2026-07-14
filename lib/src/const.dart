@@ -20,8 +20,8 @@ const initialHour = 0;
 const finalHour = Duration.hoursPerDay;
 const stepHour = TimeStep.minutes60;
 
-const initialDay = DateTime.monday;
-const finalDay = DateTime.sunday;
+const initialDay = 0;
+const finalDay = 7;
 
 const initialWeek = 0;
 const finalWeek = 6;
