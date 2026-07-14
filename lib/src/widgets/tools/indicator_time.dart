@@ -17,22 +17,24 @@ class TimeIndicator extends StatelessWidget {
     required this.width,
     required this.height,
     required this.timeScheme,
-    double? length,
-  }) : length = length ?? width;
+    required this.dateScheme,
+  });
 
   final double width;
   final double height;
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
-  final double length;
+  final DateScheme dateScheme;
+  double get dateScale => dateScheme.scale(width);
 
   @override
   Widget build(BuildContext context) {
     final timer = context.watch<CalendarTimer>();
     final viewer = context.watch<CalendarViewer>();
-    final date = viewer.asDate;
+    final date = viewer.asDate + dateScheme.beg;
     final config = CalendarConfig.of(context)!;
     final offset = config.view.indicatorRadius;
+    final length = (width - offset) / dateScheme.count;
     final color = config.view.indicatorColor
         ?? Theme.of(context).primaryColor;
     return TimerBuilder.periodic(
@@ -47,7 +49,7 @@ class TimeIndicator extends StatelessWidget {
           child: Stack(
             children: [
               Positioned(
-                left: offset + day * length - timer.scroll * (width-offset),
+                left: offset + day * length - timer.scroll * width,
                 top: time / timeScale,
                 height: 0.0,
                 width: length,

@@ -81,10 +81,10 @@ class MyApp extends StatelessWidget {
             view: CalendarView.weekly,
             timeRatio: 0.0,
             timeRound: 15,
-            // begHour: 6,
+            begHour: 6,
             // endHour: 22,
-            begDay: 1,
-            endDay: 7,
+            begDay: -2,
+            endDay: 5,
             source: source,
             onEventDragged: (event, fixture) {
               source.setEvent(event.id!, {

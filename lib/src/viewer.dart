@@ -15,7 +15,6 @@ class CalendarViewer extends ChangeNotifier {
     switch (view) {
       case CalendarView.daily:   _datetime = Date.now();
       case CalendarView.weekly:  _datetime = Week.now();
-      case CalendarView.monthly: _datetime = Month.now();
     }
   }
 

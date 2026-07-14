@@ -1,17 +1,16 @@
-import 'package:calendar/src/modifier.dart';
-import 'package:calendar/src/source.dart';
-import 'package:calendar/src/timer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'widgets/tools/header_calendar.dart';
-import 'widgets/views/view_daily.dart';
-import 'widgets/views/view_weekly.dart';
 import 'widgets/views/view_monthly.dart';
+import 'widgets/views/view_paged.dart';
 import 'utils/schemes.dart';
 import 'enums.dart';
 import 'const.dart';
 import 'config.dart';
 import 'viewer.dart';
+import 'modifier.dart';
+import 'source.dart';
+import 'timer.dart';
 
 
 class Calendar extends StatelessWidget {
@@ -25,6 +24,7 @@ class Calendar extends StatelessWidget {
     this.timeStep = stepHour,
     this.begDay = initialDay,
     this.endDay = finalDay,
+    this.dateStep,
     this.begWeek = initialWeek,
     this.endWeek = finalWeek,
     //
@@ -91,6 +91,7 @@ class Calendar extends StatelessWidget {
 
   final int begDay;
   final int endDay;
+  final int? dateStep;
   final int begWeek;
   final int endWeek;
   final int begHour;
@@ -177,6 +178,7 @@ class Calendar extends StatelessWidget {
   DateScheme get dateScheme => DateScheme(
     beg: begDay,
     end: endDay,
+    step: dateStep ?? endDay - begDay,
   );
 
   WeekScheme get weekScheme => WeekScheme(
@@ -198,8 +200,7 @@ class Calendar extends StatelessWidget {
     showHeader: showHeaderView,
     showIndicator: showIndicator,
     indicatorColor: indicatorColor,
-    swipeDirection: swipeDirection
-        ?? (view == CalendarView.monthly ? Axis.vertical : Axis.horizontal),
+    swipeDirection: swipeDirection ?? Axis.horizontal,
   );
 
   EventConfig get eventConfig => EventConfig(
@@ -227,13 +228,13 @@ class Calendar extends StatelessWidget {
           textStyle: dateTextStyle,
           background: dateBackground,
         );
-      case CalendarView.monthly:
-        return TextConfig(
-          format: dateFormat ?? monthlyHeaderFormat,
-          padding: datePadding ?? monthlyHeaderPadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
+      // case CalendarView.monthly:
+      //   return TextConfig(
+      //     format: dateFormat ?? monthlyHeaderFormat,
+      //     padding: datePadding ?? monthlyHeaderPadding,
+      //     textStyle: dateTextStyle,
+      //     background: dateBackground,
+      //   );
     }
   }
 
@@ -265,13 +266,13 @@ class Calendar extends StatelessWidget {
           textStyle: dateTextStyle,
           background: dateBackground,
         );
-      case CalendarView.monthly:
-        return TextConfig(
-          format: dateFormat ?? monthlyDateFormat,
-          padding: datePadding ?? monthlyDatePadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
+      // case CalendarView.monthly:
+      //   return TextConfig(
+      //     format: dateFormat ?? monthlyDateFormat,
+      //     padding: datePadding ?? monthlyDatePadding,
+      //     textStyle: dateTextStyle,
+      //     background: dateBackground,
+      //   );
     }
   }
 
@@ -279,35 +280,36 @@ class Calendar extends StatelessWidget {
     switch (view) {
       case CalendarView.daily:   return null;
       case CalendarView.weekly:  return null;
-      case CalendarView.monthly:
-        return TextConfig(
-          format: dateFormat ?? monthlyWeekFormat,
-          padding: datePadding ?? monthlyWeekPadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
+      // case CalendarView.monthly:
+      //   return TextConfig(
+      //     format: dateFormat ?? monthlyWeekFormat,
+      //     padding: datePadding ?? monthlyWeekPadding,
+      //     textStyle: dateTextStyle,
+      //     background: dateBackground,
+      //   );
     }
   }
 
   Widget get viewer {
     switch (view) {
       case CalendarView.daily:
-        return DailyView(
+        return CalendarPageView(
           timeScheme: timeScheme,
+          dateScheme: DateScheme(beg:0, end:0, step:1),
           callbacks: callbacks,
         );
       case CalendarView.weekly:
-        return WeeklyView(
+        return CalendarPageView(
           dateScheme: dateScheme,
           timeScheme: timeScheme,
           callbacks: callbacks,
         );
-      case CalendarView.monthly:
-        return MonthlyView(
-          dateScheme: dateScheme,
-          weekScheme: weekScheme,
-          callbacks: callbacks,
-        );
+      // case CalendarView.monthly:
+      //   return MonthlyView(
+      //     dateScheme: dateScheme,
+      //     weekScheme: weekScheme,
+      //     callbacks: callbacks,
+      //   );
     }
   }
 

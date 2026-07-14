@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:calendar/src/utils/datetime.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'widgets/slots/slot_layout.dart';
@@ -110,13 +111,13 @@ class CalendarModifier extends ChangeNotifier {
       ? (_renderer!.attached && _renderer!.hasSize)
       : false;
 
-  DateTime Function(Offset)? _converter;
-  void attachConverter(DateTime Function(Offset) converter) => _converter = converter;
+  DateTime Function(Date, Offset)? _converter;
+  void attachConverter(DateTime Function(Date, Offset) converter) => _converter = converter;
   bool get hasConverter => _converter != null;
   Fixture get convert {
     return Fixture(
-      start: _converter!(_container.topCenter),
-      stop: _converter!(_container.bottomCenter),
+      start: _converter!(_viewer!.asDate, _container.topCenter),
+      stop: _converter!(_viewer!.asDate, _container.bottomCenter),
     );
   }
 

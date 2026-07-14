@@ -6,12 +6,13 @@ import '../../enums.dart';
 import '../../const.dart';
 
 
-class DailyFrame extends StatelessWidget {
+class PageFrame extends StatelessWidget {
 
-  const DailyFrame({
+  const PageFrame({
     super.key,
     required this.width,
     required this.height,
+    required this.dateScheme,
     required this.timeScheme,
     // Interactive callback
     this.onTap,
@@ -22,7 +23,9 @@ class DailyFrame extends StatelessWidget {
 
   final double width;
   final double height;
+  final DateScheme dateScheme;
   final TimeScheme timeScheme;
+  double get dateScale => dateScheme.scale(width);
   double get timeScale => timeScheme.scale(height);
   // Interactive callback
   final FrameCallback? onTap;
@@ -33,6 +36,9 @@ class DailyFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
+    final offset = config.view.indicatorRadius;
+    final dateMargin = (config.date?.padding ?? 0.0) / 2;
+    final space = (width - offset) / dateScheme.count;
     return SizedBox(
         height: height,
         width: width,
@@ -73,11 +79,14 @@ class DailyFrame extends StatelessWidget {
               CustomPaint(
                 size: Size.infinite,
                 painter: LinesPainter(
-                  positions: [config.view.indicatorRadius],
+                  positions: [
+                    for (int i = 0; i < dateScheme.count; i++)
+                      offset + i * space
+                  ],
                   lineStyle: config.line.style,
                   lineColor: config.line.color,
                   lineWidth: config.line.width,
-                  offset: config.line.offsetY,
+                  offset: config.line.offsetY - dateMargin,
                   dashedSpace: config.line.dashedSpace,
                   dashedWidth: config.line.dashedWidth,
                   direction: LineDirection.vertical,

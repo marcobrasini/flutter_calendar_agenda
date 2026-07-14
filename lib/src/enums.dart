@@ -1,7 +1,7 @@
 enum CalendarView {
   daily,
   weekly,
-  monthly,
+  // monthly,
 }
 
 enum CalendarSwipe {

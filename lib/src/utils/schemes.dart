@@ -28,10 +28,12 @@ class DateScheme {
   const DateScheme({
     this.beg = initialDay,
     this.end = finalDay,
+    this.step = DateTime.daysPerWeek,
   });
   final int beg;
   final int end;
-  int get count => (end - beg) % DateTime.daysPerWeek + 1;
+  final int step;
+  int get count => end - beg;
   double scale(double space) => count / space;
 }
 

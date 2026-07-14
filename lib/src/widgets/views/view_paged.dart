@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../tools/indicator_time.dart';
-import '../tools/header_weekly.dart';
 import '../tools/header_time.dart';
 import '../pages/page_viewer.dart';
-import '../pages/page_weekly.dart';
+import '../pages/page_header.dart';
+import '../pages/page_widget.dart';
 import '../slots/slot_modify.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
@@ -13,27 +13,26 @@ import '../../context.dart';
 import '../../config.dart';
 
 
-class WeeklyView extends StatefulWidget {
-
-  const WeeklyView({
+class CalendarPageView extends StatefulWidget {
+  const CalendarPageView({
     super.key,
-    required this.dateScheme,
     required this.timeScheme,
+    required this.dateScheme,
     required this.callbacks,
     //
     this.cornerWidget,
   });
 
-  final DateScheme dateScheme;
   final TimeScheme timeScheme;
+  final DateScheme dateScheme;
   final CallbackScheme callbacks;
   final Widget? cornerWidget;
 
   @override
-  State<WeeklyView> createState() => _WeeklyViewState();
+  State<CalendarPageView> createState() => _CalendarPageViewState();
 }
 
-class _WeeklyViewState extends State<WeeklyView> {
+class _CalendarPageViewState extends State<CalendarPageView> {
   final _viewer = PageController(initialPage: 1);
   final _scroller = ScrollController();
   final _keyScroll = GlobalKey();
@@ -44,11 +43,11 @@ class _WeeklyViewState extends State<WeeklyView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
-      final renderer = _keyScroll.currentContext?.findRenderObject() as RenderBox;
+      final renderer = _keyScroll.currentContext?.findRenderObject();
+      modifier.attachRenderer(renderer as RenderBox);
       modifier.attachSlider(_scroller);
-      modifier.attachRenderer(renderer);
       modifier.reset();
-      });
+    });
     super.initState();
   }
 
@@ -66,6 +65,7 @@ class _WeeklyViewState extends State<WeeklyView> {
             ? constraints.maxHeight - timeMargin - dateOffset
             : widget.timeScheme.minutes * widget.timeScheme.ratio;
         final pageWidth = constraints.maxWidth - timeOffset;
+        // final space = (pageWidth - offset) / widget.dateScheme.count;
         //
         return Column(
           children: [
@@ -79,14 +79,14 @@ class _WeeklyViewState extends State<WeeklyView> {
                 SizedBox(
                   width: pageWidth,
                   height: dateOffset,
-                  child: WeeklyHeader(
+                  child: PageHeader(
                     width: pageWidth,
                     height: pageHeight,
                     scheme: widget.dateScheme,
                     controller: _viewer,
                   ),
                 ),
-              ]
+              ],
             ),
             Expanded(
               child: SingleChildScrollView (
@@ -107,8 +107,8 @@ class _WeeklyViewState extends State<WeeklyView> {
                           ViewerPage(
                             controller: _viewer,
                             direction: config.view.swipeDirection,
-                            builder: (date) => WeeklyPage(
-                              week: date.toWeek,
+                            builder: (datetime) => PageWidget(
+                              date: datetime.date,
                               width: pageWidth,
                               height: pageHeight,
                               timeScheme: widget.timeScheme,
@@ -120,7 +120,7 @@ class _WeeklyViewState extends State<WeeklyView> {
                             width: pageWidth,
                             height: pageHeight,
                             timeScheme: widget.timeScheme,
-                            length: (pageWidth - offset) / widget.dateScheme.count,
+                            dateScheme: widget.dateScheme,
                           ),
                           Builder(
                             builder: (context) {
