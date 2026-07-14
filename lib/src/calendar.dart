@@ -8,7 +8,6 @@ import 'widgets/views/view_daily.dart';
 import 'widgets/views/view_weekly.dart';
 import 'widgets/views/view_monthly.dart';
 import 'utils/schemes.dart';
-import 'data/event.dart';
 import 'enums.dart';
 import 'const.dart';
 import 'config.dart';

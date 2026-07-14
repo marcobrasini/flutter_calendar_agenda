@@ -77,4 +77,4 @@ const eventSlotLineWidth = 2.5;
 const eventDraggableSlotAlpha = 127;
 const eventSlotPadding = 4.0;
 const eventSlotRounded = 4.0;
-const eventSlotDuration = Duration(minutes: 200);
+const eventSlotDuration = Duration(milliseconds: 200);

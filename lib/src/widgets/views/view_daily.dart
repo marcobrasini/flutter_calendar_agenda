@@ -53,7 +53,6 @@ class _DailyViewState extends State<DailyView> {
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
     final offset = config.view.indicatorRadius;
-    final modifier = context.watch<CalendarModifier>();
     return LayoutBuilder(
       builder: (context, constraints) {
         final timeMargin = context.timeMargin();
@@ -74,8 +73,14 @@ class _DailyViewState extends State<DailyView> {
                   height: dateOffset,
                   child: widget.cornerWidget,
                 ),
-                DailyHeader(
+                SizedBox(
                   width: pageWidth,
+                  height: dateOffset,
+                  child: DailyHeader(
+                    width: pageWidth,
+                    height: pageHeight,
+                    controller: _viewer,
+                  ),
                 ),
               ],
             ),
@@ -112,12 +117,17 @@ class _DailyViewState extends State<DailyView> {
                             timeScheme: widget.timeScheme,
                             length: pageWidth - offset,
                           ),
-                          SizedBox(
-                            width: pageWidth,
-                            height: pageHeight,
-                            child: (modifier.editing)
-                                ? EditableSlot(layout: modifier.layout!)
-                                : SizedBox.shrink(),
+                          Builder(
+                            builder: (context) {
+                              final modifier = context.watch<CalendarModifier>();
+                              return SizedBox(
+                                width: pageWidth,
+                                height: pageHeight,
+                                child: (modifier.editing)
+                                    ? EditSlot(layout: modifier.layout!)
+                                    : SizedBox.shrink(),
+                              );
+                            },
                           )
                         ],
                       ),

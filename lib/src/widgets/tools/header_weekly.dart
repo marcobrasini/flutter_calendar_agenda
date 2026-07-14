@@ -12,14 +12,16 @@ class WeeklyHeader extends StatelessWidget {
 
   const WeeklyHeader({
     super.key,
-    this.width,
-    this.height,
+    required this.width,
+    required this.height,
     required this.scheme,
+    this.controller,
   });
 
-  final double? width;
-  final double? height;
+  final double width;
+  final double height;
   final DateScheme scheme;
+  final PageController? controller;
 
   List<Date> dates(Week week) {
     final dateList = <Date>[];
@@ -30,12 +32,9 @@ class WeeklyHeader extends StatelessWidget {
     return dateList;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final dateConfig = CalendarConfig.of(context)!.date!;
-    final viewer = context.watch<CalendarViewer>();
+  List<Widget> slots(Week actual, dateConfig) {
     final widgets = <Widget>[];
-    for (Date date in dates(viewer.asWeek)) {
+    for (Date date in dates(actual)) {
       widgets.add(Expanded(
           child: DateSlot(
             date: date,
@@ -46,11 +45,46 @@ class WeeklyHeader extends StatelessWidget {
           )
       ));
     }
-    return SizedBox(
-      width: width,
-      height: height,
-      child: Row(
-        children: widgets,
+    return widgets;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dateConfig = CalendarConfig.of(context)!.date!;
+    final viewer = context.watch<CalendarViewer>();
+    final actual = viewer.asWeek;
+    return ClipRect(
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: (controller != null)
+            ? AnimatedBuilder(
+            animation: controller!,
+            builder: (context, _) {
+              double page = 1.0;
+              if (controller!.hasClients
+                  && controller!.position.haveDimensions) {
+                page = controller!.page ?? 1.0;
+              }
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  for (int i in [0, 1, 2])
+                    Positioned(
+                      left: (i - page) * width,
+                      top: 0,
+                      width: width,
+                      height: height,
+                      child: Row(
+                        children: slots(actual + (i - 1), dateConfig),
+                      ),
+                    ),
+                ],
+              );
+            })
+            : Row(
+          children: slots(actual, dateConfig),
+        ),
       ),
     );
   }

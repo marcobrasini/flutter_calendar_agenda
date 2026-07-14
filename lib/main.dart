@@ -79,10 +79,10 @@ class MyApp extends StatelessWidget {
           padding: EdgeInsets.all(16.0),
           child: Calendar(
             view: CalendarView.weekly,
-            // timeRatio: 0.0,
+            timeRatio: 0.0,
             timeRound: 15,
-            begHour: 6,
-            endHour: 22,
+            // begHour: 6,
+            // endHour: 22,
             begDay: 1,
             endDay: 7,
             source: source,

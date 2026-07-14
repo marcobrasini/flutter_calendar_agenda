@@ -1,12 +1,12 @@
-import 'package:calendar/src/modifier.dart';
-import 'package:calendar/src/source.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../frames/frame_daily.dart';
-import '../slots/slot_daily.dart';
+import '../slots/slot_page.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
 import '../../data/fixture.dart';
+import '../../modifier.dart';
+import '../../source.dart';
 import '../../config.dart';
 
 
@@ -47,8 +47,8 @@ class DailyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<CalendarModifier>().attachConverter(converter);
-    final source = context.watch<CalendarSource>();
+    context.read<CalendarModifier>().attachConverter(converter);
+    context.watch<CalendarSource>();
     final config = CalendarConfig.of(context)!;
     final offset = config.view.indicatorRadius;
     return SizedBox(
@@ -67,12 +67,13 @@ class DailyPage extends StatelessWidget {
           ),
           Positioned(
             left: offset,
-            child: DailySlot(
-              events: source.forDate(date),
+            child: PageSlot(
+              date: date,
               width: width - offset,
               height: height,
               timeScheme: timeScheme,
               callbacks: callbacks,
+              offset: Offset.zero,
             ),
           ),
         ],

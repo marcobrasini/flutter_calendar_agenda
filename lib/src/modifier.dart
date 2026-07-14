@@ -332,6 +332,7 @@ class CalendarModifier extends ChangeNotifier {
   }
 
   void _attachPointerRoutes() {
+    if (_editing && _action == SlotAction.dragging) return;
     _editing = true;
     if (_pointer != null) {
       GestureBinding.instance.pointerRouter.addRoute(

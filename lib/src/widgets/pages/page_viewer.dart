@@ -38,19 +38,22 @@ class _ViewerPageState extends State<ViewerPage> {
 
   @override
   void initState() {
+    widget.controller.addListener(_swiping);
+    final viewer = context.read<CalendarViewer>();
+    final modifier = context.read<CalendarModifier>();
+    modifier.attachSwiper(viewer);
+    _datetime = viewer.datetime;
     super.initState();
-    widget.controller.addListener(_onScroll);
-    _datetime = context.read<CalendarViewer>().datetime;
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_onScroll);
+    widget.controller.removeListener(_swiping);
     widget.controller.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
+  void _swiping() {
     if (!widget.controller.hasClients) return;
     final timer = context.read<CalendarTimer>();
     final page = widget.controller.page!;
@@ -96,8 +99,6 @@ class _ViewerPageState extends State<ViewerPage> {
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
     final viewer = context.watch<CalendarViewer>();
-    final modifier = context.watch<CalendarModifier>();
-    modifier.attachSwiper(viewer);
     if (viewer.swiping != null) {
       _onAnimate(viewer);
       viewer.clear();
@@ -107,7 +108,6 @@ class _ViewerPageState extends State<ViewerPage> {
       controller: widget.controller,
       itemCount: 3,
       itemBuilder: (context, index) => widget.builder(_datetime + index-1),
-      physics: (modifier.isResizing) ? NeverScrollableScrollPhysics() : null,
     );
   }
 }

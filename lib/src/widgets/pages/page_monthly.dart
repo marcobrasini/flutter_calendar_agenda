@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../frames/frame_monthly.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import 'page_slot.dart';
 
 
 class MonthlyPage extends StatelessWidget {

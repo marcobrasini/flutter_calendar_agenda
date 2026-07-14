@@ -56,7 +56,6 @@ class _WeeklyViewState extends State<WeeklyView> {
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
     final offset = config.view.indicatorRadius;
-    final modifier = context.watch<CalendarModifier>();
     return LayoutBuilder(
       builder: (context, constraints) {
         final timeMargin = context.timeMargin();
@@ -77,9 +76,15 @@ class _WeeklyViewState extends State<WeeklyView> {
                   height: dateOffset,
                   child: widget.cornerWidget,
                 ),
-                WeeklyHeader(
+                SizedBox(
                   width: pageWidth,
-                  scheme: widget.dateScheme,
+                  height: dateOffset,
+                  child: WeeklyHeader(
+                    width: pageWidth,
+                    height: pageHeight,
+                    scheme: widget.dateScheme,
+                    controller: _viewer,
+                  ),
                 ),
               ]
             ),
@@ -117,13 +122,18 @@ class _WeeklyViewState extends State<WeeklyView> {
                             timeScheme: widget.timeScheme,
                             length: (pageWidth - offset) / widget.dateScheme.count,
                           ),
-                          SizedBox(
-                            width: pageWidth,
-                            height: pageHeight,
-                            child: (modifier.editing)
-                                ? EditableSlot(layout: modifier.layout!)
-                                : SizedBox.shrink(),
-                          ),
+                          Builder(
+                            builder: (context) {
+                              final modifier = context.watch<CalendarModifier>();
+                              return SizedBox(
+                                width: pageWidth,
+                                height: pageHeight,
+                                child: (modifier.editing)
+                                    ? EditSlot(layout: modifier.layout!)
+                                    : SizedBox.shrink(),
+                              );
+                            },
+                          )
                         ],
                       ),
                     ),

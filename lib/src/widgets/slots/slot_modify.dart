@@ -12,8 +12,8 @@ import 'slot_event.dart';
 typedef EventBuilder = Widget Function(BuildContext);
 
 
-class EditableSlot extends StatelessWidget {
-  const EditableSlot({
+class EditSlot extends StatelessWidget {
+  const EditSlot({
     super.key,
     required this.layout,
     this.builder,

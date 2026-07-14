@@ -22,7 +22,7 @@ class SlotLayout {
     this.split = 1,
   });
 
-  bool get isExpanded => parent == null && order == 0 && split == 1;
+  bool get isExpanded => (parent == null) && order == 0 && split == 1;
 
   double get top => container.top;
   double get left => (parent ?? container.left) + order * column + offset;

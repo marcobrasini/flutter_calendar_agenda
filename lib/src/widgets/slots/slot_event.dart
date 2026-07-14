@@ -33,7 +33,7 @@ class EventSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final modifier = context.watch<CalendarModifier>();
+    final modifier = context.read<CalendarModifier>();
     final alpha = dragging ? eventDraggableSlotAlpha : 255;
     return Listener(
       onPointerDown: (pointerEvent) {
