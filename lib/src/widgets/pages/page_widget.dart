@@ -4,7 +4,6 @@ import 'page_frame.dart';
 import 'page_slot.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import '../../data/fixture.dart';
 import '../../modifier.dart';
 import '../../source.dart';
 import '../../config.dart';
@@ -50,7 +49,7 @@ class PageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<CalendarSource>();
+    context.watch<CalendarEvents>();
     context.read<CalendarModifier>().attachConverter(converter);
     final config = CalendarConfig.of(context)!;
     final offset = config.view.indicatorRadius;

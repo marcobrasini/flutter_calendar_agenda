@@ -35,7 +35,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   intl: ^0.20.2
-  rrule: ^0.2.18
   provider: ^6.1.5+1
   timer_builder: ^2.0.0
 

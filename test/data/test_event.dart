@@ -17,7 +17,6 @@ void main() {
   final parentId = "parentId";
   final pattern = Pattern(
     type: PatternType.weekly,
-    since: start
   );
 
   final data = {
@@ -58,7 +57,7 @@ void main() {
     parentId: "recurrenceId"
   );
   final exception = Event(
-      id: "exception",
+      id: "exceptionId",
       start: start,
       stop: stop,
       subject: "deviation",
@@ -72,15 +71,16 @@ void main() {
       subject: "deviation",
       location: location,
       color: color,
-      pattern: pattern
+      pattern: pattern,
+      parentId: "recurrenceId"
   );
-  final exemplar = Event(
-      start: start,
-      stop: stop,
-      subject: "exemplar",
-      location: location,
-      color: color,
-  );
+  // final exemplar = Event(
+  //     start: start,
+  //     stop: stop,
+  //     subject: "exemplar",
+  //     location: location,
+  //     color: color,
+  // );
 
 
   group('Event', () {
@@ -228,7 +228,6 @@ void main() {
       expect(deviation.type, EventType.deviation);
       expect(exception.type, EventType.exception);
       expect(instance.type, EventType.instance);
-      expect(exemplar.type, EventType.exemplar);
     });
 
     test('Event isOccurrence', () {
@@ -237,7 +236,6 @@ void main() {
       expect(deviation.isOccurrence, isFalse);
       expect(exception.isOccurrence, isFalse);
       expect(instance.isOccurrence, isFalse);
-      expect(exemplar.isOccurrence, isFalse);
     });
 
     test('Event isRecurrence', () {
@@ -246,7 +244,6 @@ void main() {
       expect(deviation.isRecurrence, isFalse);
       expect(exception.isRecurrence, isFalse);
       expect(instance.isRecurrence, isFalse);
-      expect(exemplar.isRecurrence, isFalse);
     });
 
     test('Event isDeviation', () {
@@ -255,7 +252,6 @@ void main() {
       expect(deviation.isDeviation, isTrue);
       expect(exception.isDeviation, isFalse);
       expect(instance.isDeviation, isFalse);
-      expect(exemplar.isDeviation, isFalse);
     });
 
     test('Event isException', () {
@@ -264,7 +260,6 @@ void main() {
       expect(deviation.isException, isFalse);
       expect(exception.isException, isTrue);
       expect(instance.isException, isFalse);
-      expect(exemplar.isException, isFalse);
     });
 
     test('Event isInstance', () {
@@ -273,17 +268,8 @@ void main() {
       expect(deviation.isInstance, isFalse);
       expect(exception.isInstance, isFalse);
       expect(instance.isInstance, isTrue);
-      expect(exemplar.isInstance, isFalse);
     });
 
-    test('Event isExemplar', () {
-      expect(occurrence.isExemplar, isFalse);
-      expect(recurrence.isExemplar, isFalse);
-      expect(deviation.isExemplar, isFalse);
-      expect(exception.isExemplar, isFalse);
-      expect(instance.isExemplar, isFalse);
-      expect(exemplar.isExemplar, isTrue);
-    });
   });
 
 

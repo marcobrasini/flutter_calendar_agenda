@@ -5,7 +5,7 @@ import 'package:calendar/src/utils/datetime.dart';
 
 void main() {
 
-  final since = DateTime.now().date;
+  final since = DateTime.now();
 
   group('Pattern daily', () {
     final step = 3;
@@ -17,15 +17,20 @@ void main() {
       since.add(Duration(days: step)).round(),
       since.add(Duration(days: 6*step)).round(),
     };
+    final allExceptions = {
+      for (int i = 0 ; i < length; i++)
+        ((since.date + (i * step)) & since.time).round(),
+    };
     final exceptionLength = exceptions.where((d) => d.isBefore(until)).length;
+    final rrule = "RRULE:FREQ=DAILY;INTERVAL=$step;COUNT=$count;"
+        "UNTIL=${until.toISOString()};EXDATE=${exceptions.map(
+            (e) => e.toISOString()).join(",")};";
 
     test('Pattern constructor default', () {
       final pattern = Pattern(
         type: PatternType.daily,
-        since: since,
       );
       expect(pattern.type, PatternType.daily);
-      expect(pattern.since, since);
       expect(pattern.step, 1);
       expect(pattern.count, isNull);
       expect(pattern.until, isNull);
@@ -36,14 +41,12 @@ void main() {
     test('Pattern constructor', () {
       final pattern = Pattern(
         type: PatternType.daily,
-        since: since,
         step: step,
         count: count,
         until: until,
         exceptions: exceptions,
       );
       expect(pattern.type, PatternType.daily);
-      expect(pattern.since, since);
       expect(pattern.step, step);
       expect(pattern.count, count);
       expect(pattern.until, until);
@@ -51,15 +54,36 @@ void main() {
       expect(pattern.recurrences, isEmpty);
     });
 
+    test('Pattern constructor fromISOString', () {
+      final pattern = Pattern.fromICSString(rrule);
+      expect(pattern.type, PatternType.daily);
+      expect(pattern.step, step);
+      expect(pattern.count, count);
+      expect(pattern.until, until);
+      expect(pattern.exceptions, exceptions);
+      expect(pattern.recurrences, isEmpty);
+    });
+
+    test('Pattern toISOString', () {
+      print(until.isUtc);
+      final pattern = Pattern(
+        type: PatternType.daily,
+        step: step,
+        count: count,
+        until: until,
+        exceptions: exceptions,
+      );
+      expect(pattern.toICSString(), rrule);
+    });
+
     test('Pattern iterator count', () {
       final pattern = Pattern(
         type: PatternType.daily,
-        since: since,
         step: step,
         count: count,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -75,13 +99,12 @@ void main() {
     test('Pattern iterator count with exceptions', () {
       final pattern = Pattern(
         type: PatternType.daily,
-        since: since,
         step: step,
         count: count,
         exceptions: exceptions,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -96,12 +119,11 @@ void main() {
     test('Pattern iterator until', () {
       final pattern = Pattern(
         type: PatternType.daily,
-        since: since,
         step: step,
         until: until,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -117,13 +139,12 @@ void main() {
     test('Pattern iterator until with exceptions', () {
       final pattern = Pattern(
         type: PatternType.daily,
-        since: since,
         step: step,
         until: until,
         exceptions: exceptions,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -134,6 +155,21 @@ void main() {
         expect(date.isBefore(until), isTrue);
         expect(exceptions.contains(date), isFalse);
       }
+    });
+
+    test('Pattern iterator all exceptions', () {
+      final pattern = Pattern(
+        type: PatternType.daily,
+        step: step,
+        until: until,
+        exceptions: allExceptions,
+      );
+      final List<DateTime> dates = [];
+      final iterator = pattern.iterator(since);
+      while (iterator.moveNext()) {
+        dates.add(iterator.current);
+      }
+      expect(dates.isEmpty, true);
     });
 
   });
@@ -147,6 +183,10 @@ void main() {
     final exceptions = {
       since.add(Duration(days: 7)).round(),
       since.add(Duration(days: 28)).round(),
+    };
+    final allExceptions = {
+      for (int i = 0 ; i <= length; i++)
+        ((since.date + (i * step * 7)) & since.time).round(),
     };
     final exceptionLength = exceptions.where(
             (d) => d.isBefore(until) && ((d.toWeek % since) % step == 0)
@@ -165,10 +205,8 @@ void main() {
     test('Pattern constructor default', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
       );
       expect(pattern.type, PatternType.weekly);
-      expect(pattern.since, since);
       expect(pattern.step, 1);
       expect(pattern.count, isNull);
       expect(pattern.until, isNull);
@@ -179,7 +217,6 @@ void main() {
     test('Pattern constructor', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         count: count,
         until: until,
@@ -187,7 +224,6 @@ void main() {
         recurrences: recurrences,
       );
       expect(pattern.type, PatternType.weekly);
-      expect(pattern.since, since);
       expect(pattern.step, step);
       expect(pattern.count, count);
       expect(pattern.until, until);
@@ -198,14 +234,13 @@ void main() {
     test('Pattern iterator', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         count: count,
         until: until,
         exceptions: exceptions,
         recurrences: recurrences,
       );
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       expect(iterator, isA<PatternWeekly>());
       expect(pattern.recurrences, recurrences);
     });
@@ -213,12 +248,11 @@ void main() {
     test('Pattern iterator count', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         count: count,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -233,13 +267,12 @@ void main() {
     test('Pattern iterator count with exceptions', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         count: count,
         exceptions: exceptions,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -253,13 +286,12 @@ void main() {
     test('Pattern iterator count with recurrences', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         count: count,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -272,14 +304,13 @@ void main() {
     test('Pattern iterator count with recurrences and exceptions', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         count: count,
         exceptions: recurrenceExceptions,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -293,12 +324,11 @@ void main() {
     test('Pattern iterator until', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         until: until,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -313,13 +343,12 @@ void main() {
     test('Pattern iterator until with exceptions', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         until: until,
         exceptions: exceptions,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -334,13 +363,12 @@ void main() {
     test('Pattern iterator until with recurrences', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         until: until,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -353,14 +381,13 @@ void main() {
     test('Pattern iterator until with recurrences and exceptions', () {
       final pattern = Pattern(
         type: PatternType.weekly,
-        since: since,
         step: step,
         until: until,
         exceptions: recurrenceExceptions,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -371,6 +398,22 @@ void main() {
       }
     });
 
+    test('Pattern iterator until all exceptions', () {
+      final pattern = Pattern(
+        type: PatternType.weekly,
+        step: step,
+        until: until,
+        exceptions: allExceptions,
+      );
+      print(until);
+      final List<DateTime> dates = [];
+      final iterator = pattern.iterator(since);
+      while (iterator.moveNext()) {
+        dates.add(iterator.current);
+      }
+      print(dates);
+      expect(dates.isEmpty, isTrue);
+    });
   });
 
   group('Pattern monthly', () {
@@ -408,10 +451,8 @@ void main() {
     test('Pattern constructor default', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
       );
       expect(pattern.type, PatternType.monthly);
-      expect(pattern.since, since);
       expect(pattern.step, 1);
       expect(pattern.count, isNull);
       expect(pattern.until, isNull);
@@ -422,7 +463,6 @@ void main() {
     test('Pattern constructor', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         count: count,
         until: until,
@@ -430,7 +470,6 @@ void main() {
         recurrences: recurrences,
       );
       expect(pattern.type, PatternType.monthly);
-      expect(pattern.since, since);
       expect(pattern.step, step);
       expect(pattern.count, count);
       expect(pattern.until, until);
@@ -441,14 +480,13 @@ void main() {
     test('Pattern iterator', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         count: count,
         until: until,
         exceptions: exceptions,
         recurrences: recurrences,
       );
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       expect(iterator, isA<PatternMonthly>());
       expect(pattern.recurrences, recurrences);
     });
@@ -456,12 +494,11 @@ void main() {
     test('Pattern iterator count', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         count: count,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -476,13 +513,12 @@ void main() {
     test('Pattern iterator count with exceptions', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         count: count,
         exceptions: exceptions,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -496,13 +532,12 @@ void main() {
     test('Pattern iterator count with recurrences', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         count: count,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -516,14 +551,13 @@ void main() {
     test('Pattern iterator count with recurrences and exceptions', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         count: count,
         exceptions: recurrenceExceptions,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -538,12 +572,11 @@ void main() {
     test('Pattern iterator until', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         until: until,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -559,13 +592,12 @@ void main() {
     test('Pattern iterator until with exceptions', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         until: until,
         exceptions: exceptions,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -579,13 +611,12 @@ void main() {
     test('Pattern iterator until with recurrences', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         until: until,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -598,14 +629,13 @@ void main() {
     test('Pattern iterator until with recurrences and exceptions', () {
       final pattern = Pattern(
         type: PatternType.monthly,
-        since: since,
         step: step,
         until: until,
         exceptions: recurrenceExceptions,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -619,13 +649,12 @@ void main() {
     test('Pattern iterator count with recurrences 31st', () {
       final pattern = Pattern(
           type: PatternType.monthly,
-          since: since,
           step: 1,
           count: count,
           recurrences: [Date(since.year, 1, 31)]
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -638,13 +667,12 @@ void main() {
     test('Pattern iterator count with recurrences 28th and 31st', () {
       final pattern = Pattern(
           type: PatternType.monthly,
-          since: since,
           step: 1,
           count: 2*count,
           recurrences: [Date(since.year, 1, 28), Date(since.year, 1, 31)]
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -691,10 +719,8 @@ void main() {
     test('Pattern constructor default', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
       );
       expect(pattern.type, PatternType.yearly);
-      expect(pattern.since, since);
       expect(pattern.step, 1);
       expect(pattern.count, isNull);
       expect(pattern.until, isNull);
@@ -705,7 +731,6 @@ void main() {
     test('Pattern constructor', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         count: count,
         until: until,
@@ -713,7 +738,6 @@ void main() {
         recurrences: recurrences,
       );
       expect(pattern.type, PatternType.yearly);
-      expect(pattern.since, since);
       expect(pattern.step, step);
       expect(pattern.count, count);
       expect(pattern.until, until);
@@ -724,14 +748,13 @@ void main() {
     test('Pattern iterator', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         count: count,
         until: until,
         exceptions: exceptions,
         recurrences: recurrences,
       );
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       expect(iterator, isA<PatternYearly>());
       expect(pattern.recurrences, recurrences);
     });
@@ -739,12 +762,11 @@ void main() {
     test('Pattern iterator count', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         count: count,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -760,13 +782,12 @@ void main() {
     test('Pattern iterator count with exceptions', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         count: count,
         exceptions: exceptions,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -779,13 +800,12 @@ void main() {
     test('Pattern iterator count with recurrences', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         count: count,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -801,14 +821,13 @@ void main() {
     test('Pattern iterator count with recurrences and exceptions', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         count: count,
         exceptions: recurrenceExceptions,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -825,12 +844,11 @@ void main() {
     test('Pattern iterator until', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         until: until,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -846,13 +864,12 @@ void main() {
     test('Pattern iterator until with exceptions', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         until: until,
         exceptions: exceptions,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -866,13 +883,12 @@ void main() {
     test('Pattern iterator until with recurrences', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         until: until,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -887,14 +903,13 @@ void main() {
     test('Pattern iterator until with recurrences and exceptions', () {
       final pattern = Pattern(
         type: PatternType.yearly,
-        since: since,
         step: step,
         until: until,
         exceptions: recurrenceExceptions,
         recurrences: recurrences,
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
@@ -910,13 +925,12 @@ void main() {
     test('Pattern iterator count with recurrences 2/29th', () {
       final pattern = Pattern(
           type: PatternType.yearly,
-          since: since,
           step: 1,
           count: count,
           recurrences: [Date(2028, 2, 29)]
       );
       final List<DateTime> dates = [];
-      final iterator = pattern.iterator;
+      final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }

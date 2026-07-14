@@ -6,6 +6,20 @@ import 'package:calendar/src/data/event.dart';
 import 'package:calendar/src/utils/datetime.dart';
 
 
+class Appointment extends Event {
+  Appointment({
+    required super.id,
+    required super.start,
+    required super.stop,
+    required super.color,
+    required super.subject,
+    this.infos,
+  });
+
+  String? infos;
+}
+
+
 void main() {
   runApp(const MyApp());
 }
@@ -17,55 +31,62 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = Date.now() & Time(9, 0);
-    final source = CalendarSource([
-      Event(
+    final source = CalendarSource<Appointment>(events: [
+      Appointment(
         id: "event1",
         start: now,
         stop: now.add(Duration(hours: 1)),
         color:  Colors.blue,
-        subject: "Occurrence",
+        subject: "Now",
+        infos: "infos_now_event1",
       ),
-      Event(
+      Appointment(
         id: "event2",
         start: now.add(Duration(minutes: 45)),
         stop: now.add(Duration(hours: 2, minutes: 45)),
         color:  Colors.pink,
-        subject: "Occurrence",
+        subject: "Next",
+        infos: "infos_next_event2",
       ),
-      Event(
+      Appointment(
         id: "event3",
         start: now.add(Duration(hours: 24)),
-        stop: now.add(Duration(hours: 24, minutes: 30)),
+        stop: now.add(Duration(hours: 25)),
         color:  Colors.brown,
-        subject: "Occurrence",
+        subject: "Tomorrow",
+        infos: "infos_tomorrow_event3",
       ),
-      Event(
+      Appointment(
         id: "event4",
-        start: now.add(Duration(hours: -24, minutes: 30)),
+        start: now.add(Duration(hours: -25)),
         stop: now.add(Duration(hours: -23)),
         color:  Colors.teal,
-        subject: "Other",
+        subject: "Yesterday",
+        infos: "infos_yesterday_event4",
       ),
-      Event(
+      Appointment(
         id: "event5",
         start: now.add(Duration(hours: 24*3 + 6)),
         stop: now.add(Duration(hours: 24*3 + 7)),
-        color:  Colors.green,
-        subject: "Occurrence",
+        color:  Colors.orange,
+        subject: "After",
+        infos: "infos_after_event5",
       ),
-      Event(
+      Appointment(
         id: "event6",
-        start: now.add(Duration(hours: 24 +2)),
-        stop: now.add(Duration(hours: 24 +4)),
+        start: now.add(Duration(hours: 24 + 2)),
+        stop: now.add(Duration(hours: 24 + 4)),
         color:  Colors.yellow,
-        subject: "Case",
+        subject: "Before",
+        infos: "infos_before_event6",
       ),
-      Event(
+      Appointment(
         id: "event7",
         start: now.add(Duration(hours: 3, minutes: 30)),
         stop: now.add(Duration(hours: 4, minutes: 30)),
         color:  Colors.grey,
-        subject: "Case",
+        subject: "Later",
+        infos: "infos_later_event7",
       ),
     ]);
 
@@ -76,28 +97,28 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: Scaffold(
-        appBar: AppBar(title: Text("Weekly view")),
+        appBar: AppBar(title: Text("Appointment")),
         body: Padding(
           padding: EdgeInsets.all(16.0),
-          child: Calendar(
+          child: Calendar<Appointment>(
+            source: source,
             view: CalendarView.weekly,
             timeRound: 15,
             begHour: 6,
             endHour: 22,
-            source: source,
             onEventDragged: (event, fixture) {
               source.setEvent(event.id!, {
                 "start": fixture.start,
                 "stop": fixture.stop
               });
-              print("dragged $event -> $fixture");
+              print("dragged $event with ${event.infos} -> $fixture");
             },
             onEventResized:  (event, fixture) {
               source.setEvent(event.id!, {
                 "start": fixture.start,
                 "stop": fixture.stop
               });
-              print("resized $event -> $fixture");
+              print("resized $event with ${event.infos} -> $fixture");
             },
             onEventCreated: (fixture) {
               print("created $fixture");

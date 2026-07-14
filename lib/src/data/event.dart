@@ -11,7 +11,6 @@ enum EventType {
   exception,
   deviation,
   instance,
-  exemplar,
 }
 
 
@@ -21,7 +20,7 @@ class Event extends Fixture with Diagnosticable {
   Color color;
   String subject;
   String? location;
-  final String? parentId;
+  String? parentId;
   final Pattern? pattern;
 
   Event({
@@ -77,12 +76,22 @@ class Event extends Fixture with Diagnosticable {
 
   bool get isDeviation => id != null && pattern!=null && parentId!=null;
 
-  bool get isInstance => id == null && pattern!=null;
+  bool get isInstance => id == null && pattern!=null && parentId!=null;
 
-  bool get isExemplar => id == null && pattern==null;
+  Event exemplar() => Event(
+    start: start,
+    stop: stop,
+    color: color,
+    subject: subject,
+    location: location,
+  );
+
+  @protected
+  Event instance([Map<String, dynamic>? data]) => Event.make(
+      data: {...get(), ...(data ?? {})},
+  );
 
   EventType get type {
-    if (isExemplar) return EventType.exemplar;
     if (isInstance) return EventType.instance;
     if (isDeviation) return EventType.deviation;
     if (isException) return EventType.exception;
@@ -122,13 +131,13 @@ class Event extends Fixture with Diagnosticable {
         return overlaps ? [this] : [];
     }
     final instances = <Event>[];
-    final iterator = pattern!.iterator;
+    final iterator = pattern!.iterator(start);
     while (iterator.moveNext()) {
       final instanceStart = iterator.current;
       final instanceStop = instanceStart.add(duration);
       if (instanceStart.date >= to) break;
       if (instanceStart.date < to && instanceStop.date >= from) {
-        instances.add(Event.make(data: {
+        instances.add(instance({
           ...get(),
           "start": instanceStart,
           "stop": instanceStop,
@@ -143,6 +152,8 @@ class Event extends Fixture with Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Object>('id', id));
+    properties.add(DiagnosticsProperty<DateTime>('start', start));
+    properties.add(DiagnosticsProperty<DateTime>('stop', stop));
     properties.add(StringProperty('subject', subject));
     properties.add(ColorProperty('color', color));
     properties.add(StringProperty('location', location));

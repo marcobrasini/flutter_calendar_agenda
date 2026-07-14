@@ -18,7 +18,7 @@ void main() {
         color: Colors.blue,
         subject: 'Started yesterday',
       );
-      final source = CalendarSource([event]);
+      final source = CalendarEvents(events: [event]);
       final result = source.forDate(today);
       expect(result, contains(event));
     },);
@@ -30,7 +30,7 @@ void main() {
         color: Colors.blue,
         subject: 'Finished tomorrow',
       );
-      final source = CalendarSource([event]);
+      final source = CalendarEvents(events: [event]);
       final result = source.forDate(today);
       expect(result, contains(event));
     },);
@@ -42,7 +42,7 @@ void main() {
         color: Colors.blue,
         subject: 'Started yesterday',
       );
-      final source = CalendarSource([event]);
+      final source = CalendarEvents(events: [event]);
       final result = source.forDate(today);
       expect(result, contains(event));
     },);
@@ -54,7 +54,7 @@ void main() {
         color: Colors.blue,
         subject: 'Finished after tomorrow',
       );
-      final source = CalendarSource([event]);
+      final source = CalendarEvents(events: [event]);
       final result = source.forDate(today);
       expect(result, contains(event));
     },);
@@ -66,7 +66,7 @@ void main() {
         color: Colors.blue,
         subject: 'Started yesterday and Finished tomorrow',
       );
-      final source = CalendarSource([event]);
+      final source = CalendarEvents(events: [event]);
       final result = source.forDate(today);
       expect(result, contains(event));
     },);
@@ -78,7 +78,7 @@ void main() {
         color: Colors.blue,
         subject: 'Finished yesterday',
       );
-      final source = CalendarSource([event]);
+      final source = CalendarEvents(events: [event]);
       final result = source.forDate(today);
       expect(result, isNot(contains(event)));
     },);
@@ -90,7 +90,7 @@ void main() {
         color: Colors.blue,
         subject: 'Started tomorrow',
       );
-      final source = CalendarSource([event]);
+      final source = CalendarEvents(events: [event]);
       final result = source.forDate(today);
       expect(result, isNot(contains(event)));
     },);
@@ -102,7 +102,7 @@ void main() {
           color: Colors.purple,
           subject: '',
         );
-        final source = CalendarSource([event]);
+        final source = CalendarEvents(events: [event]);
         final first = source.forDate(today);
         final second = source.forDate(today);
         expect(first, contains(event));

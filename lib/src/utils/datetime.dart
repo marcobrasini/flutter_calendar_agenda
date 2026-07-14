@@ -318,13 +318,14 @@ extension DateAndTime on DateTime {
   Month get toMonth => Month(year, month);
   Year get toYear => Year(year);
 
-  String toISOCompact() => ''
-      '${year.toString().padLeft(4, '0')}'
-      '${month.toString().padLeft(2, '0')}'
-      '${day.toString().padLeft(2, '0')}T'
-      '${hour.toString().padLeft(2, '0')}'
-      '${minute.toString().padLeft(2, '0')}'
-      '${second.toString().padLeft(2, '0')}Z';
+  String toISOString() => ""
+      "${year.toString().padLeft(4, '0')}"
+      "${month.toString().padLeft(2, '0')}"
+      "${day.toString().padLeft(2, '0')}T"
+      "${hour.toString().padLeft(2, '0')}"
+      "${minute.toString().padLeft(2, '0')}"
+      "${second.toString().padLeft(2, '0')}"
+      "${isUtc ? 'Z' : ''}";
 
   String format(String fmt) => DateFormat(fmt).format(this);
   DateTime round() => date & time;

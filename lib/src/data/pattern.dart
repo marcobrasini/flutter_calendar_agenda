@@ -1,4 +1,3 @@
-import 'package:rrule/rrule.dart';
 import 'package:flutter/foundation.dart';
 import 'package:calendar/src/utils/datetime.dart';
 
@@ -10,15 +9,25 @@ enum PatternType {
   yearly,
 }
 
+String? patternProperty(String source, String property) {
+  final index = source.indexOf(property);
+  if (index == -1) return null;
+  final start = index + ("$property=").length;
+  final stop = source.indexOf(";", start);
+  return stop == -1
+      ? source.substring(start)
+      : source.substring(start, stop);
+}
+
 
 class Pattern with Diagnosticable {
-  static const _ICSToType = {
+  static const _icsToType = {
     "DAILY": PatternType.daily,
     "WEEKLY": PatternType.weekly,
     "MONTHLY": PatternType.monthly,
     "YEARLY": PatternType.yearly,
   };
-  static const _TypeToICS = {
+  static const _typeToIcs = {
     PatternType.daily: "DAILY",
     PatternType.weekly: "WEEKLY",
     PatternType.monthly: "MONTHLY",
@@ -26,117 +35,104 @@ class Pattern with Diagnosticable {
   };
 
   final PatternType type;
-  final DateTime since;
   final int step;
-  final int? count;
-  final DateTime? until;
-  final Set<DateTime> exceptions;
+  int? count;
+  DateTime? until;
+  Set<DateTime> exceptions;
   List<Date> recurrences;
 
   Pattern({
-    required this.since,
     required this.type,
     this.step = 1,
     this.count,
     this.until,
-    this.exceptions = const {},
-    this.recurrences = const [],
-  });
+    Set<DateTime>? exceptions,
+    List<Date>? recurrences,
+  }) : exceptions = exceptions ?? <DateTime>{},
+        recurrences = recurrences ?? <Date>[];
 
-  factory Pattern.fromICSString(DateTime since, String rule) {
-    final rrule = RecurrenceRule.fromString(rule);
-    final type = Pattern._ICSToType[rrule.frequency.toString()]!;
-    final recurrences = <Date>[];
-    switch (type) {
-      case PatternType.daily:
-        break;
-      case PatternType.weekly:
-        for (var day in rrule.byWeekDays) {
-          recurrences.add(Date(2024, 1, day.day));
-        }
-        break;
-      case PatternType.monthly:
-        for (var day in rrule.byMonthDays) {
-          recurrences.add(Date(2024, 1, day));
-        }
-        break;
-      case PatternType.yearly:
-        for (var month in rrule.byMonths) {
-          if (rrule.byMonthDays.isEmpty) {
-            recurrences.add(Date(2024, month, 1));
-          } else {
-            for (var day in rrule.byMonthDays) {
-              recurrences.add(Date(2024, month, day));
-            }
-          }
-        }
-        for (var day in rrule.byYearDays) {
-          recurrences.add(Date(2024, 1, day));
-        }
-        break;
-    }
+  factory Pattern.fromICSString(String string) {
+    final properties = {
+      "type": patternProperty(string, "FREQ"),
+      "step": patternProperty(string, "INTERVAL"),
+      "count": patternProperty(string, "COUNT"),
+      "until": patternProperty(string, "UNTIL"),
+      "exceptions": patternProperty(string, "EXDATE"),
+    };
     return Pattern(
-      since: since,
-      type: type,
-      step: rrule.interval ?? 1,
-      count: rrule.count,
-      until: rrule.until,
-      recurrences: recurrences,
+      type: _icsToType[properties["type"]!]!,
+      step: (properties["step"] != null) ? int.parse(properties["step"]!) : 1,
+      count: (properties["count"] != null) ? int.parse(properties["count"]!) : null,
+      until: (properties["until"] != null) ? DateTime.parse(properties["until"]!) : null,
+      exceptions: {
+        for (String date in (properties["exceptions"]?.split(',') ?? []))
+          DateTime.parse(date)
+      }
     );
   }
 
   String toICSString() {
-    final strings = <String>["FREQ:${_TypeToICS[type]}"];
+    final strings = <String>["FREQ=${_typeToIcs[type]}"];
     if (step != 1) strings.add("INTERVAL=$step");
     if (count != null) strings.add("COUNT=$count");
-    if (until != null) strings.add("UNTIL=${until!.toISOCompact()}");
+    if (until != null) strings.add("UNTIL=${until!.toISOString()}");
     if (exceptions.isNotEmpty) {
-      final dates = exceptions.map((e) => e.toISOCompact()).join(",");
-      strings.add("EXDATE=$dates");
+      final dates = exceptions.map((date) => date.toISOString()).toList();
+      strings.add("EXDATE=${dates.join(",")}");
     }
     return "RRULE:${strings.join(";")};";
   }
 
-  PatternIterator get iterator {
+  PatternIterator iterator(DateTime datetime) {
     switch(type) {
       case PatternType.daily:
-        return PatternDaily(this);
+        return PatternDaily(this, datetime);
       case PatternType.weekly:
-        return PatternWeekly(this);
+        return PatternWeekly(this, datetime);
       case PatternType.monthly:
-        return PatternMonthly(this);
+        return PatternMonthly(this, datetime);
       case PatternType.yearly:
-        return PatternYearly(this);
+        return PatternYearly(this, datetime);
     }
   }
 
   @override
-  int get hashCode => Object.hash(since, type, step, count, until);
+  int get hashCode => Object.hash(type, step, count, until);
 
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     if (other is Pattern) {
-      return other.since == since
-          && other.type == type
+      return other.type == type
           && other.step == step
           && other.count == count
           && other.until == until;
     }
     return false;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<PatternType>('type', type));
+    properties.add(IntProperty('step', step));
+    properties.add(IntProperty('count', count));
+    properties.add(DiagnosticsProperty<DateTime>('until', until));
+  }
 }
 
 
 class PatternIterator implements Iterator<DateTime> {
-  PatternIterator(this.pattern) : current = pattern.since, index = 0;
+  PatternIterator(this.pattern, this.since) : current = since, index = 0;
 
   final Pattern pattern;
+  final DateTime since;
   @override DateTime current;
   int index;
+  bool _first = true;
   int _i = 0;
 
-  DateTime initDateTime() => pattern.since.round();
+  DateTime initDateTime() => since.round();
 
   @override
   bool moveNext() {
@@ -144,6 +140,7 @@ class PatternIterator implements Iterator<DateTime> {
     if (pattern.count != null && index >= pattern.count!) return false;
     if (pattern.until != null && !next.isBefore(pattern.until!)) return false;
     current = next;
+    _first = false;
     if (pattern.exceptions.isNotEmpty
         && pattern.exceptions.contains(current)) {
       return moveNext();
@@ -159,13 +156,13 @@ class PatternIterator implements Iterator<DateTime> {
 
 
 class PatternDaily extends PatternIterator {
-  PatternDaily(super.pattern) {
+  PatternDaily(super.pattern, super.since) {
     pattern.recurrences = [];
   }
 
   @override
   DateTime nextDateTime() {
-    if (index == 0) return initDateTime();
+    if (_first) return initDateTime();
     final time = current.time;
     final date = current.date + pattern.step;
     return date & time;
@@ -174,7 +171,7 @@ class PatternDaily extends PatternIterator {
 
 
 class PatternWeekly extends PatternIterator {
-  PatternWeekly(super.pattern);
+  PatternWeekly(super.pattern, super.since);
 
   bool isRecurrence(DateTime date) => pattern.recurrences.any(
           (value) => (date.weekday == value.weekday)
@@ -185,13 +182,13 @@ class PatternWeekly extends PatternIterator {
     final time = current.time;
     Week week = current.toWeek;
     Date date, item;
-    if (index == 0) {
+    if (_first) {
       if (pattern.recurrences.isEmpty) return initDateTime();
-      if (isRecurrence(pattern.since)) return initDateTime();
+      if (isRecurrence(since)) return initDateTime();
     }
     final recurrences = pattern.recurrences.isNotEmpty
         ? pattern.recurrences
-        : [pattern.since.date];
+        : [since.date];
     while (true) {
       for (var i = 0; i < recurrences.length - _i; i++) {
         item = recurrences[_i + i];
@@ -209,7 +206,7 @@ class PatternWeekly extends PatternIterator {
 
 
 class PatternMonthly extends PatternIterator {
-  PatternMonthly(super.pattern);
+  PatternMonthly(super.pattern, super.since);
 
   bool isRecurrence(DateTime date) => pattern.recurrences.any(
           (value) => (date.day == value.day)
@@ -220,13 +217,13 @@ class PatternMonthly extends PatternIterator {
     final time = current.time;
     Month month = current.toMonth;
     Date date, item;
-    if (index == 0) {
+    if (_first) {
       if (pattern.recurrences.isEmpty) return initDateTime();
-      if (isRecurrence(pattern.since)) return initDateTime();
+      if (isRecurrence(since)) return initDateTime();
     }
     final recurrences = pattern.recurrences.isNotEmpty
         ? pattern.recurrences
-        : [pattern.since.date];
+        : [since.date];
     while (true) {
       for (var i = 0; i < recurrences.length - _i; i++) {
         item = recurrences[_i + i];
@@ -247,7 +244,7 @@ class PatternMonthly extends PatternIterator {
 
 
 class PatternYearly extends PatternIterator {
-  PatternYearly(super.pattern);
+  PatternYearly(super.pattern, super.since);
   
   bool isRecurrence(DateTime date) => pattern.recurrences.any(
           (value) => (date.month == value.month) && (date.day == value.day)
@@ -258,13 +255,13 @@ class PatternYearly extends PatternIterator {
     final time = current.time;
     Year year = current.toYear;
     Date date, item;
-    if (index == 0) {
+    if (_first) {
       if (pattern.recurrences.isEmpty) return initDateTime();
-      if (isRecurrence(pattern.since)) return initDateTime();
+      if (isRecurrence(since)) return initDateTime();
     }
     final recurrences = pattern.recurrences.isNotEmpty
         ? pattern.recurrences
-        : [pattern.since.date];
+        : [since.date];
     while (true) {
       for (var i = 0; i < recurrences.length - _i; i++) {
         item = recurrences[_i + i];

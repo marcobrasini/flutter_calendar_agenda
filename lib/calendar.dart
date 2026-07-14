@@ -2,7 +2,9 @@ library calendar;
 
 export 'src/calendar.dart' show Calendar;
 export 'src/source.dart' show CalendarSource;
+export 'src/viewer.dart' show CalendarViewer;
 export 'src/enums.dart' show CalendarView;
-export 'src/data/event.dart' show Event;
+export 'src/data/event.dart' show Event, EventType;
 export 'src/data/fixture.dart' show Fixture;
-export 'src/utils/datetime.dart' show Date, Time, Week, Month;
+export 'src/data/pattern.dart' show Pattern, PatternType;
+export 'src/utils/datetime.dart';

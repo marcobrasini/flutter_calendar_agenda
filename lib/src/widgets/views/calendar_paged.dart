@@ -13,8 +13,8 @@ import '../../context.dart';
 import '../../config.dart';
 
 
-class CalendarPageView extends StatefulWidget {
-  const CalendarPageView({
+class CalendarPaged extends StatefulWidget {
+  const CalendarPaged({
     super.key,
     required this.timeScheme,
     required this.dateScheme,
@@ -29,10 +29,10 @@ class CalendarPageView extends StatefulWidget {
   final Widget? cornerWidget;
 
   @override
-  State<CalendarPageView> createState() => _CalendarPageViewState();
+  State<CalendarPaged> createState() => _CalendarPagedState();
 }
 
-class _CalendarPageViewState extends State<CalendarPageView> {
+class _CalendarPagedState extends State<CalendarPaged> {
   final _viewer = PageController(initialPage: 1);
   final _scroller = ScrollController();
   final _keyScroll = GlobalKey();
@@ -54,7 +54,6 @@ class _CalendarPageViewState extends State<CalendarPageView> {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
-    final offset = config.view.indicatorRadius;
     return LayoutBuilder(
       builder: (context, constraints) {
         final timeMargin = context.timeMargin();

@@ -56,7 +56,7 @@ class PageSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
-    final source = context.read<CalendarSource>();
+    final source = context.read<CalendarEvents>();
     final events = source.forDate(date);
     return SizedBox(
       width: width,
@@ -65,7 +65,7 @@ class PageSlot extends StatelessWidget {
         children: [
           for (final layout in layouts(events, config.event.padding))
             Positioned(
-              key: ValueKey(layout.event.id),
+              key: ValueKey(layout.event.hashCode),
               left: 0.0,
               right: 0.0,
               top: layout.top,

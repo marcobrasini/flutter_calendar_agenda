@@ -1,9 +1,11 @@
+import 'package:calendar/src/data/fixture.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'widgets/tools/header_calendar.dart';
+import 'widgets/views/calendar_header.dart';
 import 'widgets/views/view_monthly.dart';
-import 'widgets/views/view_paged.dart';
+import 'widgets/views/calendar_paged.dart';
 import 'utils/schemes.dart';
+import 'data/event.dart';
 import 'enums.dart';
 import 'const.dart';
 import 'config.dart';
@@ -13,7 +15,7 @@ import 'source.dart';
 import 'timer.dart';
 
 
-class Calendar extends StatelessWidget {
+class Calendar<T extends Event> extends StatelessWidget {
 
   const Calendar({
     super.key,
@@ -87,7 +89,7 @@ class Calendar extends StatelessWidget {
   });
 
   final CalendarView view;
-  final CalendarSource source;
+  final CalendarSource<T> source;
 
   final int begDay;
   final int endDay;
@@ -145,25 +147,39 @@ class Calendar extends StatelessWidget {
   final bool draggableEvent;
   final bool resizableEvent;
   //
-  final SlotCallback? onEventTap;
-  final SlotCallback? onEventDoubleTap;
-  final SlotCallback? onEventLongPress;
+  final SlotCallback<T>? onEventTap;
+  final SlotCallback<T>? onEventDoubleTap;
+  final SlotCallback<T>? onEventLongPress;
   final PageCallback? onFrameTap;
   final PageCallback? onFrameDoubleTap;
   final PageCallback? onFrameLongPress;
-  final ModifyCallback? onEventDragged;
-  final ModifyCallback? onEventResized;
+  final ModifyCallback<T>? onEventDragged;
+  final ModifyCallback<T>? onEventResized;
   final CreateCallback? onEventCreated;
 
   CallbackScheme get callbacks => CallbackScheme(
-    onEventTap: onEventTap,
-    onEventDoubleTap: onEventDoubleTap,
-    onEventLongPress: onEventLongPress,
     onFrameTap: onFrameTap,
     onFrameDoubleTap: onFrameDoubleTap,
     onFrameLongPress: onFrameLongPress,
-    onEventDragged: draggableEvent ? onEventDragged : null,
-    onEventResized: resizableEvent ? onEventResized : null,
+    onEventTap: onEventTap != null
+        ? (Event e) => onEventTap!(e as T)
+        : null ,
+    onEventDoubleTap: onEventDoubleTap != null
+        ? (Event e) => onEventDoubleTap!(e as T)
+        : null,
+    onEventLongPress: onEventLongPress != null
+        ? (Event e) => onEventLongPress!(e as T)
+        : null,
+    onEventDragged: draggableEvent
+        ? (onEventDragged != null
+        ? (Event e, Fixture f) => onEventDragged!(e as T, f)
+        : null
+    ) : null,
+    onEventResized: resizableEvent
+        ? (onEventResized != null
+        ? (Event e, Fixture f) => onEventResized!(e as T, f)
+        : null
+    ) : null,
     onEventCreated: onEventCreated,
   );
 
@@ -293,13 +309,13 @@ class Calendar extends StatelessWidget {
   Widget get viewer {
     switch (view) {
       case CalendarView.daily:
-        return CalendarPageView(
+        return CalendarPaged(
           timeScheme: timeScheme,
-          dateScheme: DateScheme(beg:0, end:0, step:1),
+          dateScheme: DateScheme(beg:0, end:1, step:1),
           callbacks: callbacks,
         );
       case CalendarView.weekly:
-        return CalendarPageView(
+        return CalendarPaged(
           dateScheme: dateScheme,
           timeScheme: timeScheme,
           callbacks: callbacks,
@@ -317,7 +333,7 @@ class Calendar extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => source),
+        ChangeNotifierProvider<CalendarEvents>.value(value: source),
         ChangeNotifierProvider(create: (_) => CalendarViewer(view)),
         ChangeNotifierProvider(create: (_) => CalendarTimer()),
         ChangeNotifierProvider(create: (_) => CalendarModifier(

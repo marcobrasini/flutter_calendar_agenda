@@ -44,9 +44,16 @@ void main() {
       expect(time.minute, now.minute);
     });
 
-    test('toISOCompact', () {
+    test('toISOString local', () {
       final isoString = now.toString().split('.')[0].split(" ");
-      expect(now.toISOCompact(), ""
+      expect(now.toISOString(), ""
+          "${isoString[0].replaceAll('-', '')}T"
+          "${isoString[1].replaceAll(':', '')}");
+    });
+
+    test('toISOString UTC', () {
+      final isoString = now.toUtc().toString().split('.')[0].split(" ");
+      expect(now.toUtc().toISOString(), ""
           "${isoString[0].replaceAll('-', '')}T"
           "${isoString[1].replaceAll(':', '')}Z");
     });

@@ -54,8 +54,18 @@ class EventSlot extends StatelessWidget {
           borderRadius: BorderRadius.circular(eventSlotRounded),
           color: layout.event.color.withAlpha(alpha),
         ),
-        child: builder?.call(context) ?? Text(
-          layout.event.subject,
+        child: Stack(
+          children: [
+            builder?.call(context) ?? Text(layout.event.subject),
+            if (layout.event.parentId != null) Positioned(
+              left: 0.0,
+              bottom: 0.0,
+              child: Icon(
+                (layout.event.pattern == null) ? Icons.sync_disabled : Icons.sync,
+                size: 12.0,
+              ),
+            )
+          ],
         ),
       ),
     );

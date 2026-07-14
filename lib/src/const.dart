@@ -5,15 +5,15 @@ import 'data/event.dart';
 import 'enums.dart';
 
 //
-typedef SlotCallback = void Function(Event);
-typedef PageCallback = void Function(DateTime);
-typedef FrameCallback = void Function(Offset, [Event?]);
+typedef SlotCallback<T extends Event> = void Function(T);
+typedef PageCallback<T extends Event> = void Function(DateTime);
+typedef FrameCallback<T extends Event> = void Function(Offset, [T?]);
 //
-typedef CreateCallback = void Function(Fixture);
-typedef ModifyCallback = void Function(Event, Fixture);
-typedef DeleteCallback = void Function(Event);
+typedef CreateCallback<T extends Event> = void Function(Fixture);
+typedef ModifyCallback<T extends Event> = void Function(T, Fixture);
+typedef DeleteCallback<T extends Event> = void Function(T);
 //
-typedef EventBuilder = Widget Function(Event);
+typedef EventBuilder<T extends Event> = Widget Function(T);
 
 
 const initialHour = 0;
