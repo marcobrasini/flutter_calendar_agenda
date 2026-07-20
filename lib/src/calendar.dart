@@ -334,7 +334,7 @@ class Calendar<T extends Event> extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CalendarEvents>.value(value: source),
-        ChangeNotifierProvider(create: (_) => CalendarViewer(view)),
+        ChangeNotifierProvider(create: (_) => CalendarViewer(source, view)),
         ChangeNotifierProvider(create: (_) => CalendarTimer()),
         ChangeNotifierProvider(create: (_) => CalendarModifier(
           onEventDragged: callbacks.onEventDragged,

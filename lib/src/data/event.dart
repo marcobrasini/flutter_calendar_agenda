@@ -1,4 +1,3 @@
-import 'package:calendar/src/utils/datetime.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'fixture.dart';
@@ -88,7 +87,7 @@ class Event extends Fixture with Diagnosticable {
 
   @protected
   Event instance([Map<String, dynamic>? data]) => Event.make(
-      data: {...get(), ...(data ?? {})},
+      data: {...get(), ...(data ?? {}), "parentId": id},
   );
 
   EventType get type {
@@ -125,23 +124,20 @@ class Event extends Fixture with Diagnosticable {
     return false;
   }
 
-  List<Event> expand(Date from, Date to) {
+  List<Event> expand(DateTime from, DateTime to) {
     if (pattern == null) {
-      final overlaps = start.date < to && stop.date >= from;
-        return overlaps ? [this] : [];
+      return range(from, to) ? [this] : [];
     }
     final instances = <Event>[];
     final iterator = pattern!.iterator(start);
     while (iterator.moveNext()) {
       final instanceStart = iterator.current;
       final instanceStop = instanceStart.add(duration);
-      if (instanceStart.date >= to) break;
-      if (instanceStart.date < to && instanceStop.date >= from) {
+      if (!instanceStart.isBefore(to)) break;
+      if (instanceStop.isAfter(from)) {
         instances.add(instance({
-          ...get(),
           "start": instanceStart,
           "stop": instanceStop,
-          "parentId": id,
         }));
       }
     }

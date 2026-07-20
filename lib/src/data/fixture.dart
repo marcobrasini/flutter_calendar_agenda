@@ -26,6 +26,12 @@ class Fixture with Diagnosticable {
   bool get isAllDay => start == start.date && stop == stop.date;
   bool get isSpanned => duration.inDays >= 1 && stop != start.date + 1;
 
+  List<Date> get dates => [
+    for (var date = start.date; date < stop.date + 1; date += 1) date
+  ];
+
+  bool range(DateTime from, DateTime to) =>
+      start.isBefore(to) && stop.isAfter(from);
 
   @override
   int get hashCode => Object.hash(start, stop);

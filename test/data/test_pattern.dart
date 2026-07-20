@@ -65,7 +65,6 @@ void main() {
     });
 
     test('Pattern toISOString', () {
-      print(until.isUtc);
       final pattern = Pattern(
         type: PatternType.daily,
         step: step,
@@ -405,13 +404,11 @@ void main() {
         until: until,
         exceptions: allExceptions,
       );
-      print(until);
       final List<DateTime> dates = [];
       final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
-      print(dates);
       expect(dates.isEmpty, isTrue);
     });
   });

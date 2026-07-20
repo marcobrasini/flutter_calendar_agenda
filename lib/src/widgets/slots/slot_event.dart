@@ -31,6 +31,8 @@ class EventSlot extends StatelessWidget {
   final SlotCallback? onDoubleTap;
   final SlotCallback? onLongPress;
 
+  Event get event => layout.event;
+
   @override
   Widget build(BuildContext context) {
     final modifier = context.read<CalendarModifier>();
@@ -48,20 +50,20 @@ class EventSlot extends StatelessWidget {
         padding: EdgeInsetsGeometry.all(eventSlotPadding),
         decoration: BoxDecoration(
           border: (selected) ? Border.all(
-            color: layout.event.color.dimmer(eventSlotLineDimmed),
+            color: event.color.dimmer(eventSlotLineDimmed),
             width: eventSlotLineWidth,
           ) : null,
           borderRadius: BorderRadius.circular(eventSlotRounded),
-          color: layout.event.color.withAlpha(alpha),
+          color: event.color.withAlpha(alpha),
         ),
         child: Stack(
           children: [
-            builder?.call(context) ?? Text(layout.event.subject),
-            if (layout.event.parentId != null) Positioned(
+            builder?.call(context) ?? Text(event.subject),
+            if (event.parentId != null) Positioned(
               left: 0.0,
               bottom: 0.0,
               child: Icon(
-                (layout.event.pattern == null) ? Icons.sync_disabled : Icons.sync,
+                (event.pattern == null) ? Icons.sync_disabled : Icons.sync,
                 size: 12.0,
               ),
             )

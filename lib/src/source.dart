@@ -10,123 +10,97 @@ class CalendarEvents extends ChangeNotifier {
   }) : _events = events ?? <Event>[];
 
   final List<Event> _events;
-  final Map<String, List<Event>> cache = {};
+  final Map<Date, List<Event>> _cache = {};
   final int cacheRange;
+  Date? cacheFrom;
+  Date? cacheTo;
 
-  void clear() => _events.clear();
+  void build(Date from, Date to) {
+    if (cacheFrom == null || cacheTo == null) {
+      _fetch(from, to);
+    } else if (from < cacheFrom! || to > cacheTo!) {
+      _fetch(from, to);
+    }
+  }
+
+  void clear() {
+    cacheFrom = null;
+    cacheTo = null;
+    _cache.clear();
+    _events.clear();
+  }
+
   void append(List<Event> others) => _events.addAll(others);
 
   Event find(String id) => _events.singleWhere((e) => e.id == id);
 
-  // ── Cache per giorno ────────────────────────────────────────────────────
-
-  String _key(Date date) => 'd:$date';
-
-  List<Event> _forDate(Date date) {
-    return cache.putIfAbsent(
-      _key(date),
-          () => _events.expand((e) => e.expand(date, date + 1).cast<Event>()).toList()
-        ..sort((a, b) {
-          final startSort = a.start.compareTo(b.start);
-          if (startSort != 0) return startSort;
-          return b.duration.compareTo(a.duration);
-        }),
-    );
+  List<Event> sort(List<Event> events) {
+    events.sort((a, b) {
+      final startSort = a.start.compareTo(b.start);
+      if (startSort != 0) return startSort;
+      return b.duration.compareTo(a.duration);
+    });
+    return events;
   }
-  //
-  // List<Event> _range(Date start, Date stop) {
-  //   final data = events.expand((e) => e.expand(start, stop).cast<Event>()).toList();
-  //   return cache.putIfAbsent(
-  //     _key(date),
-  //         () => events.expand((e) => e.expand(start, stop).cast<Event>()).toList()
-  //       ..sort((a, b) {
-  //         final startSort = a.start.compareTo(b.start);
-  //         if (startSort != 0) return startSort;
-  //         return b.duration.compareTo(a.duration);
-  //       }),
-  //   );
-  // }
 
   // ── Query pubbliche ─────────────────────────────────────────────────────
 
   List<Event> forDate(Date date) {
-    final result = _forDate(date);
-    _prefetch([date - cacheRange, date + cacheRange]);
-    return result;
-  }
-
-  List<Event> forWeek(Week week) {
-    final days = List.generate(7, (i) => week.mon + i);
-    final result = days.expand(_forDate).toList();
-    _prefetch([(week - 1).mon, (week + 1).sun]);
-    return result;
-  }
-
-  List<Event> forMonth(Month month) {
-    final from = Date(month.year, month.month, 1);
-    final days = List.generate(month.days, (i) => from + i);
-    final result = days.expand(_forDate).toList();
-    _prefetch([from - 1, from + month.days]);
-    return result;
+    return _cache[date] ?? [];
   }
 
   // ── Prefetch ────────────────────────────────────────────────────────────
 
-  void _prefetch(List<Date> dates) {
-    Future.microtask(() {
-      for (final date in dates) {
-        cache.putIfAbsent(
-          _key(date),
-              () => _events.expand((e) => e.expand(date, date + 1).cast<Event>()).toList(),
-        );
-      }
-    });
+  void _fetch(Date from, Date to) {
+    final events = _events.expand((e) => e.expand(from, to)).toList();
+    for (var date = from; date < to; date += 1) {
+      _cache.putIfAbsent(date, () => sort(
+          events.where((e) => e.range(date, date+1)).toList()
+      ));
+    }
+    cacheFrom = from;
+    cacheTo = to;
   }
 
-  // ── Invalidazione ───────────────────────────────────────────────────────
-
-  void _invalidate(Event event) {
+  void _cancel(Event event) {
     final id = event.id;
-    final invalidate = <String>{};
-    for (final entry in cache.entries) {
-      if (entry.value.any((e) => (e.id == id) || (e.parentId == id))) {
-        invalidate.add(entry.key);
+    for (var entry in _cache.entries) {
+      entry.value.removeWhere((e) => (e.id == id) || (e.parentId == id));
+    }
+  }
+
+  void _inject(Event event) {
+    final events = event.expand(cacheFrom!, cacheTo!);
+    for (final e in events) {
+      for (final date in e.dates) {
+        if (date < cacheFrom! || date >= cacheTo!) continue;
+        final list = _cache.putIfAbsent(date, () => <Event>[]);
+        list.add(e);
+        sort(list);
       }
     }
-    for (final key in invalidate) {
-      cache.remove(key);
-    }
   }
-
-  void _invalidateDates(Date start, Date stop) {
-    final days = stop % start;
-    for (int i = 0; i <= days; i++) {
-      cache.remove(_key(start + i));
-    }
-  }
-
-  void invalidateAll() => cache.clear();
 
   // ── Mutazioni ───────────────────────────────────────────────────────────
 
   void addEvent(Event event) {
     _events.add(event);
-    invalidateAll();
-    notifyListeners();
-  }
-
-  void delEvent(String id) {
-    final event = _events.firstWhere((e) => e.id == id);
-    _events.remove(event);
-    _invalidate(event);
+    _inject(event);
     notifyListeners();
   }
 
   void setEvent(String id, Map<String, dynamic> data) {
-    final i = _events.indexWhere((e) => e.id == id);
-    if (i == -1) return;
-    invalidateAll();
-    _events[i].set(data);
+    final event = _events.singleWhere((e) => e.id == id);
+    _cancel(event);
+    event.set(data);
+    _inject(event);
+    notifyListeners();
+  }
+
+  void delEvent(String id) {
+    final event = _events.singleWhere((e) => e.id == id);
+    _events.remove(event);
+    _cancel(event);
     notifyListeners();
   }
 }
