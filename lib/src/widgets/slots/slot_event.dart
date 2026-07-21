@@ -7,10 +7,6 @@ import '../../const.dart';
 import 'slot_layout.dart';
 
 
-typedef DragCallback = void Function(Event);
-typedef EventBuilder = Widget Function(BuildContext);
-
-
 class EventSlot extends StatelessWidget {
   const EventSlot({
     super.key,
@@ -58,7 +54,7 @@ class EventSlot extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            builder?.call(context) ?? Text(event.subject),
+            builder?.call(context, event) ?? Text(event.subject),
             if (event.parentId != null) Positioned(
               left: 0.0,
               bottom: 0.0,

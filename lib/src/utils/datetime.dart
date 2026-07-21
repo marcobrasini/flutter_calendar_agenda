@@ -214,7 +214,9 @@ class Week extends DateTime {
   
   DateTime newYear() => DateTime(year).weekStart;
   DateTime endYear() => DateTime(year+1, 1, 0).weekEnd.add(Duration(days:7));
-  
+
+  Date get first => mon;
+  Date get last => sun;
 }
 
 
@@ -262,7 +264,9 @@ class Month extends DateTime {
 
   int operator %(DateTime dateTime) => (year - dateTime.year)*12 + (month - dateTime.month);
 
-  int get days => monthLast.day;
+  Date get first => DateTime(year, month, 1).date;
+  Date get last => DateTime(year, month + 1, 0).date;
+  int get days => last.day;
 }
 
 
@@ -304,6 +308,8 @@ class Year extends DateTime {
   int operator %(DateTime dateTime) => year - dateTime.year;
 
   int get days => isLeapYear ? 366 : 365;
+  Date get first => DateTime(year, 1, 1).date;
+  Date get last => DateTime(year + 1, 1, 0).date;
 }
 
 
@@ -336,13 +342,13 @@ extension DateAndTime on DateTime {
   int get dayNumber => date % Year(year);
 
   DateTime get weekStart => DateTime(year, month, day - (weekday - 1));
-  DateTime get weekLast => DateTime(year, month, day + (7 - weekday));
+  // DateTime get weekLast => DateTime(year, month, day + (7 - weekday));
   DateTime get weekEnd => DateTime(year, month, day + (8 - weekday));
   DateTime get monthStart => DateTime(year, month);
-  DateTime get monthLast => DateTime(year, month + 1, 0);
+  // DateTime get monthLast => DateTime(year, month + 1, 0);
   DateTime get monthEnd => DateTime(year, month + 1);
   DateTime get yearStart => DateTime(year);
-  DateTime get yearLast => DateTime(year + 1, 1, 0);
+  // DateTime get yearLast => DateTime(year + 1, 1, 0);
   DateTime get yearEnd => DateTime(year + 1, 1);
 
   DateTime operator &(DateTime datetime) => DateTime(

@@ -7,7 +7,7 @@ void main() {
   final current = Week.now();
 
   bool isFirst(DateTime datetime) => datetime.date == datetime.weekStart;
-  bool isLast(DateTime datetime) => datetime.date == datetime.weekLast;
+  bool isLast(DateTime datetime) => datetime.date + 1 == datetime.weekEnd;
 
   void expectIsWeek(Week week) {
     expect(current, isA<Week>());
@@ -226,8 +226,8 @@ void main() {
       final followingDay = DateTime(now.year, now.month, now.day+1);
       expect(current == now.weekStart.yesterday, isFalse);
       expect(current == now.weekStart, isTrue);
-      expect(current == now.weekLast, isTrue);
-      expect(current == now.weekLast.tomorrow, isFalse);
+      expect(current == current.last, isTrue);
+      expect(current == current.last.tomorrow, isFalse);
       expect(current == previousDay, !isFirst(now));
       expect(current == followingDay, !isLast(now));
     });
@@ -241,8 +241,8 @@ void main() {
       final followingDay = DateTime(now.year, now.month, now.day+1);
       expect(current < now.weekStart.yesterday, isFalse);
       expect(current < now.weekStart, isFalse);
-      expect(current < now.weekLast, isFalse);
-      expect(current < now.weekLast.tomorrow, isTrue);
+      expect(current < current.last, isFalse);
+      expect(current < current.last.tomorrow, isTrue);
       expect(current < previousDay, isFalse);
       expect(current < followingDay, isLast(now));
     });
@@ -256,8 +256,8 @@ void main() {
       final followingDay = DateTime(now.year, now.month, now.day+1);
       expect(current <= now.weekStart.yesterday, isFalse);
       expect(current <= now.weekStart, isTrue);
-      expect(current <= now.weekLast, isTrue);
-      expect(current <= now.weekLast.tomorrow, isTrue);
+      expect(current <= current.last, isTrue);
+      expect(current <= current.last.tomorrow, isTrue);
       expect(current <= previousDay, !isFirst(now));
       expect(current <= followingDay, isTrue);
     });
@@ -271,8 +271,8 @@ void main() {
       final followingDay = DateTime(now.year, now.month, now.day+1);
       expect(current > now.weekStart.yesterday, isTrue);
       expect(current > now.weekStart, isFalse);
-      expect(current > now.weekLast, isFalse);
-      expect(current > now.weekLast.tomorrow, isFalse);
+      expect(current > current.last, isFalse);
+      expect(current > current.last.tomorrow, isFalse);
       expect(current > previousDay, isFirst(now));
       expect(current > followingDay, isFalse);
     });
@@ -286,8 +286,8 @@ void main() {
       final followingDay = DateTime(now.year, now.month, now.day+1);
       expect(current >= now.weekStart.yesterday, isTrue);
       expect(current >= now.weekStart, isTrue);
-      expect(current >= now.weekLast, isTrue);
-      expect(current >= now.weekLast.tomorrow, isFalse);
+      expect(current >= current.last, isTrue);
+      expect(current >= current.last.tomorrow, isFalse);
       expect(current >= previousDay, isTrue);
       expect(current >= followingDay, !isLast(now));
     });

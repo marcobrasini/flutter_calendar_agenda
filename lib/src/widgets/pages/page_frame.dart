@@ -12,8 +12,9 @@ class PageFrame extends StatelessWidget {
     super.key,
     required this.width,
     required this.height,
-    required this.dateScheme,
-    required this.timeScheme,
+    this.offset = 0.0,
+    this.dateScheme,
+    this.timeScheme,
     // Interactive callback
     this.onTap,
     this.onDoubleTap,
@@ -23,10 +24,11 @@ class PageFrame extends StatelessWidget {
 
   final double width;
   final double height;
-  final DateScheme dateScheme;
-  final TimeScheme timeScheme;
-  double get dateScale => dateScheme.scale(width);
-  double get timeScale => timeScheme.scale(height);
+  final double offset;
+  final DateScheme? dateScheme;
+  final TimeScheme? timeScheme;
+  double get dateScale => dateScheme?.scale(width) ?? double.nan;
+  double get timeScale => timeScheme?.scale(height) ?? double.nan;
   // Interactive callback
   final FrameCallback? onTap;
   final FrameCallback? onDoubleTap;
@@ -36,37 +38,21 @@ class PageFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context)!;
-    final offset = config.view.indicatorRadius;
     final dateMargin = (config.date?.padding ?? 0.0) / 2;
-    final space = (width - offset) / dateScheme.count;
+    final space = (width - offset) / (dateScheme?.count ?? 1);
     return SizedBox(
         height: height,
         width: width,
         child: GestureDetector(
-          onTapUp: (details)  {
-            if (config.event.createAt == GestureType.tap) {
-              onCreate?.call(details.localPosition);
-            }
-            onTap?.call(details.localPosition);
-          },
-          onLongPressDown: (details) {
-            if (config.event.createAt == GestureType.longPress) {
-              onCreate?.call(details.localPosition);
-            }
-            onLongPress?.call(details.localPosition);
-          },
-          onDoubleTapDown: (details) {
-            if (config.event.createAt == GestureType.doubleTap) {
-              onCreate?.call(details.localPosition);
-            }
-            onDoubleTap?.call(details.localPosition);
-          },
+          onTapUp: (details) => onTap?.call(details.localPosition),
+          onLongPressDown: (details) => onLongPress?.call(details.localPosition),
+          onDoubleTapDown: (details) => onDoubleTap?.call(details.localPosition),
           child: Stack(
             children: [
-              CustomPaint(
+              if (timeScheme != null) CustomPaint(
                 size: Size.infinite,
                 painter: LinesPainter(
-                  divisions: timeScheme.hours,
+                  divisions: timeScheme!.count,
                   lineStyle: config.line.style,
                   lineColor: config.line.color,
                   lineWidth: config.line.width,
@@ -76,11 +62,11 @@ class PageFrame extends StatelessWidget {
                   direction: LineDirection.horizontal,
                 ),
               ),
-              CustomPaint(
+              if (dateScheme != null) CustomPaint(
                 size: Size.infinite,
                 painter: LinesPainter(
                   positions: [
-                    for (int i = 0; i < dateScheme.count; i++)
+                    for (int i = 0; i < dateScheme!.count; i++)
                       offset + i * space
                   ],
                   lineStyle: config.line.style,

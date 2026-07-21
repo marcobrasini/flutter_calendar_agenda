@@ -9,12 +9,14 @@ typedef SlotCallback<T extends Event> = void Function(T);
 typedef PageCallback<T extends Event> = void Function(DateTime);
 typedef FrameCallback<T extends Event> = void Function(Offset, [T?]);
 //
+typedef DragCallback<T extends Event> = void Function(T);
 typedef CreateCallback<T extends Event> = void Function(Fixture);
 typedef ModifyCallback<T extends Event> = void Function(T, Fixture);
 typedef DeleteCallback<T extends Event> = void Function(T);
 //
-typedef EventBuilder<T extends Event> = Widget Function(T);
-
+typedef EventBuilder<T extends Event> = Widget Function(BuildContext, T);
+typedef ScrollBuilder = Widget Function(int);
+typedef PageBuilder = Widget Function(DateTime);
 
 const initialHour = 0;
 const finalHour = Duration.hoursPerDay;

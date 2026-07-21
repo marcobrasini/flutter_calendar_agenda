@@ -16,19 +16,19 @@ class PageWidget extends StatelessWidget {
     required this.date,
     required this.width,
     required this.height,
+    required this.callbacks,
     required this.timeScheme,
     required this.dateScheme,
-    required this.callbacks,
   });
 
   final Date date;
   final double width;
   final double height;
+  final CallbackScheme callbacks;
   final DateScheme dateScheme;
   final TimeScheme timeScheme;
   double get dateScale => dateScheme.scale(width);
   double get timeScale => timeScheme.scale(height);
-  final CallbackScheme callbacks;
 
   DateTime converter(Date date, Offset local) {
     final step = timeScheme.round;
@@ -37,15 +37,6 @@ class PageWidget extends StatelessWidget {
     final from = (date + days) & Time.fromHour(timeScheme.beg);
     return from.add(Duration(minutes: delta));
   }
-
-  // void _onTapped(BuildContext context, Offset local) {
-  //   final config = CalendarConfig.of(context)!;
-  //   final start = converter(local);
-  //   callbacks.onEventCreated?.call(Fixture(
-  //     start: start,
-  //     stop: start.add(config.event.duration),
-  //   ));
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -59,16 +50,12 @@ class PageWidget extends StatelessWidget {
         PageFrame(
           width: width,
           height: height,
+          offset: offset,
           timeScheme: timeScheme,
           dateScheme: dateScheme,
-          onTap: (local, [_]) =>
-              callbacks.onFrameTap?.call(converter(date, local)),
-          onDoubleTap: (local, [_]) =>
-              callbacks.onFrameDoubleTap?.call(converter(date, local)),
-          onLongPress: (local, [_]) =>
-              callbacks.onFrameLongPress?.call(converter(date, local)),
-          // onCreate: (local, [_]) =>
-          //     _onTapped(context, local),
+          onTap: (local, [_]) => callbacks.onFrameTap?.call(converter(date, local)),
+          onDoubleTap: (local, [_]) => callbacks.onFrameDoubleTap?.call(converter(date, local)),
+          onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(converter(date, local)),
         ),
         for (int i = dateScheme.beg; i < dateScheme.end; i++)
           Positioned(

@@ -8,40 +8,42 @@ import '../../config.dart';
 
 
 
-class PageHeader extends StatelessWidget {
+class ViewHeader extends StatelessWidget {
 
-  const PageHeader({
+  const ViewHeader({
     super.key,
     required this.width,
     required this.height,
     required this.scheme,
+    required this.config,
     this.controller,
   });
 
   final double width;
   final double height;
   final DateScheme scheme;
+  final TextConfig config;
   final PageController? controller;
 
-  List<Date> dates(Date date) {
+  List<Date> dates([Date? date]) {
     final dateList = <Date>[];
-    Date start = date + scheme.beg;
+    Date start = (date ?? Week.weekDays.mon) + scheme.beg;
     for (int i = 0 ; i < scheme.count ; i++) {
       dateList.add(start + i);
     }
     return dateList;
   }
 
-  List<Widget> slots(DateTime datetime, dateConfig) {
+  List<Widget> slots(DateTime? datetime) {
     final widgets = <Widget>[];
-    for (Date date in dates(datetime.date)) {
+    for (Date date in dates(datetime?.date)) {
       widgets.add(Expanded(
           child: DateSlot(
             date: date,
-            dateFormat: dateConfig.format,
-            datePadding: dateConfig.padding,
-            dateTextStyle: dateConfig.textStyle,
-            dateBackground: dateConfig.background,
+            dateFormat: config.format,
+            datePadding: config.padding,
+            dateTextStyle: config.textStyle,
+            dateBackground: config.background,
           )
       ));
     }
@@ -50,7 +52,6 @@ class PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateConfig = CalendarConfig.of(context)!.date!;
     final viewer = context.watch<CalendarViewer>();
     final date = viewer.asDate;
     return ClipRect(
@@ -62,29 +63,27 @@ class PageHeader extends StatelessWidget {
             animation: controller!,
             builder: (context, _) {
               double page = 1.0;
-              if (controller!.hasClients
-                  && controller!.position.haveDimensions) {
+              if (controller!.hasClients && controller!.position.haveDimensions) {
                 page = controller!.page ?? 1.0;
               }
               return Stack(
                 clipBehavior: Clip.none,
-                children: [
-                  for (int i in [0, 1, 2])
-                    Positioned(
-                      left: (i - page) * width,
-                      top: 0,
-                      width: width,
-                      height: height,
-                      child: Row(
-                        children: slots(date + (i - 1) * scheme.step, dateConfig),
+                children: [0, 1, 2].map(
+                      (i) => Positioned(
+                        left: (i - page) * width,
+                        top: 0,
+                        width: width,
+                        height: height,
+                        child: Row(
+                          children: slots(date + (i - 1) * scheme.step),
+                        ),
                       ),
-                    ),
-                ],
+                ).toList(),
               );
             })
             : Row(
-          children: slots(date, dateConfig),
-        ),
+              children: slots(null),
+            ),
       ),
     );
   }

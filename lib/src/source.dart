@@ -19,6 +19,7 @@ class CalendarEvents extends ChangeNotifier {
     if (cacheFrom == null || cacheTo == null) {
       _fetch(from, to);
     } else if (from < cacheFrom! || to > cacheTo!) {
+      _cache.removeWhere((key, value) => key < from || key >= to);
       _fetch(from, to);
     }
   }
@@ -41,6 +42,12 @@ class CalendarEvents extends ChangeNotifier {
       return b.duration.compareTo(a.duration);
     });
     return events;
+  }
+
+  List<Date> get dates {
+    final keys = _cache.keys.toList();
+    keys.sort((a, b) => a.compareTo(b));
+    return keys;
   }
 
   // ── Query pubbliche ─────────────────────────────────────────────────────
@@ -86,7 +93,6 @@ class CalendarEvents extends ChangeNotifier {
   void addEvent(Event event) {
     _events.add(event);
     _inject(event);
-    notifyListeners();
   }
 
   void setEvent(String id, Map<String, dynamic> data) {
@@ -94,14 +100,12 @@ class CalendarEvents extends ChangeNotifier {
     _cancel(event);
     event.set(data);
     _inject(event);
-    notifyListeners();
   }
 
   void delEvent(String id) {
     final event = _events.singleWhere((e) => e.id == id);
     _events.remove(event);
     _cancel(event);
-    notifyListeners();
   }
 }
 
@@ -114,7 +118,18 @@ class CalendarSource<T extends Event> extends CalendarEvents {
   @override
   T find(String id) => super.find(id) as T;
 
-  void insertEvent(T event) => super.addEvent(event);
-  void modifyEvent(T event) => super.setEvent(event.id!, event.get());
-  void removeEvent(T event) => super.delEvent(event.id!);
+  void insertEvent(T event, [bool notify = true]) {
+    super.addEvent(event);
+    if (notify) notifyListeners();
+  }
+
+  void modifyEvent(T event, [bool notify = true]) {
+    super.setEvent(event.id!, event.get());
+    if (notify) notifyListeners();
+  }
+
+  void removeEvent(T event, [bool notify = true]) {
+    super.delEvent(event.id!);
+    if (notify) notifyListeners();
+  }
 }

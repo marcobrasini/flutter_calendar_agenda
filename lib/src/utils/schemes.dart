@@ -20,7 +20,7 @@ class TimeScheme {
   Time get to     => (end == finalHour)   ? Time.end : Time(end, 0);
   int get hours   => (end - beg) % (Duration.hoursPerDay + 1);
   int get minutes => hours * Duration.minutesPerHour;
-  int get count   => hours * (Duration.minutesPerHour ~/ step.minutes) + 1;
+  int get count   => (hours - 1) * (Duration.minutesPerHour ~/ step.minutes) + 1;
   double scale(double space) => minutes / space;
 }
 
@@ -35,6 +35,9 @@ class DateScheme {
   final int step;
   int get count => end - beg;
   double scale(double space) => count / space;
+
+  factory DateScheme.daily() => DateScheme(beg:0, end:1, step:1);
+  factory DateScheme.weekly() => DateScheme(beg:0, end:7, step:7);
 }
 
 
@@ -59,9 +62,10 @@ class CallbackScheme {
     this.onFrameDoubleTap,
     this.onFrameLongPress,
     this.onEventCreated,
+    this.onEventUpdated,
+    this.onEventDeleted,
     this.onEventDragged,
     this.onEventResized,
-    this.onEventDeleted,
   });
   final SlotCallback? onEventTap;
   final SlotCallback? onEventDoubleTap;
@@ -70,7 +74,8 @@ class CallbackScheme {
   final PageCallback? onFrameDoubleTap;
   final PageCallback? onFrameLongPress;
   final CreateCallback? onEventCreated;
+  final ModifyCallback? onEventUpdated;
+  final DeleteCallback? onEventDeleted;
   final ModifyCallback? onEventDragged;
   final ModifyCallback? onEventResized;
-  final DeleteCallback? onEventDeleted;
 }

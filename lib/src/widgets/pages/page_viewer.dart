@@ -1,4 +1,5 @@
 import 'package:calendar/src/timer.dart';
+import 'package:calendar/src/widgets/pages/page_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../modifier.dart';
@@ -8,7 +9,7 @@ import '../../const.dart';
 import '../../enums.dart';
 
 
-typedef PageBuilder = Widget Function(DateTime date);
+typedef PageBuilder = PageWidget Function(DateTime);
 
 
 class ViewerPage extends StatefulWidget {
@@ -35,15 +36,20 @@ class ViewerPage extends StatefulWidget {
 
 class _ViewerPageState extends State<ViewerPage> {
   dynamic _datetime;
+  final List<PageWidget> _pages = [];
 
   @override
   void initState() {
-    widget.controller.addListener(_swiping);
+    super.initState();
     final viewer = context.read<CalendarViewer>();
     final modifier = context.read<CalendarModifier>();
     modifier.attachSwiper(viewer);
     _datetime = viewer.datetime;
-    super.initState();
+    _pages.addAll([-1, 0, 1].map((i) => widget.builder(_datetime + i)));
+    widget.controller.addListener(_swiping);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.controller.jumpToPage(1);
+    });
   }
 
   @override
@@ -63,51 +69,56 @@ class _ViewerPageState extends State<ViewerPage> {
       if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final controller = context.read<CalendarViewer>();
-        if (index == 0) controller.last();
-        if (index == 2) controller.next();
-        setState(() {
-          _datetime = controller.datetime;
-        });
+        if (index == 0) {
+          controller.last();
+          setState(() {
+            _datetime = controller.datetime;
+            _pages
+              ..removeAt(2)
+              ..insert(0, widget.builder(_datetime - 1));
+          });
+        }
+        if (index == 2) {
+          controller.next();
+          setState(() {
+            _datetime = controller.datetime;
+            _pages
+              ..removeAt(0)
+              ..insert(2, widget.builder(_datetime + 1));
+          });
+        }
         widget.controller.jumpToPage(1);
         timer.swipe(0.0);
       });
     }
   }
 
-  void _onAnimate(CalendarViewer viewer) {
+  void _animate(CalendarSwipe swipe) {
     if (!widget.controller.hasClients) return;
-    final page = ViewerPage.pages[viewer.swiping!];
+    final page = ViewerPage.pages[swipe];
     if (page != null) {
-      if (!mounted) return;
       widget.controller.animateToPage(
         page,
         duration: viewSwipeDelay,
         curve: Curves.easeInOut,
-      ).then((_) {
-        setState(() {
-          _datetime = viewer.datetime;
-        });
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          widget.controller.jumpToPage(1);
-        });
-      });
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context)!;
     final viewer = context.watch<CalendarViewer>();
     if (viewer.swiping != null) {
-      _onAnimate(viewer);
+      final swipe = viewer.swiping!;
       viewer.clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _animate(swipe);
+      });
     }
-    return PageView.builder(
-      scrollDirection: config.view.swipeDirection,
+    return PageView(
+      scrollDirection: widget.direction,
       controller: widget.controller,
-      itemCount: 3,
-      itemBuilder: (context, index) => widget.builder(_datetime + index-1),
+      children: _pages,
     );
   }
 }

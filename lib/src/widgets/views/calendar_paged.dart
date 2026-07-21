@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../tools/indicator_time.dart';
 import '../tools/header_time.dart';
 import '../pages/page_viewer.dart';
-import '../pages/page_header.dart';
 import '../pages/page_widget.dart';
 import '../slots/slot_modify.dart';
 import '../../utils/datetime.dart';
@@ -11,6 +10,7 @@ import '../../utils/schemes.dart';
 import '../../modifier.dart';
 import '../../context.dart';
 import '../../config.dart';
+import 'view_header.dart';
 
 
 class CalendarPaged extends StatefulWidget {
@@ -78,10 +78,11 @@ class _CalendarPagedState extends State<CalendarPaged> {
                 SizedBox(
                   width: pageWidth,
                   height: dateOffset,
-                  child: PageHeader(
+                  child: ViewHeader(
                     width: pageWidth,
                     height: pageHeight,
                     scheme: widget.dateScheme,
+                    config: config.date!,
                     controller: _viewer,
                   ),
                 ),
@@ -107,6 +108,7 @@ class _CalendarPagedState extends State<CalendarPaged> {
                             controller: _viewer,
                             direction: config.view.swipeDirection,
                             builder: (datetime) => PageWidget(
+                              key: ValueKey<Date>(datetime.date),
                               date: datetime.date,
                               width: pageWidth,
                               height: pageHeight,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../slots/slot_event.dart';
 import '../slots/slot_string.dart';
 import '../slots/slot_layout.dart';
+import '../slots/slot_modify.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
 import '../../data/event.dart';
@@ -42,7 +43,7 @@ class PageSlot extends StatelessWidget {
     for (final event in events) {
       final slotTop = _yOf(event) / timeScale;
       final slotHeight = event.duration.inMinutes / timeScale;
-      final content = StringSlot(string: event.subject, width: width);
+      final content = SlotString(string: event.subject, width: width);
       containers.add(SlotLayout(
         event: event,
         container: Rect.fromLTWH(offset.dx, offset.dy + slotTop, width, slotHeight),
@@ -74,7 +75,6 @@ class PageSlot extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   PagedEventSlot(
-                    key: ValueKey(layout.event.id),
                     layout: layout,
                     offset: offset,
                     callbacks: callbacks,
@@ -146,31 +146,4 @@ class PagedEventSlot extends StatelessWidget {
       ),
     );
   }
-}
-
-
-@immutable
-class SlotModifier {
-  const SlotModifier({
-    required this.selected,
-    required this.editing,
-    required this.container,
-    required this.action,
-  });
-
-  final bool selected;
-  final bool editing;
-  final Rect? container;
-  final SlotAction? action;
-
-  @override
-  bool operator ==(Object other) => identical(this, other) || (
-      other is SlotModifier
-          && other.selected == selected
-          && other.editing == editing
-          && other.action == action
-          && other.container == container);
-
-  @override
-  int get hashCode => Object.hash(selected, editing, action, container);
 }

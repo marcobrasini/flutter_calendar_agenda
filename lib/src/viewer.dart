@@ -33,7 +33,7 @@ class CalendarViewer extends ChangeNotifier {
     switch (view) {
       case CalendarView.daily:   _datetime = Date.now();
       case CalendarView.weekly:  _datetime = Week.now();
-      // case CalendarView.monthly:  _datetime = Month.now();
+      case CalendarView.monthly: _datetime = Month.now();
     }
     update();
   }
@@ -51,7 +51,7 @@ class CalendarViewer extends ChangeNotifier {
     switch(view) {
       case CalendarView.daily:   return (_datetime as Date).start;
       case CalendarView.weekly:  return (_datetime as Week).start;
-    // case CalendarView.monthly: return (_datetime as Month).start;
+      case CalendarView.monthly: return (_datetime as Month).start;
     }
   }
 
@@ -59,7 +59,7 @@ class CalendarViewer extends ChangeNotifier {
     switch(view) {
       case CalendarView.daily:   return (_datetime as Date).stop;
       case CalendarView.weekly:  return (_datetime as Week).stop;
-    // case CalendarView.monthly: return (_datetime as Month).stop;
+      case CalendarView.monthly: return (_datetime as Month).stop;
     }
   }
 

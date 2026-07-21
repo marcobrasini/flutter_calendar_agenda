@@ -117,14 +117,14 @@ void main() {
       expect(weekStart.second, 0);
     });
 
-    test('weekLast', () {
-      final weekLast = now.weekLast;
-      expect(weekLast, isA<DateTime>());
-      expect(weekLast.weekday, DateTime.sunday);
-      expect(weekLast.hour, 0);
-      expect(weekLast.minute, 0);
-      expect(weekLast.second, 0);
-    });
+    // test('weekLast', () {
+    //   final weekLast = now.weekLast;
+    //   expect(weekLast, isA<DateTime>());
+    //   expect(weekLast.weekday, DateTime.sunday);
+    //   expect(weekLast.hour, 0);
+    //   expect(weekLast.minute, 0);
+    //   expect(weekLast.second, 0);
+    // });
 
     test('weekEnd', () {
       final weekEnd = now.weekEnd;
@@ -146,17 +146,17 @@ void main() {
       expect(monthStart.second, 0);
     });
 
-    test('monthLast', () {
-      final date = now.toMonth;
-      final monthLast = now.monthLast;
-      expect(monthLast, isA<DateTime>());
-      expect(monthLast.year, now.year);
-      expect(monthLast.month, now.month);
-      expect(monthLast.day, date.days);
-      expect(monthLast.hour, 0);
-      expect(monthLast.minute, 0);
-      expect(monthLast.second, 0);
-    });
+    // test('monthLast', () {
+    //   final date = now.toMonth;
+    //   final monthLast = now.monthLast;
+    //   expect(monthLast, isA<DateTime>());
+    //   expect(monthLast.year, now.year);
+    //   expect(monthLast.month, now.month);
+    //   expect(monthLast.day, date.days);
+    //   expect(monthLast.hour, 0);
+    //   expect(monthLast.minute, 0);
+    //   expect(monthLast.second, 0);
+    // });
 
     test('monthEnd', () {
       final monthEnd = now.monthEnd;
@@ -180,16 +180,16 @@ void main() {
       expect(yearStart.second, 0);
     });
 
-    test('yearLast', () {
-      final yearLast = now.yearLast;
-      expect(yearLast, isA<DateTime>());
-      expect(yearLast.year, now.year);
-      expect(yearLast.month, 12);
-      expect(yearLast.day, 31);
-      expect(yearLast.hour, 0);
-      expect(yearLast.minute, 0);
-      expect(yearLast.second, 0);
-    });
+    // test('yearLast', () {
+    //   final yearLast = now.yearLast;
+    //   expect(yearLast, isA<DateTime>());
+    //   expect(yearLast.year, now.year);
+    //   expect(yearLast.month, 12);
+    //   expect(yearLast.day, 31);
+    //   expect(yearLast.hour, 0);
+    //   expect(yearLast.minute, 0);
+    //   expect(yearLast.second, 0);
+    // });
 
     test('yearEnd', () {
       final yearEnd = now.yearEnd;

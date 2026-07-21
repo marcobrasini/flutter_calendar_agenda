@@ -43,13 +43,14 @@ class TimeIndicator extends StatelessWidget {
         final now = DateTime.now();
         final time = now.time % Time.fromHour(timeScheme.beg);
         final day = now.date % date;
+        final dx = ((day / dateScheme.count).round()) * offset;
         return SizedBox(
           width: width,
           height: height,
           child: Stack(
             children: [
               Positioned(
-                left: offset + day * length - timer.scroll * width,
+                left: day * length - timer.scroll * width + dx,
                 top: time / timeScale,
                 height: 0.0,
                 width: length,
