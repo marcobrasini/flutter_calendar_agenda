@@ -1,79 +1,86 @@
-import 'package:calendar/src/timer.dart';
-import 'package:calendar/src/viewer.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:timer_builder/timer_builder.dart';
 import '../../utils/datetime.dart';
-import '../../utils/schemes.dart';
+import '../../metrics.dart';
+import '../../viewer.dart';
 import '../../config.dart';
-import '../../enums.dart';
-import 'painter_lines.dart';
-import 'painter_point.dart';
+import 'pointer_date.dart';
+import 'pointer_time.dart';
 
 
 class TimeIndicator extends StatelessWidget {
   const TimeIndicator({
     super.key,
-    required this.width,
-    required this.height,
-    required this.timeScheme,
-    required this.dateScheme,
+    required this.metrics,
+    required this.controller,
+    required this.direction,
   });
 
-  final double width;
-  final double height;
-  final TimeScheme timeScheme;
-  double get timeScale => timeScheme.scale(height);
-  final DateScheme dateScheme;
-  double get dateScale => dateScheme.scale(width);
+  final CalendarMetrics metrics;
+  final CalendarController controller;
+  final Axis direction;
+
+  Offset? getOffset() {
+    if (!controller.hasClients) return null;
+    final now = DateTime.now();
+    final date = controller.datetime.date;
+    final days = now.date % date;
+    final weeks = (days / metrics.dateStep).floor();
+    final tiles = days - weeks * metrics.dateStep;
+    final length = metrics.dateSpace;
+    final dx = (direction == Axis.horizontal)
+        ? tiles * length + controller.distance - controller.offset
+        : tiles * length;
+    final double dy;
+    if (metrics.timeScheme != null) {
+      final time = now.time % Time.fromHour(metrics.timeBeg);
+      dy = (direction == Axis.vertical)
+          ? time / metrics.timeScale + controller.distance - controller.offset
+          : time / metrics.timeScale;
+      return Offset(dx, dy);
+    }
+    if (metrics.weekScheme != null) {
+      dy = (direction == Axis.vertical)
+          ? weeks / metrics.weekScale - controller.offset
+          : weeks / metrics.weekScale;
+      return Offset(dx, dy);
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final timer = context.watch<CalendarTimer>();
-    final viewer = context.watch<CalendarViewer>();
-    final date = viewer.asDate + dateScheme.beg;
-    final config = CalendarConfig.of(context)!;
-    final offset = config.view.indicatorRadius;
-    final length = (width - offset) / dateScheme.count;
-    final color = config.view.indicatorColor
-        ?? Theme.of(context).primaryColor;
+    final config = CalendarConfig.of(context);
     return TimerBuilder.periodic(
       config.view.indicatorPeriod,
       builder: (context) {
-        final now = DateTime.now();
-        final time = now.time % Time.fromHour(timeScheme.beg);
-        final day = now.date % date;
-        final dx = ((day / dateScheme.count).round()) * offset;
-        return SizedBox(
-          width: width,
-          height: height,
-          child: Stack(
-            children: [
-              Positioned(
-                left: day * length - timer.scroll * width + dx,
-                top: time / timeScale,
-                height: 0.0,
-                width: length,
-                child: CustomPaint(
-                  size: Size.infinite,
-                  painter: LinesPainter(
-                    positions: [0.0],
-                    lineStyle: LineStyle.solid,
-                    lineColor: color,
-                    lineWidth: config.view.indicatorWidth,
-                    direction: LineDirection.horizontal,
-                    points: [
-                      PointPainter(
-                        offset: Offset.zero,
-                        radius: config.view.indicatorRadius,
-                        color: color,
-                      )
-                    ],
+        return ListenableBuilder(
+          listenable: Listenable.merge([controller, metrics]),
+          builder: (context, _) {
+            final length = metrics.dateSpace;
+            final offset = getOffset();
+            return (offset != null) ? SizedBox(
+              width: metrics.width,
+              height: metrics.height,
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: offset.dx,
+                    top: offset.dy,
+                    width: length,
+                    child: (metrics.timeScheme != null)
+                        ? TimePointer(
+                      size: Size(length, 0.0),
+                    )
+                        : DatePointer(
+                      date: Date.now(),
+                      focus: true,
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ) : SizedBox.shrink();
+          },
         );
       },
     );

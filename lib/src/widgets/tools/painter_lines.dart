@@ -3,7 +3,6 @@ import '../../enums.dart';
 import 'painter_point.dart';
 
 
-/// Paints 24 hour lines.
 class LinesPainter extends CustomPainter {
 
   const LinesPainter({
@@ -13,7 +12,7 @@ class LinesPainter extends CustomPainter {
     required this.lineColor,
     required this.lineWidth,
     required this.direction,
-    this.offset = 0.0,
+    this.offset = Offset.zero,
     this.length,
     this.dashedWidth,
     this.dashedSpace,
@@ -25,7 +24,7 @@ class LinesPainter extends CustomPainter {
   final LineStyle lineStyle;
   final double lineWidth;
   final Color lineColor;
-  final double offset;
+  final Offset offset;
   final double? length;
   final double? dashedWidth;
   final double? dashedSpace;
@@ -34,10 +33,17 @@ class LinesPainter extends CustomPainter {
   bool get isVertical => direction == LineDirection.vertical;
   bool get isHorizontal => direction == LineDirection.horizontal;
 
+  double lineLength(Size size) =>
+      length ?? ((isHorizontal) ? size.width : size.height);
+
   List<double> linePositions(Size size) {
     if (positions.isEmpty) {
-      final step = ((isHorizontal) ? size.height : size.width) / divisions;
-      return [for (int i = 0; i < divisions + 1; i++) i * step];
+      final range = (isHorizontal) ? size.height : size.width;
+      final delta = (isHorizontal) ? offset.dy : offset.dx;
+      final step = (range - delta) / divisions;
+      return (delta == 0.0)
+          ? [for (int i = 0; i <= divisions; i++) delta + i * step]
+          : [for (int i = 0; i < divisions; i++) delta + i * step];
     }
     return positions;
   }
@@ -78,8 +84,8 @@ class LinesPainter extends CustomPainter {
       ..strokeWidth = lineWidth
       ..color = lineColor
       ..style = PaintingStyle.fill;
-    final beg = offset;
-    final end = beg + (length ?? ((isHorizontal) ? size.width : size.height) - beg);
+    final beg = 0.0;
+    final end = beg + (lineLength(size) - beg);
     for (var fix in linePositions(size)) {
       switch (lineStyle) {
         case LineStyle.solid:

@@ -1,3 +1,4 @@
+import 'package:calendar/src/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/calendar.dart';
 
@@ -82,21 +83,18 @@ class MyApp extends StatelessWidget {
             begHour: 6,
             endHour: 22,
             onEventDragged: (event, fixture) {
-              source.setEvent(event.id!, {
+              source.modifyEvent(event.set({
                 "start": fixture.start,
                 "stop": fixture.stop
-              });
+              }));
               print("dragged $event -> $fixture");
             },
             onEventResized:  (event, fixture) {
-              source.setEvent(event.id!, {
+              source.modifyEvent(event.set({
                 "start": fixture.start,
                 "stop": fixture.stop
-              });
+              }));
               print("resized $event -> $fixture");
-            },
-            onEventCreated: (fixture) {
-              print("created $fixture");
             },
             onEventTap: (event) {
               print("tap $event");

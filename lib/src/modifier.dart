@@ -1,9 +1,8 @@
 import 'dart:async';
-import 'package:calendar/src/utils/datetime.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'widgets/slots/slot_layout.dart';
-import 'widgets/slots/slot_event.dart';
+import 'utils/datetime.dart';
 import 'data/fixture.dart';
 import 'viewer.dart';
 import 'enums.dart';
@@ -23,8 +22,8 @@ class CalendarModifier extends ChangeNotifier {
     DragCallback? onResizeMove,
     DragCallback? onResizeEnd,
     VoidCallback? onResizeCancel,
-    this.swipingDirection = Axis.horizontal,
-    this.slidingDirection = Axis.vertical,
+    required this.swipingDirection,
+    required this.slidingDirection,
     this.swipeMargin = viewSwipeMargin,
     this.slideMargin = viewSlideMargin,
   }) : _startCallbacks = {
@@ -61,6 +60,7 @@ class CalendarModifier extends ChangeNotifier {
   Offset? _localOffset;
   bool _editing = false;
   Rect _container = Rect.zero;
+  Offset? _boxOffset;
 
   SlotAction get action => _action;
   SlotLayout? get layout => _layout;
@@ -68,6 +68,8 @@ class CalendarModifier extends ChangeNotifier {
   Offset? get initialOffset => _initialOffset;
   Offset? get actualOffset => _actualOffset;
   Offset? get localOffset => _localOffset;
+  Offset get boxOffset => _boxOffset ??= _renderer!.globalToLocal(_initialOffset!) - _localOffset!;
+
   Offset get dragged => (_actualOffset != null && _initialOffset != null)
       ? _actualOffset! - _initialOffset!
       : Offset.zero;
@@ -88,7 +90,7 @@ class CalendarModifier extends ChangeNotifier {
 
   //
   CalendarViewer? _viewer;
-  final Axis swipingDirection;
+  final Axis? swipingDirection;
   final double swipeMargin;
   Timer? _swipeTimer;
   int _swipeStep = 0;
@@ -96,7 +98,7 @@ class CalendarModifier extends ChangeNotifier {
   bool get hasViewer => (_viewer != null) ? true : false;
   //
   ScrollController? _slider;
-  final Axis slidingDirection;
+  final Axis? slidingDirection;
   final double slideMargin;
   Timer? _slideTimer;
   double _slideSpace = 0;
@@ -106,18 +108,28 @@ class CalendarModifier extends ChangeNotifier {
   double get slided => (hasSlider) ? _slider!.offset - _slideStart : 0.0;
   //
   RenderBox?  _renderer;
-  void attachRenderer(RenderBox? renderer) => _renderer = renderer;
+  void attachRenderer(RenderBox? renderer) =>
+      _renderer = renderer;
   bool get hasRenderer => (_renderer != null)
       ? (_renderer!.attached && _renderer!.hasSize)
       : false;
 
   DateTime Function(Date, Offset)? _converter;
-  void attachConverter(DateTime Function(Date, Offset) converter) => _converter = converter;
+  void attachConverter(DateTime Function(Date, Offset) converter) =>
+      _converter = converter;
   bool get hasConverter => _converter != null;
-  Fixture get convert {
+  Fixture get convertSlot {
     return Fixture(
-      start: _converter!(_viewer!.asDate, _container.topCenter),
-      stop: _converter!(_viewer!.asDate, _container.bottomCenter),
+      start: _converter!(_viewer!.start, _container.topCenter),
+      stop: _converter!(_viewer!.start, _container.bottomCenter),
+    );
+  }
+  Fixture get convertTile {
+    final drop = _converter!(_viewer!.start, _container.center);
+    final days = drop.date % _layout!.event.start.date;
+    return Fixture(
+      start: _layout!.event.start.add(Duration(days: days)),
+      stop: _layout!.event.stop.add(Duration(days: days)),
     );
   }
 
@@ -141,6 +153,7 @@ class CalendarModifier extends ChangeNotifier {
     _initialOffset = null;
     _actualOffset = null;
     _localOffset = null;
+    _boxOffset = null;
   }
 
   void free() {
@@ -161,7 +174,7 @@ class CalendarModifier extends ChangeNotifier {
   //
   double _slidingEdge() {
     double space = 0;
-    switch (slidingDirection) {
+    switch (slidingDirection!) {
       case Axis.vertical:
         final height = _renderer!.constraints.maxHeight;
         final local = _renderer!.globalToLocal(_actualOffset!);
@@ -190,7 +203,7 @@ class CalendarModifier extends ChangeNotifier {
   }
 
   void _sliding() {
-    if (hasRenderer) {
+    if (hasRenderer && slidingDirection != null) {
       _slideSpace = _slidingEdge();
       (_slideSpace != 0) ? _slidingStart() : _slidingStop();
     }
@@ -202,7 +215,7 @@ class CalendarModifier extends ChangeNotifier {
       final position = _slider!.position;
       final offset = (position.pixels + _slideSpace);
       _slider!.jumpTo(offset.clamp(0.0, position.maxScrollExtent));
-      set(_layout!.container);
+      set(boxOffset & _layout!.container.size);
       notifyListeners();
     });
   }
@@ -216,7 +229,7 @@ class CalendarModifier extends ChangeNotifier {
   //
   int swipingEdge() {
     final local = _renderer!.globalToLocal(_actualOffset!);
-    switch (swipingDirection) {
+    switch (swipingDirection!) {
       case Axis.horizontal:
         final width = _renderer!.constraints.maxWidth;
         if (local.dx <= swipeMargin) return -1;
@@ -230,7 +243,7 @@ class CalendarModifier extends ChangeNotifier {
   }
 
   void _swiping() {
-    if (hasRenderer) {
+    if (hasRenderer && swipingDirection != null) {
       _swipeStep = swipingEdge();
       (_swipeStep != 0) ? _swipingStart() : _swipingStop();
     }
@@ -257,7 +270,8 @@ class CalendarModifier extends ChangeNotifier {
     if (_action == SlotAction.none) return;
     if (isRecording) {
       _startCallbacks[_action]?.call(_layout!.event);
-      _container = _layout!.container;
+      _container = boxOffset & _layout!.container.size;
+      _initialOffset = _actualOffset;
       if (hasSlider) _slideStart = hasSlider ? _slider!.offset : 0;
       _attachPointerRoutes();
       notifyListeners();
@@ -265,14 +279,14 @@ class CalendarModifier extends ChangeNotifier {
   }
 
   void move() {
-    set(_layout!.container);
+    set(boxOffset & _layout!.container.size);
     if (hasViewer) _swiping();
     if (hasSlider) _sliding();
     notifyListeners();
   }
 
   void end() {
-    final fixture = convert;
+    final fixture = (_layout!.tile) ? convertTile : convertSlot;
     switch (_action) {
       case SlotAction.dragging:
         onEventDragged?.call(_layout!.event, fixture);
@@ -280,7 +294,7 @@ class CalendarModifier extends ChangeNotifier {
       case SlotAction.resizing:
         onEventResized?.call(_layout!.event, fixture);
         break;
-      default:
+      case SlotAction.none:
         break;
     }
     reset();

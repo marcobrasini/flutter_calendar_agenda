@@ -4,7 +4,6 @@ import 'const.dart';
 
 
 class TextConfig{
-
   const TextConfig({
     required this.format,
     this.padding = 0.0,
@@ -20,7 +19,6 @@ class TextConfig{
 
 
 class LineConfig{
-
   const LineConfig({
     this.style = lineFrameStyle,
     this.color = lineFrameColor,
@@ -45,7 +43,6 @@ class LineConfig{
 
 class ViewConfig{
   const ViewConfig({
-    this.swipeDirection = Axis.horizontal,
     this.showHeader = true,
     this.showIndicator = true,
     this.indicatorPeriod = timeIndicatorPeriod,
@@ -54,13 +51,23 @@ class ViewConfig{
     this.indicatorColor,
   });
 
-  final Axis swipeDirection;
   final bool showHeader;
   final bool showIndicator;
   final Duration indicatorPeriod;
   final double indicatorRadius;
   final double indicatorWidth;
   final Color? indicatorColor;
+
+  Axis scrollDirection(CalendarView view) => switch(view) {
+    CalendarView.daily    => Axis.horizontal,
+    CalendarView.weekly   => Axis.horizontal,
+    CalendarView.monthly  => Axis.vertical,
+  };
+  Axis slideDirection(CalendarView view) => switch(view) {
+    CalendarView.daily    => Axis.vertical,
+    CalendarView.weekly   => Axis.vertical,
+    CalendarView.monthly  => Axis.horizontal,
+  };
 }
 
 class EventConfig{
@@ -71,6 +78,7 @@ class EventConfig{
     required this.resizable,
     required this.padding,
     required this.rounded,
+    required this.tileSize,
     this.textStyle,
     this.overflow,
     this.maxLines,
@@ -83,6 +91,7 @@ class EventConfig{
   final bool resizable;
   final double padding;
   final double rounded;
+  final double tileSize;
   final TextStyle? textStyle;
   final TextOverflow? overflow;
   final int? maxLines;
@@ -111,8 +120,14 @@ class CalendarConfig extends InheritedWidget {
   final TextConfig? date;
   final TextConfig? week;
 
-  static CalendarConfig? of(BuildContext context) {
+  static CalendarConfig? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<CalendarConfig>();
+  }
+
+  static CalendarConfig of(BuildContext context) {
+    final CalendarConfig? config = maybeOf(context);
+    assert(config != null, 'No CalendarConfig found in context');
+    return config!;
   }
 
   @override

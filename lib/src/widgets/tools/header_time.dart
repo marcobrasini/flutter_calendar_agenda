@@ -31,7 +31,7 @@ class TimeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context)!;
+    final config = CalendarConfig.of(context);
     final headerWidth = width;
     final headerHeight = height == null ? null : height! + context.timeMargin();
     return Container(

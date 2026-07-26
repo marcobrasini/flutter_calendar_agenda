@@ -18,10 +18,15 @@ class TimeScheme {
   final int round;
   Time get from   => (beg == initialHour) ? Time.beg : Time(beg, 0);
   Time get to     => (end == finalHour)   ? Time.end : Time(end, 0);
-  int get hours   => (end - beg) % (Duration.hoursPerDay + 1);
+  int get hours   => (to % from) ~/ Duration.minutesPerHour;
   int get minutes => hours * Duration.minutesPerHour;
-  int get count   => (hours - 1) * (Duration.minutesPerHour ~/ step.minutes) + 1;
+  int get count   => (to % from) ~/ step.minutes;
   double scale(double space) => minutes / space;
+
+  factory TimeScheme.allDay() => TimeScheme(
+      beg: 0, end: 24,
+      step: TimeStep.hours24
+  );
 }
 
 class DateScheme {

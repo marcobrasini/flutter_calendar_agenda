@@ -1,12 +1,9 @@
-import 'package:calendar/src/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../modifier.dart';
-import '../../viewer.dart';
-import '../../config.dart';
-
-
-typedef HeaderCallback = void Function();
+import '../modifier.dart';
+import '../viewer.dart';
+import '../config.dart';
+import '../enums.dart';
 
 
 class CalendarHeader extends StatelessWidget {
@@ -22,7 +19,7 @@ class CalendarHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewer = context.watch<CalendarViewer>();
     final modifier = context.watch<CalendarModifier>();
-    final header = CalendarConfig.of(context)!.header;
+    final header = CalendarConfig.of(context).header;
     final color = header.background ?? Theme.of(context).primaryColor;
     final style = header.textStyle ?? TextStyle(
       color: Colors.white,

@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../utils/color.dart';
 import '../../modifier.dart';
-import '../../config.dart';
 import '../../const.dart';
 import '../../enums.dart';
 import 'slot_layout.dart';
 import 'slot_event.dart';
-
 
 
 typedef EventBuilder = Widget Function(BuildContext);
@@ -51,64 +49,68 @@ class SlotEditor extends StatelessWidget {
             ),
           ),
           if (modifier.isResizing) Positioned(
-              left: container.left + container.width / 2 - radius + offset.dx,
-              top: container.top - radius,
-              width: 2 * radius,
-              height: 2 * radius,
-              child: GestureDetector(
-                onLongPress: () {
-                  modifier.take(
-                      modifier.layout!, SlotAction.resizing, ResizeSide.before
+            left: container.left + container.width / 2 - radius + offset.dx,
+            top: container.top - radius + offset.dy,
+            width: 2 * radius,
+            height: 2 * radius,
+            child: GestureDetector(
+              onLongPress: () {
+                modifier.take(
+                  modifier.layout!,
+                  SlotAction.resizing,
+                  ResizeSide.before,
+                );
+                modifier.start();
+              },
+              child: Listener(
+                onPointerDown: (pointerEvent) {
+                  final box = context.findRenderObject() as RenderBox;
+                  modifier.enter(
+                    pointerEvent.pointer,
+                    pointerEvent.position,
+                    box.globalToLocal(pointerEvent.position),
                   );
-                  modifier.start();
                 },
-                child: Listener(
-                  onPointerDown: (pointerEvent) {
-                    final box = context.findRenderObject() as RenderBox;
-                    modifier.enter(
-                        pointerEvent.pointer,
-                        pointerEvent.position,
-                        box.globalToLocal(pointerEvent.position)
-                    );
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: layout.event.color.dimmer(eventSlotLineDimmed),
-                    ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: layout.event.color.dimmer(eventSlotLineDimmed),
                   ),
                 ),
-              )
+              ),
+            ),
           ),
           if (modifier.isResizing) Positioned(
-              left: container.left + container.width / 2 - radius + offset.dx,
-              top: container.top + container.height - radius,
-              width: 2 * radius,
-              height: 2 * radius,
-              child: GestureDetector(
-                onLongPress: () {
-                  modifier.take(
-                      modifier.layout!, SlotAction.resizing, ResizeSide.after
+            left: container.left + container.width / 2 - radius + offset.dx,
+            top: container.top + container.height - radius + offset.dy,
+            width: 2 * radius,
+            height: 2 * radius,
+            child: GestureDetector(
+              onLongPress: () {
+                modifier.take(
+                  modifier.layout!,
+                  SlotAction.resizing,
+                  ResizeSide.after,
+                );
+                modifier.start();
+              },
+              child: Listener(
+                onPointerDown: (pointerEvent) {
+                  final box = context.findRenderObject() as RenderBox;
+                  modifier.enter(
+                    pointerEvent.pointer,
+                    pointerEvent.position,
+                    box.globalToLocal(pointerEvent.position),
                   );
-                  modifier.start();
                 },
-                child: Listener(
-                  onPointerDown: (pointerEvent) {
-                    final box = context.findRenderObject() as RenderBox;
-                    modifier.enter(
-                      pointerEvent.pointer,
-                      pointerEvent.position,
-                      box.globalToLocal(pointerEvent.position),
-                    );
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: layout.event.color.dimmer(eventSlotLineDimmed),
-                    ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: layout.event.color.dimmer(eventSlotLineDimmed),
                   ),
                 ),
-              )
+              ),
+            ),
           ),
         ],
       ),

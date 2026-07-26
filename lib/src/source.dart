@@ -1,6 +1,7 @@
 import 'data/event.dart';
 import 'utils/datetime.dart';
 import 'package:flutter/material.dart';
+import 'viewer.dart';
 
 
 class CalendarEvents extends ChangeNotifier {
@@ -18,10 +19,21 @@ class CalendarEvents extends ChangeNotifier {
   void build(Date from, Date to) {
     if (cacheFrom == null || cacheTo == null) {
       _fetch(from, to);
+      cacheFrom = from;
+      cacheTo = to;
     } else if (from < cacheFrom! || to > cacheTo!) {
-      _cache.removeWhere((key, value) => key < from || key >= to);
-      _fetch(from, to);
+      shift(from, cacheFrom!);
+      shift(cacheTo!, to);
+      cacheFrom = from;
+      cacheTo = to;
     }
+  }
+
+  void shift(Date from, Date to) {
+    if (from == to) return;
+    (from < to)
+        ? _fetch(from, to)
+        : _loose(to, from);
   }
 
   void clear() {
@@ -29,13 +41,14 @@ class CalendarEvents extends ChangeNotifier {
     cacheTo = null;
     _cache.clear();
     _events.clear();
+    notifyListeners();
   }
 
   void append(List<Event> others) => _events.addAll(others);
 
   Event find(String id) => _events.singleWhere((e) => e.id == id);
 
-  List<Event> sort(List<Event> events) {
+  static List<Event> sort(List<Event> events) {
     events.sort((a, b) {
       final startSort = a.start.compareTo(b.start);
       if (startSort != 0) return startSort;
@@ -44,15 +57,18 @@ class CalendarEvents extends ChangeNotifier {
     return events;
   }
 
+  List<Event> get events => _events;
   List<Date> get dates {
     final keys = _cache.keys.toList();
     keys.sort((a, b) => a.compareTo(b));
     return keys;
   }
+  bool get built => cacheFrom != null && cacheTo != null;
 
   // ── Query pubbliche ─────────────────────────────────────────────────────
 
   List<Event> forDate(Date date) {
+    build((date - cacheRange).toMonth.start, (date - cacheRange).toMonth.stop);
     return _cache[date] ?? [];
   }
 
@@ -65,14 +81,11 @@ class CalendarEvents extends ChangeNotifier {
           events.where((e) => e.range(date, date+1)).toList()
       ));
     }
-    cacheFrom = from;
-    cacheTo = to;
   }
 
-  void _cancel(Event event) {
-    final id = event.id;
-    for (var entry in _cache.entries) {
-      entry.value.removeWhere((e) => (e.id == id) || (e.parentId == id));
+  void _loose(Date from, Date to) {
+    for (var date = from; date < to; date += 1) {
+      _cache.remove(date);
     }
   }
 
@@ -81,10 +94,15 @@ class CalendarEvents extends ChangeNotifier {
     for (final e in events) {
       for (final date in e.dates) {
         if (date < cacheFrom! || date >= cacheTo!) continue;
-        final list = _cache.putIfAbsent(date, () => <Event>[]);
-        list.add(e);
-        sort(list);
+        sort(_cache[date]!..add(e));
       }
+    }
+  }
+
+  void _cancel(Event event) {
+    final id = event.id;
+    for (var entry in _cache.entries) {
+      entry.value.removeWhere((e) => (e.id == id) || (e.parentId == id));
     }
   }
 
@@ -109,10 +127,12 @@ class CalendarEvents extends ChangeNotifier {
   }
 }
 
+
 class CalendarSource<T extends Event> extends CalendarEvents {
   CalendarSource({List<T>? events, super.cacheRange})
       : super(events: events);
 
+  @override
   List<T> get events => _events.cast<T>();
 
   @override

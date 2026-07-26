@@ -1,5 +1,3 @@
-library calendar;
-
 export 'src/calendar.dart' show Calendar;
 export 'src/source.dart' show CalendarSource;
 export 'src/viewer.dart' show CalendarViewer;

@@ -1,3 +1,4 @@
+import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../utils/color.dart';
@@ -7,11 +8,10 @@ import '../../const.dart';
 import 'slot_layout.dart';
 
 
-class EventSlot extends StatelessWidget {
-  const EventSlot({
+class SlotEvent extends StatelessWidget {
+  const SlotEvent({
     super.key,
     required this.layout,
-    this.builder,
     this.selected = false,
     this.dragging = false,
     this.onTap,
@@ -20,7 +20,6 @@ class EventSlot extends StatelessWidget {
   });
 
   final SlotLayout layout;
-  final EventBuilder? builder;
   final bool selected;
   final bool dragging;
   final SlotCallback? onTap;
@@ -31,19 +30,20 @@ class EventSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final config = CalendarConfig.of(context);
     final modifier = context.read<CalendarModifier>();
     final alpha = dragging ? eventDraggableSlotAlpha : 255;
     return Listener(
       onPointerDown: (pointerEvent) {
         final box = context.findRenderObject() as RenderBox;
+        final local = box.globalToLocal(pointerEvent.position);
         modifier.enter(
             pointerEvent.pointer,
             pointerEvent.position,
-            box.globalToLocal(pointerEvent.position)
+            local + Offset(layout.left, 0.0),
         );
       },
       child: Container(
-        padding: EdgeInsetsGeometry.all(eventSlotPadding),
         decoration: BoxDecoration(
           border: (selected) ? Border.all(
             color: event.color.dimmer(eventSlotLineDimmed),
@@ -54,7 +54,10 @@ class EventSlot extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            builder?.call(context, event) ?? Text(event.subject),
+            config.event.builder?.call(context, event) ?? Padding(
+              padding: EdgeInsetsGeometry.all(eventSlotPadding),
+              child: Text(event.subject),
+            ),
             if (event.parentId != null) Positioned(
               left: 0.0,
               bottom: 0.0,

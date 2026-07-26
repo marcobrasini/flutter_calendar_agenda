@@ -1,18 +1,16 @@
-import 'package:calendar/src/data/fixture.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'widgets/views/calendar_header.dart';
-import 'widgets/views/view_monthly.dart';
-import 'widgets/views/calendar_paged.dart';
+import 'widgets/calendar_widget.dart';
+import 'widgets/calendar_header.dart';
 import 'utils/schemes.dart';
+import 'data/fixture.dart';
 import 'data/event.dart';
+import 'modifier.dart';
+import 'viewer.dart';
+import 'source.dart';
+import 'config.dart';
 import 'enums.dart';
 import 'const.dart';
-import 'config.dart';
-import 'viewer.dart';
-import 'modifier.dart';
-import 'source.dart';
-import 'timer.dart';
 
 
 class Calendar<T extends Event> extends StatelessWidget {
@@ -71,6 +69,7 @@ class Calendar<T extends Event> extends StatelessWidget {
     this.eventDuration = eventSlotDuration,
     this.eventPadding = eventSlotPadding,
     this.eventRounded = eventSlotRounded,
+    this.eventTileSize = eventSlotTileSize,
     this.eventTextStyle,
     this.eventTextMaxLines,
     this.eventTextOverflow,
@@ -85,7 +84,6 @@ class Calendar<T extends Event> extends StatelessWidget {
     this.onFrameLongPress,
     this.onEventDragged,
     this.onEventResized,
-    this.onEventCreated,
   });
 
   final CalendarView view;
@@ -141,6 +139,7 @@ class Calendar<T extends Event> extends StatelessWidget {
   final TextStyle? eventTextStyle;
   final double eventPadding;
   final double eventRounded;
+  final double eventTileSize;
   final int? eventTextMaxLines;
   final TextOverflow? eventTextOverflow;
   final Duration eventDuration;
@@ -155,7 +154,6 @@ class Calendar<T extends Event> extends StatelessWidget {
   final PageCallback? onFrameLongPress;
   final ModifyCallback<T>? onEventDragged;
   final ModifyCallback<T>? onEventResized;
-  final CreateCallback? onEventCreated;
 
   CallbackScheme get callbacks => CallbackScheme(
     onFrameTap: onFrameTap,
@@ -172,15 +170,14 @@ class Calendar<T extends Event> extends StatelessWidget {
         : null,
     onEventDragged: draggableEvent
         ? (onEventDragged != null
-        ? (Event e, Fixture f) => onEventDragged!(e as T, f)
-        : null
-    ) : null,
+            ? (Event e, Fixture f) => onEventDragged!(e as T, f)
+            : null
+        ) : null,
     onEventResized: resizableEvent
         ? (onEventResized != null
-        ? (Event e, Fixture f) => onEventResized!(e as T, f)
-        : null
-    ) : null,
-    onEventCreated: onEventCreated,
+            ? (Event e, Fixture f) => onEventResized!(e as T, f)
+            : null
+        ) : null,
   );
 
   TimeScheme get timeScheme => TimeScheme(
@@ -216,13 +213,20 @@ class Calendar<T extends Event> extends StatelessWidget {
     showHeader: showHeaderView,
     showIndicator: showIndicator,
     indicatorColor: indicatorColor,
-    swipeDirection: swipeDirection ?? Axis.horizontal,
   );
 
   EventConfig get eventConfig => EventConfig(
-    builder: eventBuilder,
+    builder: eventBuilder ?? switch(view) {
+      CalendarView.daily => null,
+      CalendarView.weekly => null,
+      CalendarView.monthly => (context, Event event) => Padding(
+        padding: EdgeInsets.symmetric(horizontal: eventPadding),
+        child: Center(child: Text(event.subject, maxLines: 1)),
+      ),
+    },
     padding: eventPadding,
     rounded: eventRounded,
+    tileSize: eventTileSize,
     duration: eventDuration,
     draggable: draggableEvent,
     resizable: resizableEvent,
@@ -244,13 +248,13 @@ class Calendar<T extends Event> extends StatelessWidget {
           textStyle: dateTextStyle,
           background: dateBackground,
         );
-      // case CalendarView.monthly:
-      //   return TextConfig(
-      //     format: dateFormat ?? monthlyHeaderFormat,
-      //     padding: datePadding ?? monthlyHeaderPadding,
-      //     textStyle: dateTextStyle,
-      //     background: dateBackground,
-      //   );
+      case CalendarView.monthly:
+        return TextConfig(
+          format: dateFormat ?? monthlyHeaderFormat,
+          padding: datePadding ?? monthlyHeaderPadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
     }
   }
 
@@ -282,13 +286,13 @@ class Calendar<T extends Event> extends StatelessWidget {
           textStyle: dateTextStyle,
           background: dateBackground,
         );
-      // case CalendarView.monthly:
-      //   return TextConfig(
-      //     format: dateFormat ?? monthlyDateFormat,
-      //     padding: datePadding ?? monthlyDatePadding,
-      //     textStyle: dateTextStyle,
-      //     background: dateBackground,
-      //   );
+      case CalendarView.monthly:
+        return TextConfig(
+          format: dateFormat ?? monthlyDateFormat,
+          padding: datePadding ?? monthlyDatePadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
     }
   }
 
@@ -296,52 +300,55 @@ class Calendar<T extends Event> extends StatelessWidget {
     switch (view) {
       case CalendarView.daily:   return null;
       case CalendarView.weekly:  return null;
-      // case CalendarView.monthly:
-      //   return TextConfig(
-      //     format: dateFormat ?? monthlyWeekFormat,
-      //     padding: datePadding ?? monthlyWeekPadding,
-      //     textStyle: dateTextStyle,
-      //     background: dateBackground,
-      //   );
+      case CalendarView.monthly:
+        return TextConfig(
+          format: dateFormat ?? monthlyWeekFormat,
+          padding: datePadding ?? monthlyWeekPadding,
+          textStyle: dateTextStyle,
+          background: dateBackground,
+        );
     }
   }
 
-  Widget get viewer {
-    switch (view) {
-      case CalendarView.daily:
-        return CalendarPaged(
+  Widget get viewer => switch (view) {
+      CalendarView.daily => CalendarWidget(
           timeScheme: timeScheme,
-          dateScheme: DateScheme(beg:0, end:1, step:1),
+          dateScheme: DateScheme.daily(),
+          weekScheme: null,
           callbacks: callbacks,
-        );
-      case CalendarView.weekly:
-        return CalendarPaged(
+        ),
+      CalendarView.weekly => CalendarWidget(
+          timeScheme: timeScheme,
           dateScheme: dateScheme,
-          timeScheme: timeScheme,
+          weekScheme: null,
           callbacks: callbacks,
-        );
-      // case CalendarView.monthly:
-      //   return MonthlyView(
-      //     dateScheme: dateScheme,
-      //     weekScheme: weekScheme,
-      //     callbacks: callbacks,
-      //   );
-    }
-  }
+        ),
+      CalendarView.monthly => CalendarWidget(
+          timeScheme: null,
+          dateScheme: dateScheme,
+          weekScheme: weekScheme,
+          callbacks: callbacks,
+        ),
+  };
 
   @override
   Widget build(BuildContext context) {
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CalendarEvents>.value(value: source),
         ChangeNotifierProvider(create: (_) => CalendarViewer(source, view)),
-        ChangeNotifierProvider(create: (_) => CalendarTimer()),
         ChangeNotifierProvider(create: (_) => CalendarModifier(
           onEventDragged: callbacks.onEventDragged,
           onEventResized: callbacks.onEventResized,
+          swipingDirection: viewConfig.scrollDirection(view),
+          slidingDirection: viewConfig.slideDirection(view),
         ))
       ],
       builder: (context, _) {
+        context.read<CalendarModifier>().attachSwiper(
+            context.read<CalendarViewer>()
+        );
         return CalendarConfig(
           view: viewConfig,
           line: lineConfig,

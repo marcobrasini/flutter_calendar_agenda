@@ -5,19 +5,19 @@ import 'utils/datetime.dart';
 import 'enums.dart';
 
 
-extension on Date {
+extension CalendarDate on Date {
   Date get start => this;
-  Date get stop => start + 1;
+  Date get stop => this;
 }
 
-extension on Week {
+extension CalendarWeek on Week {
   Date get start => mon;
-  Date get stop => start + 7;
+  Date get stop => sun;
 }
 
-extension on Month {
-  Date get start => weekStart.date;
-  Date get stop => start + 42;
+extension CalendarMonth on Month {
+  Date get start => first.weekStart.date;
+  Date get stop => last.weekEnd.date;
 }
 
 
@@ -25,26 +25,23 @@ class CalendarViewer extends ChangeNotifier {
 
   final CalendarView view;
   final CalendarEvents source;
+  final CalendarController controller;
   late DateTime _datetime;
   CalendarSwipe? _swiping;
-  double offset = 0.0;
 
-  CalendarViewer(this.source, this.view) {
+  CalendarViewer(this.source, this.view) : controller = CalendarController() {
     switch (view) {
       case CalendarView.daily:   _datetime = Date.now();
       case CalendarView.weekly:  _datetime = Week.now();
       case CalendarView.monthly: _datetime = Month.now();
     }
-    update();
+    controller.datetime = _datetime;
   }
 
-  // Getter tipizzati — il cast è in un posto solo
+  dynamic get datetime => _datetime;
   Date  get asDate  => _datetime.date;
   Week  get asWeek  => _datetime.toWeek;
   Month get asMonth => _datetime.toMonth;
-
-  // Mantenuto per retrocompatibilità
-  DateTime get datetime => _datetime;
   CalendarSwipe? get swiping => _swiping;
 
   Date get start {
@@ -63,23 +60,24 @@ class CalendarViewer extends ChangeNotifier {
     }
   }
 
-  void update() {
-    final from = (start.date - 1).toMonth.start;
-    final to = (stop.date + 1).toMonth.stop;
-    source.build(from, to);
+  void set(DateTime datetime) {
+    switch(view) {
+      case CalendarView.daily:    _datetime = datetime.date;
+      case CalendarView.weekly:   _datetime = datetime.toWeek;
+      case CalendarView.monthly:  _datetime = datetime.toMonth;
+    }
+    notifyListeners();
   }
 
   void next([bool swiping = false]) {
     _datetime = (_datetime as dynamic) + 1;
     if (swiping) return swipe(CalendarSwipe.forward);
-    Future.microtask(() => update());
     notifyListeners();
   }
 
   void last([bool swiping = false]) {
     _datetime = (_datetime as dynamic) - 1;
     if (swiping) return swipe(CalendarSwipe.backward);
-    Future.microtask(() => update());
     notifyListeners();
   }
 
@@ -93,14 +91,26 @@ class CalendarViewer extends ChangeNotifier {
   }
 
   String title(BuildContext context) {
-    final header = CalendarConfig.of(context)!.header;
+    final header = CalendarConfig.of(context).header;
     switch (view) {
       case CalendarView.weekly:
         final week = asWeek;
-        return "${week.mon.format(header.format)} "
-            "─ ${week.sun.format(header.format)}";
+        return "${week.mon.format(header.format)}"
+            " ─ ${week.sun.format(header.format)}";
       default:
         return datetime.format(header.format);
     }
+  }
+}
+
+class CalendarController extends ScrollController {
+  final key = GlobalKey();
+  late DateTime datetime;
+  double distance = 0.0;
+
+  @override
+  void jumpTo(double value) {
+    distance += value - position.pixels;
+    super.jumpTo(value);
   }
 }

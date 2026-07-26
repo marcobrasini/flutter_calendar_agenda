@@ -85,10 +85,19 @@ class Event extends Fixture with Diagnosticable {
     location: location,
   );
 
-  @protected
   Event instance([Map<String, dynamic>? data]) => Event.make(
-      data: {...get(), ...(data ?? {}), "parentId": id},
+    data: {...get(), ...(data ?? {}), "parentId": id},
   );
+
+  Event exception([String? id, Map<String, dynamic>? data]) => Event.make(
+    id: id, data: {
+      ...get(), ...(data ?? {}), "pattern": null, "parentId": this.id
+  });
+
+  Event deviation([String? id, Map<String, dynamic>? data]) => Event.make(
+    id: id, data: {
+      ...get(), "pattern": pattern, ...(data ?? {}), "parentId": this.id
+  });
 
   EventType get type {
     if (isInstance) return EventType.instance;

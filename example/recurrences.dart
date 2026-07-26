@@ -1,3 +1,4 @@
+import 'package:calendar/src/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/calendar.dart';
 
@@ -70,24 +71,20 @@ class MyApp extends StatelessWidget {
             begHour: 6,
             endHour: 22,
             onEventDragged: (event, fixture) {
-              print(event.type);
               if (event.isInstance) {
                 final recurrence = source.find(event.parentId!);
                 final delta = fixture.start.difference(event.start);
-                source.setEvent(recurrence.id!, {
+                source.modifyEvent(recurrence.set({
                   "start": recurrence.start.add(delta),
                   "stop": recurrence.stop.add(delta)
-                });
+                }));
               } else {
-                source.setEvent(event.id!, {
+                source.modifyEvent(event.set({
                   "start": fixture.start,
                   "stop": fixture.stop
-                });
+                }));
               }
               print("dragged $event -> $fixture");
-            },
-            onEventCreated: (fixture) {
-              print("created $fixture");
             },
             onEventTap: (event) {
               print("tap $event");

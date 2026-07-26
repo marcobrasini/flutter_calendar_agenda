@@ -1,7 +1,7 @@
 enum CalendarView {
   daily,
   weekly,
-  // monthly,
+  monthly,
 }
 
 enum CalendarSwipe {
@@ -45,7 +45,8 @@ enum GestureType {
 enum TimeStep {
   minutes60(60),
   minutes30(30),
-  minutes15(15);
+  minutes15(15),
+  hours24(1440);
 
   final int minutes;
   const TimeStep(this.minutes);

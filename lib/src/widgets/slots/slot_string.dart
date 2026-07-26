@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import '../tools/painter_string.dart';
 
 
-class StringSlot extends StatelessWidget {
+class SlotString extends StatelessWidget {
   final String string;
   final double width;
   final TextStyle? textStyle;
   final int? maxLines;
 
-  const StringSlot({
+  const SlotString({
     super.key,
     required this.string,
     required this.width,

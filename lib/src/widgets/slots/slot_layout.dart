@@ -12,6 +12,7 @@ class SlotLayout {
   double? parent;
   int split;
   int order;
+  bool tile;
 
   SlotLayout({
     required this.event,
@@ -20,6 +21,7 @@ class SlotLayout {
     this.padding = 0.0,
     this.order = 0,
     this.split = 1,
+    this.tile = false,
   });
 
   bool get isExpanded => (parent == null) && order == 0 && split == 1;

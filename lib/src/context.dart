@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 import 'utils/datetime.dart';
 
 
-extension CalendarMetrics on BuildContext {
+extension CalendarDimensions on BuildContext {
 
-  CalendarConfig get config => CalendarConfig.of(this)!;
+  CalendarConfig get config => CalendarConfig.of(this);
 
   double timeMargin() {
-    final timeConfig = CalendarConfig.of(this)!.time;
+    final timeConfig = config.time;
     if (timeConfig == null) return 0.0;
     final s = timeConfig.textStyle ?? DefaultTextStyle.of(this).style;
     return s.fontSize! * (s.height ?? 1.5);
   }
 
   double timeOffset() {
-    final timeConfig = CalendarConfig.of(this)!.time;
+    final timeConfig = config.time;
     if (timeConfig == null) return 0.0;
     final layout = TextPainter(
       text: TextSpan(
@@ -32,7 +32,7 @@ extension CalendarMetrics on BuildContext {
   }
 
   double dateOffset() {
-    final dateConfig = CalendarConfig.of(this)!.date;
+    final dateConfig = config.date;
     if (dateConfig == null) return 0.0;
     final layout = TextPainter(
       text: TextSpan(

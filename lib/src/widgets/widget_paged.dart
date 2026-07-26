@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../slots/slot_event.dart';
-import '../slots/slot_string.dart';
-import '../slots/slot_layout.dart';
-import '../slots/slot_modify.dart';
-import '../../utils/datetime.dart';
-import '../../utils/schemes.dart';
-import '../../data/event.dart';
-import '../../modifier.dart';
-import '../../source.dart';
-import '../../config.dart';
-import '../../const.dart';
-import '../../enums.dart';
+import 'slots/slot_event.dart';
+import 'slots/slot_string.dart';
+import 'slots/slot_layout.dart';
+import 'slots/slot_modify.dart';
+import '../utils/datetime.dart';
+import '../utils/schemes.dart';
+import '../data/event.dart';
+import '../modifier.dart';
+import '../source.dart';
+import '../config.dart';
+import '../const.dart';
+import '../enums.dart';
 
 
-class PageSlot extends StatelessWidget {
-  const PageSlot({
+class WidgetPaged extends StatelessWidget {
+  const WidgetPaged({
     super.key,
     required this.date,
     required this.width,
     required this.height,
     required this.timeScheme,
     required this.callbacks,
-    this.offset = Offset.zero,
   });
 
   final Date date;
@@ -31,7 +30,6 @@ class PageSlot extends StatelessWidget {
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
   final CallbackScheme callbacks;
-  final Offset offset;
 
   int _yOf(Event event) {
     final from = Time.fromHour(timeScheme.beg);
@@ -46,7 +44,7 @@ class PageSlot extends StatelessWidget {
       final content = SlotString(string: event.subject, width: width);
       containers.add(SlotLayout(
         event: event,
-        container: Rect.fromLTWH(offset.dx, offset.dy + slotTop, width, slotHeight),
+        container: Rect.fromLTWH(0.0, slotTop, width, slotHeight),
         content: content.layout.height,
         padding: padding,
       ));
@@ -54,9 +52,10 @@ class PageSlot extends StatelessWidget {
     final results = SlotLayout.layouts(containers);
     return results;
   }
+
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context)!;
+    final config = CalendarConfig.of(context);
     final source = context.read<CalendarEvents>();
     final events = source.forDate(date);
     return SizedBox(
@@ -74,9 +73,8 @@ class PageSlot extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  PagedEventSlot(
+                  PagedSlotEvent(
                     layout: layout,
-                    offset: offset,
                     callbacks: callbacks,
                   ),
                 ],
@@ -89,15 +87,13 @@ class PageSlot extends StatelessWidget {
 }
 
 
-class PagedEventSlot extends StatelessWidget {
-  const PagedEventSlot({
+class PagedSlotEvent extends StatelessWidget {
+  const PagedSlotEvent({
     super.key,
-    required this.offset,
     required this.layout,
     required this.callbacks,
   });
 
-  final Offset offset;
   final SlotLayout layout;
   final CallbackScheme callbacks;
 
@@ -117,9 +113,9 @@ class PagedEventSlot extends StatelessWidget {
     return AnimatedPositioned(
       key: ValueKey(layout.event.id),
       duration: eventSlotDuration,
-      top: 0.0 - offset.dy,
-      bottom: 0.0 - offset.dy,
-      left: (container?.left ?? layout.left) - offset.dx,
+      top: 0.0,
+      bottom: 0.0,
+      left: (container?.left ?? layout.left),
       width: container?.width ?? layout.width,
       onEnd: () => modifier.start(),
       child: GestureDetector(
@@ -139,10 +135,10 @@ class PagedEventSlot extends StatelessWidget {
         },
         child: (slot.editing && slot.action == SlotAction.resizing)
             ? const SizedBox.shrink()
-            : EventSlot(
-              layout: layout,
-              dragging: slot.editing && slot.action == SlotAction.dragging,
-            ),
+            : SlotEvent(
+          layout: layout,
+          dragging: slot.editing && slot.action == SlotAction.dragging,
+        ),
       ),
     );
   }
