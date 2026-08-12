@@ -71,6 +71,8 @@ class CallbackScheme {
     this.onEventDeleted,
     this.onEventDragged,
     this.onEventResized,
+    this.onEventSwipedLeft,
+    this.onEventSwipedRight,
   });
   final SlotCallback? onEventTap;
   final SlotCallback? onEventDoubleTap;
@@ -83,4 +85,6 @@ class CallbackScheme {
   final DeleteCallback? onEventDeleted;
   final ModifyCallback? onEventDragged;
   final ModifyCallback? onEventResized;
+  final ModifyCallback? onEventSwipedLeft;
+  final ModifyCallback? onEventSwipedRight;
 }

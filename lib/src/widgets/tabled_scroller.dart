@@ -167,10 +167,7 @@ class SnapPhysics extends ScrollPhysics {
     final target = metrics.offset(index);
     if (target != position.pixels) {
       return ScrollSpringSimulation(
-        spring,
-        position.pixels,
-        target,
-        velocity,
+        spring, position.pixels, target, velocity,
         tolerance: toleranceFor(position),
       );
     }

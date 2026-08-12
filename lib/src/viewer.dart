@@ -31,21 +31,23 @@ class CalendarViewer extends ChangeNotifier {
   Month get asMonth => _datetime.toMonth;
   CalendarSwipe? get swiping => _swiping;
 
-  Date get start {
-    switch(view) {
-      case CalendarView.daily:   return (_datetime as Date).start;
-      case CalendarView.weekly:  return (_datetime as Week).start;
-      case CalendarView.monthly: return (_datetime as Month).start;
-    }
-  }
+  dynamic type(dynamic datetime) => switch(view) {
+    CalendarView.daily =>   (datetime as Date),
+    CalendarView.weekly =>  (datetime as Week),
+    CalendarView.monthly => (datetime as Month),
+  };
 
-  Date get stop {
-    switch(view) {
-      case CalendarView.daily:   return (_datetime as Date).stop;
-      case CalendarView.weekly:  return (_datetime as Week).stop;
-      case CalendarView.monthly: return (_datetime as Month).stop;
-    }
-  }
+  Date get start => switch(view) {
+    CalendarView.daily =>   type(_datetime).start,
+    CalendarView.weekly =>  type(_datetime).start,
+    CalendarView.monthly => type(_datetime).start,
+  };
+
+  Date get stop => switch(view) {
+    CalendarView.daily =>   type(_datetime).stop,
+    CalendarView.weekly =>  type(_datetime).stop,
+    CalendarView.monthly => type(_datetime).stop,
+  };
 
   void set(DateTime datetime) {
     switch(view) {

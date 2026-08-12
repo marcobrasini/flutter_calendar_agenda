@@ -71,6 +71,7 @@ class Time extends DateTime {
   }
 }
 
+
 class TimeEnd extends Time {
   TimeEnd._() : super._(1, 1, 2, 0, 0);
 
@@ -84,6 +85,7 @@ class TimeEnd extends Time {
   int get hashCode => Object.hash(super.hashCode, 'TimeEnd');
 }
 
+
 class TimeBeg extends Time {
   TimeBeg._() : super._(1, 1, 1, 0, 0);
 
@@ -96,6 +98,7 @@ class TimeBeg extends Time {
   @override
   int get hashCode => Object.hash(super.hashCode, 'TimeBeg');
 }
+
 
 class Date extends DateTime {
   Date(super.year, super.month, super.day);
@@ -152,6 +155,8 @@ class Date extends DateTime {
   ).inDays;
 
   DateTime get end => DateTime(year, month, day + 1);
+  Date get first => this;
+  Date get last => this;
 }
 
 

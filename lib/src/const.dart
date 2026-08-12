@@ -15,6 +15,7 @@ typedef ModifyCallback<T extends Event> = void Function(T, Fixture);
 typedef DeleteCallback<T extends Event> = void Function(T);
 //
 typedef EventBuilder<T extends Event> = Widget Function(BuildContext, T);
+typedef HeaderBuilder = Widget Function(BuildContext, DateTime, DateTime);
 
 
 const initialHour = 0;
@@ -78,7 +79,8 @@ const eventSlotOffset = 20.0;
 const eventSlotOffsetRatio = 8;
 const eventSlotLineDimmed = 0.25;
 const eventSlotLineWidth = 2.5;
-const eventSlotTileSize = 24.0;
+const eventSlotTabledExtent = 24.0;
+const eventSlotAgendaExtent = 60.0;
 const eventDraggableSlotAlpha = 127;
 const eventSlotPadding = 4.0;
 const eventSlotRounded = 4.0;

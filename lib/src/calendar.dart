@@ -47,6 +47,7 @@ class Calendar<T extends Event> extends StatelessWidget {
     this.weekTextStyle,
     this.weekBackground,
     //
+    this.headerBuilder,
     this.headerFormat,
     this.headerPadding,
     this.headerTextStyle,
@@ -71,7 +72,7 @@ class Calendar<T extends Event> extends StatelessWidget {
     this.eventDuration = eventSlotDuration,
     this.eventPadding = eventSlotPadding,
     this.eventRounded = eventSlotRounded,
-    this.eventTileSize = eventSlotTileSize,
+    this.eventExtent,
     this.eventTextStyle,
     this.eventTextMaxLines,
     this.eventTextOverflow,
@@ -117,6 +118,7 @@ class Calendar<T extends Event> extends StatelessWidget {
   final TextStyle? weekTextStyle;
   final Color? weekBackground;
   //
+  final HeaderBuilder? headerBuilder;
   final String? headerFormat;
   final double? headerPadding;
   final TextStyle? headerTextStyle;
@@ -142,7 +144,7 @@ class Calendar<T extends Event> extends StatelessWidget {
   final TextStyle? eventTextStyle;
   final double eventPadding;
   final double eventRounded;
-  final double eventTileSize;
+  final double? eventExtent;
   final int? eventTextMaxLines;
   final TextOverflow? eventTextOverflow;
   final Duration eventDuration;
@@ -157,31 +159,6 @@ class Calendar<T extends Event> extends StatelessWidget {
   final PageCallback? onFrameLongPress;
   final ModifyCallback<T>? onEventDragged;
   final ModifyCallback<T>? onEventResized;
-
-  CallbackScheme get callbacks => CallbackScheme(
-    onFrameTap: onFrameTap,
-    onFrameDoubleTap: onFrameDoubleTap,
-    onFrameLongPress: onFrameLongPress,
-    onEventTap: onEventTap != null
-        ? (Event e) => onEventTap!(e as T)
-        : null ,
-    onEventDoubleTap: onEventDoubleTap != null
-        ? (Event e) => onEventDoubleTap!(e as T)
-        : null,
-    onEventLongPress: onEventLongPress != null
-        ? (Event e) => onEventLongPress!(e as T)
-        : null,
-    onEventDragged: draggableEvent
-        ? (onEventDragged != null
-            ? (Event e, Fixture f) => onEventDragged!(e as T, f)
-            : null
-        ) : null,
-    onEventResized: resizableEvent
-        ? (onEventResized != null
-            ? (Event e, Fixture f) => onEventResized!(e as T, f)
-            : null
-        ) : null,
-  );
 
   TimeScheme get timeScheme => TimeScheme(
     beg: begHour,
@@ -200,6 +177,31 @@ class Calendar<T extends Event> extends StatelessWidget {
   WeekScheme get weekScheme => WeekScheme(
     beg: begWeek,
     end: endWeek,
+  );
+
+  CallbackScheme get callbacks => CallbackScheme(
+    onFrameTap: onFrameTap,
+    onFrameDoubleTap: onFrameDoubleTap,
+    onFrameLongPress: onFrameLongPress,
+    onEventTap: onEventTap != null
+        ? (Event e) => onEventTap!(e as T)
+        : null ,
+    onEventDoubleTap: onEventDoubleTap != null
+        ? (Event e) => onEventDoubleTap!(e as T)
+        : null,
+    onEventLongPress: onEventLongPress != null
+        ? (Event e) => onEventLongPress!(e as T)
+        : null,
+    onEventDragged: draggableEvent
+        ? (onEventDragged != null
+        ? (Event e, Fixture f) => onEventDragged!(e as T, f)
+        : null
+    ) : null,
+    onEventResized: resizableEvent
+        ? (onEventResized != null
+        ? (Event e, Fixture f) => onEventResized!(e as T, f)
+        : null
+    ) : null,
   );
 
   LineConfig get lineConfig => LineConfig(
@@ -229,85 +231,61 @@ class Calendar<T extends Event> extends StatelessWidget {
     },
     padding: eventPadding,
     rounded: eventRounded,
-    tileSize: eventTileSize,
+    extent: eventExtent ?? eventSlotTabledExtent,
     duration: eventDuration,
     draggable: draggableEvent,
     resizable: resizableEvent,
     swipeable: false,
   );
 
-  TextConfig get headerConfig => switch (view) {
-    CalendarView.daily => TextConfig(
-      format: dateFormat ?? dailyHeaderFormat,
-      padding: datePadding ?? dailyHeaderPadding,
+  HeaderConfig get headerConfig => HeaderConfig(
+      builder: headerBuilder,
+      format: dateFormat ?? switch (view) {
+        CalendarView.daily => dailyHeaderFormat,
+        CalendarView.weekly => weeklyHeaderFormat,
+        CalendarView.monthly => monthlyHeaderFormat,
+      },
+      padding: datePadding ?? switch (view) {
+        CalendarView.daily => dailyHeaderPadding,
+        CalendarView.weekly => weeklyHeaderPadding,
+        CalendarView.monthly => monthlyHeaderPadding,
+      },
       textStyle: dateTextStyle,
       background: dateBackground,
-    ),
-    CalendarView.weekly => TextConfig(
-      format: dateFormat ?? weeklyHeaderFormat,
-      padding: datePadding ?? weeklyHeaderPadding,
-      textStyle: dateTextStyle,
-      background: dateBackground,
-    ),
+    );
+
+  TextConfig get timeConfig => TextConfig(
+    format: timeFormat ?? timeHeaderFormat,
+    padding: timePadding ?? timeHeaderPadding,
+    textStyle: timeTextStyle,
+    background: timeBackground,
+  );
+
+  TextConfig get dateConfig => TextConfig(
+    format: dateFormat ?? switch (view) {
+      CalendarView.daily => dailyDateFormat,
+      CalendarView.weekly => weeklyDateFormat,
+      CalendarView.monthly => monthlyDateFormat,
+    },
+    padding: datePadding ?? switch (view) {
+      CalendarView.daily => dailyDatePadding,
+      CalendarView.weekly => weeklyDatePadding,
+      CalendarView.monthly => monthlyDatePadding,
+    },
+    textStyle: dateTextStyle,
+    background: dateBackground,
+  );
+
+  TextConfig? get weekConfig => switch (view) {
+    CalendarView.daily => null,
+    CalendarView.weekly => null,
     CalendarView.monthly => TextConfig(
-      format: dateFormat ?? monthlyHeaderFormat,
-      padding: datePadding ?? monthlyHeaderPadding,
+      format: dateFormat ?? monthlyWeekFormat,
+      padding: datePadding ?? monthlyWeekPadding,
       textStyle: dateTextStyle,
       background: dateBackground,
     ),
   };
-
-  TextConfig get timeConfig {
-    switch (view) {
-      default:
-        return TextConfig(
-          format: timeFormat ?? timeHeaderFormat,
-          padding: timePadding ?? timeHeaderPadding,
-          textStyle: timeTextStyle,
-          background: timeBackground,
-        );
-    }
-  }
-
-  TextConfig? get dateConfig {
-    switch (view) {
-      case CalendarView.daily:
-        return TextConfig(
-          format: dateFormat ?? dailyDateFormat,
-          padding: datePadding ?? dailyDatePadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
-      case CalendarView.weekly:
-        return TextConfig(
-          format: dateFormat ?? weeklyDateFormat,
-          padding: datePadding ?? weeklyDatePadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
-      case CalendarView.monthly:
-        return TextConfig(
-          format: dateFormat ?? monthlyDateFormat,
-          padding: datePadding ?? monthlyDatePadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
-    }
-  }
-
-  TextConfig? get weekConfig {
-    switch (view) {
-      case CalendarView.daily:   return null;
-      case CalendarView.weekly:  return null;
-      case CalendarView.monthly:
-        return TextConfig(
-          format: dateFormat ?? monthlyWeekFormat,
-          padding: datePadding ?? monthlyWeekPadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
-    }
-  }
 
   Widget get viewer => switch (view) {
       CalendarView.daily => CalendarTabled(

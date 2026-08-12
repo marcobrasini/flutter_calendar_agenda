@@ -5,13 +5,13 @@ import 'const.dart';
 
 class TextConfig{
   const TextConfig({
-    required this.format,
+    this.format,
     this.padding = 0.0,
     this.textStyle,
     this.background,
   });
 
-  final String format;
+  final String? format;
   final double padding;
   final TextStyle? textStyle;
   final Color? background;
@@ -44,6 +44,7 @@ class LineConfig{
 class ViewConfig{
   const ViewConfig({
     this.showHeader = true,
+    this.showHeaderButton = true,
     this.showIndicator = true,
     this.indicatorPeriod = timeIndicatorPeriod,
     this.indicatorRadius = timeIndicatorPointRadius,
@@ -52,6 +53,7 @@ class ViewConfig{
   });
 
   final bool showHeader;
+  final bool showHeaderButton;
   final bool showIndicator;
   final Duration indicatorPeriod;
   final double indicatorRadius;
@@ -63,6 +65,7 @@ class ViewConfig{
     CalendarView.weekly   => Axis.horizontal,
     CalendarView.monthly  => Axis.vertical,
   };
+
   Axis slideDirection(CalendarView view) => switch(view) {
     CalendarView.daily    => Axis.vertical,
     CalendarView.weekly   => Axis.vertical,
@@ -70,34 +73,50 @@ class ViewConfig{
   };
 }
 
+
 class EventConfig{
   const EventConfig({
     this.builder,
     required this.duration,
     required this.draggable,
     required this.resizable,
+    required this.swipeable,
     required this.padding,
     required this.rounded,
-    required this.tileSize,
+    required this.extent,
     this.textStyle,
     this.overflow,
     this.maxLines,
-    this.createAt = GestureType.doubleTap,
+    this.leftSwipeBuilder,
+    this.rightSwipeBuilder,
   });
 
   final EventBuilder? builder;
   final Duration duration;
   final bool draggable;
   final bool resizable;
+  final bool swipeable;
   final double padding;
   final double rounded;
-  final double tileSize;
+  final double extent;
   final TextStyle? textStyle;
   final TextOverflow? overflow;
   final int? maxLines;
-  final GestureType createAt;
+  final WidgetBuilder? leftSwipeBuilder;
+  final WidgetBuilder? rightSwipeBuilder;
 }
 
+class HeaderConfig extends TextConfig {
+  const HeaderConfig({
+    this.builder,
+    super.format,
+    super.padding,
+    super.textStyle,
+    super.background,
+  });
+
+  final HeaderBuilder? builder;
+}
 
 class CalendarConfig extends InheritedWidget {
   const CalendarConfig({
@@ -115,7 +134,7 @@ class CalendarConfig extends InheritedWidget {
   final ViewConfig view;
   final LineConfig line;
   final EventConfig event;
-  final TextConfig header;
+  final HeaderConfig header;
   final TextConfig? time;
   final TextConfig? date;
   final TextConfig? week;
@@ -133,6 +152,7 @@ class CalendarConfig extends InheritedWidget {
   @override
   bool updateShouldNotify(CalendarConfig oldWidget) {
     return line != oldWidget.line
+        || event != oldWidget.event
         || header != oldWidget.header
         || time != oldWidget.time
         || date != oldWidget.date
