@@ -6,11 +6,11 @@ import '../config.dart';
 import '../enums.dart';
 
 
-class CalendarHeader extends StatelessWidget {
+class CalendarTabledHeader extends StatelessWidget {
 
   final bool showButtons;
 
-  const CalendarHeader({
+  const CalendarTabledHeader({
     super.key,
     this.showButtons = true,
   });

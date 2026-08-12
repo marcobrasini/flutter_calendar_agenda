@@ -1,17 +1,17 @@
-import 'package:calendar/src/metrics.dart';
-import 'package:calendar/src/widgets/widget_listed.dart';
-import 'package:calendar/src/widgets/widget_paged.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'widget_frame.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../source.dart';
+import 'tabled_metrics.dart';
+import 'tabled_listed.dart';
+import 'tabled_paged.dart';
+import 'tabled_frame.dart';
 
 
-class WidgetSlot extends StatelessWidget {
+class TabledSlot extends StatelessWidget {
 
-  const WidgetSlot({
+  const TabledSlot({
     super.key,
     required this.date,
     required this.width,
@@ -40,7 +40,7 @@ class WidgetSlot extends StatelessWidget {
     final space = frameWidth / dateScheme.count;
     return Stack(
       children: [
-        if (height != null) WidgetFrame(
+        if (height != null) TabledFrame(
           width: width,
           height: height!,
           offset: offset,
@@ -57,14 +57,14 @@ class WidgetSlot extends StatelessWidget {
             child: Column(
               children: [
                 (timeScheme != null && height != null)
-                    ? WidgetPaged(
+                    ? TabledPaged(
                       date: date + i,
                       width: space,
                       height: height!,
                       timeScheme: timeScheme!,
                       callbacks: callbacks,
                     )
-                    : WidgetListed(
+                    : TabledListed(
                       date: date + i,
                       width: space,
                       height: height,

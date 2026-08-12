@@ -1,23 +1,23 @@
-import 'package:calendar/src/viewer.dart';
-import 'package:calendar/src/widgets/calendar_scroller.dart';
-import 'package:calendar/src/widgets/widget_slot.dart';
-import 'package:calendar/src/widgets/slots/slot_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'tools/indicator_time.dart';
 import 'tools/header_time.dart';
+import 'slots/slot_editor.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../modifier.dart';
 import '../context.dart';
 import '../config.dart';
-import '../metrics.dart';
-import 'widget_header.dart';
+import '../viewer.dart';
+import 'tabled_scroller.dart';
+import 'tabled_metrics.dart';
+import 'tabled_header.dart';
+import 'tabled_slot.dart';
 
 
-class CalendarWidget extends StatefulWidget {
+class CalendarTabled extends StatefulWidget {
 
-  const CalendarWidget({
+  const CalendarTabled({
     super.key,
     required this.timeScheme,
     required this.dateScheme,
@@ -34,19 +34,20 @@ class CalendarWidget extends StatefulWidget {
   final Widget? cornerWidget;
 
   @override
-  State<CalendarWidget> createState() => _CalendarWidgetState();
+  State<CalendarTabled> createState() => _CalendarTabledState();
 }
 
-class _CalendarWidgetState extends State<CalendarWidget> {
-  late final CalendarController _controller;
-  late final ScrollController _slider;
-  CalendarMetrics? _metrics;
+class _CalendarTabledState extends State<CalendarTabled> {
+  final ScrollController _slider = ScrollController();
+  late final CalendarViewer _viewer;
+  TabledMetrics? _metrics;
+
+  CalendarController get _controller => _viewer.controller;
 
   @override
   void initState() {
     super.initState();
-    _slider = ScrollController();
-    _controller =  context.read<CalendarViewer>().controller;
+    _viewer =  context.read<CalendarViewer>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
@@ -67,14 +68,15 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
-    final viewer = context.read<CalendarViewer>();
+    final scrollDirection = config.view.scrollDirection(_viewer.view);
+    final slideDirection = config.view.slideDirection(_viewer.view);
     final modifier = context.read<CalendarModifier>();
-    final metrics = _metrics ??= CalendarMetrics(
-      view: viewer.view,
+    final metrics = _metrics ??= TabledMetrics(
+      view: _viewer.view,
       timeScheme: widget.timeScheme,
       dateScheme: widget.dateScheme,
       weekScheme: widget.weekScheme,
-      direction: config.view.scrollDirection(viewer.view),
+      direction: scrollDirection,
     );
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -100,7 +102,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 SizedBox(
                   width: pageWidth,
                   height: dateOffset,
-                  child: ViewHeader(
+                  child: TabledHeader(
                     metrics: metrics,
                     controller: (widget.weekScheme == null) ? _controller : null,
                     config: (widget.weekScheme == null) ? config.date! : config.week!,
@@ -110,7 +112,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                scrollDirection: config.view.slideDirection(viewer.view),
+                scrollDirection: slideDirection,
                 controller: _slider,
                 physics: (widget.timeScheme == null)
                     ? NeverScrollableScrollPhysics()
@@ -127,12 +129,11 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                       height: pageHeight,
                       child: Stack(
                         children: [
-                          CalendarScroller(
+                          TabledScroller(
                             key: _controller.key,
-                            controller: _controller,
-                            direction: config.view.scrollDirection(viewer.view),
+                            direction: scrollDirection,
                             metrics: metrics,
-                            builder: (key, datetime) => WidgetSlot(
+                            builder: (key, datetime) => TabledSlot(
                               key: key,
                               date: datetime.date,
                               width: pageWidth,
@@ -146,7 +147,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                           if (widget.timeScheme != null || widget.weekScheme != null) TimeIndicator(
                             metrics: metrics,
                             controller: _controller,
-                            direction: config.view.scrollDirection(viewer.view),
+                            direction: scrollDirection,
                           ),
                           Builder(
                             builder: (context) {

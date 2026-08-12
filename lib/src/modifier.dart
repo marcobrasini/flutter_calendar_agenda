@@ -286,16 +286,18 @@ class CalendarModifier extends ChangeNotifier {
   }
 
   void end() {
-    final fixture = (_layout!.tile) ? convertTile : convertSlot;
-    switch (_action) {
-      case SlotAction.dragging:
-        onEventDragged?.call(_layout!.event, fixture);
-        break;
-      case SlotAction.resizing:
-        onEventResized?.call(_layout!.event, fixture);
-        break;
-      case SlotAction.none:
-        break;
+    if (layout != null) {
+      final fixture = (_layout!.tile) ? convertTile : convertSlot;
+      switch (_action) {
+        case SlotAction.dragging:
+          onEventDragged?.call(_layout!.event, fixture);
+          break;
+        case SlotAction.resizing:
+          onEventResized?.call(_layout!.event, fixture);
+          break;
+        case SlotAction.none:
+          break;
+      }
     }
     reset();
     notifyListeners();

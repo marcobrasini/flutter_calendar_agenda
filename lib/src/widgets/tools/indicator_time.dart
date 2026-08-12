@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timer_builder/timer_builder.dart';
 import '../../utils/datetime.dart';
-import '../../metrics.dart';
+import '../tabled_metrics.dart';
 import '../../viewer.dart';
 import '../../config.dart';
 import 'pointer_date.dart';
@@ -16,7 +16,7 @@ class TimeIndicator extends StatelessWidget {
     required this.direction,
   });
 
-  final CalendarMetrics metrics;
+  final TabledMetrics metrics;
   final CalendarController controller;
   final Axis direction;
 

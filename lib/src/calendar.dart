@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'widgets/calendar_widget.dart';
+import 'widgets/calendar_tabled.dart';
 import 'widgets/calendar_header.dart';
 import 'utils/schemes.dart';
 import 'data/fixture.dart';
@@ -17,8 +17,10 @@ class Calendar<T extends Event> extends StatelessWidget {
 
   const Calendar({
     super.key,
-    required this.view,
     required this.source,
+    required this.view,
+    this.scroll = CalendarScroll.snapping,
+    //
     this.begHour = initialHour,
     this.endHour = finalHour,
     this.timeStep = stepHour,
@@ -86,8 +88,9 @@ class Calendar<T extends Event> extends StatelessWidget {
     this.onEventResized,
   });
 
-  final CalendarView view;
   final CalendarSource<T> source;
+  final CalendarView view;
+  final CalendarScroll scroll;
 
   final int begDay;
   final int endDay;
@@ -230,33 +233,29 @@ class Calendar<T extends Event> extends StatelessWidget {
     duration: eventDuration,
     draggable: draggableEvent,
     resizable: resizableEvent,
+    swipeable: false,
   );
 
-  TextConfig get headerConfig {
-    switch (view) {
-      case CalendarView.daily:
-        return TextConfig(
-          format: dateFormat ?? dailyHeaderFormat,
-          padding: datePadding ?? dailyHeaderPadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
-      case CalendarView.weekly:
-        return TextConfig(
-          format: dateFormat ?? weeklyHeaderFormat,
-          padding: datePadding ?? weeklyHeaderPadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
-      case CalendarView.monthly:
-        return TextConfig(
-          format: dateFormat ?? monthlyHeaderFormat,
-          padding: datePadding ?? monthlyHeaderPadding,
-          textStyle: dateTextStyle,
-          background: dateBackground,
-        );
-    }
-  }
+  TextConfig get headerConfig => switch (view) {
+    CalendarView.daily => TextConfig(
+      format: dateFormat ?? dailyHeaderFormat,
+      padding: datePadding ?? dailyHeaderPadding,
+      textStyle: dateTextStyle,
+      background: dateBackground,
+    ),
+    CalendarView.weekly => TextConfig(
+      format: dateFormat ?? weeklyHeaderFormat,
+      padding: datePadding ?? weeklyHeaderPadding,
+      textStyle: dateTextStyle,
+      background: dateBackground,
+    ),
+    CalendarView.monthly => TextConfig(
+      format: dateFormat ?? monthlyHeaderFormat,
+      padding: datePadding ?? monthlyHeaderPadding,
+      textStyle: dateTextStyle,
+      background: dateBackground,
+    ),
+  };
 
   TextConfig get timeConfig {
     switch (view) {
@@ -311,19 +310,19 @@ class Calendar<T extends Event> extends StatelessWidget {
   }
 
   Widget get viewer => switch (view) {
-      CalendarView.daily => CalendarWidget(
+      CalendarView.daily => CalendarTabled(
           timeScheme: timeScheme,
           dateScheme: DateScheme.daily(),
           weekScheme: null,
           callbacks: callbacks,
         ),
-      CalendarView.weekly => CalendarWidget(
+      CalendarView.weekly => CalendarTabled(
           timeScheme: timeScheme,
           dateScheme: dateScheme,
           weekScheme: null,
           callbacks: callbacks,
         ),
-      CalendarView.monthly => CalendarWidget(
+      CalendarView.monthly => CalendarTabled(
           timeScheme: null,
           dateScheme: dateScheme,
           weekScheme: weekScheme,
@@ -337,7 +336,11 @@ class Calendar<T extends Event> extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CalendarEvents>.value(value: source),
-        ChangeNotifierProvider(create: (_) => CalendarViewer(source, view)),
+        ChangeNotifierProvider(create: (_) => CalendarViewer(
+          source,
+          view: view,
+          scroll: scroll,
+        )),
         ChangeNotifierProvider(create: (_) => CalendarModifier(
           onEventDragged: callbacks.onEventDragged,
           onEventResized: callbacks.onEventResized,
@@ -359,7 +362,7 @@ class Calendar<T extends Event> extends StatelessWidget {
           week: weekConfig,
           child: Column(
             children: [
-              CalendarHeader(
+              CalendarTabledHeader(
                   showButtons: showHeaderButtons,
               ),
               Expanded(

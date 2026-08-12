@@ -1,3 +1,4 @@
+// ── Calendar enums ────────────────────────────────────────────────────────
 enum CalendarView {
   daily,
   weekly,
@@ -9,6 +10,13 @@ enum CalendarSwipe {
   backward,
 }
 
+enum CalendarScroll {
+  continuous,
+  sequential,
+  snapping,
+}
+
+// ── Other enums ───────────────────────────────────────────────────────────
 enum LineStyle {
   solid,
   dashed,

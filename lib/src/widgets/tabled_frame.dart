@@ -6,9 +6,9 @@ import '../enums.dart';
 import '../const.dart';
 
 
-class WidgetFrame extends StatelessWidget {
+class TabledFrame extends StatelessWidget {
 
-  const WidgetFrame({
+  const TabledFrame({
     super.key,
     required this.width,
     required this.height,

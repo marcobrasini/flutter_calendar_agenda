@@ -1,17 +1,17 @@
-import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../utils/color.dart';
 import '../../data/event.dart';
 import '../../modifier.dart';
+import '../../config.dart';
 import '../../const.dart';
-import 'slot_layout.dart';
 
 
 class SlotEvent extends StatelessWidget {
   const SlotEvent({
     super.key,
-    required this.layout,
+    required this.event,
+    this.offset = Offset.zero,
     this.selected = false,
     this.dragging = false,
     this.onTap,
@@ -19,14 +19,13 @@ class SlotEvent extends StatelessWidget {
     this.onLongPress,
   });
 
-  final SlotLayout layout;
+  final Event event;
+  final Offset offset;
   final bool selected;
   final bool dragging;
   final SlotCallback? onTap;
   final SlotCallback? onDoubleTap;
   final SlotCallback? onLongPress;
-
-  Event get event => layout.event;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +39,7 @@ class SlotEvent extends StatelessWidget {
         modifier.enter(
             pointerEvent.pointer,
             pointerEvent.position,
-            local + Offset(layout.left, 0.0),
+            local + offset,
         );
       },
       child: Container(
@@ -52,11 +51,14 @@ class SlotEvent extends StatelessWidget {
           borderRadius: BorderRadius.circular(eventSlotRounded),
           color: event.color.withAlpha(alpha),
         ),
+        // TODO correct the recurrences icon for better visualization.
         child: Stack(
           children: [
             config.event.builder?.call(context, event) ?? Padding(
               padding: EdgeInsetsGeometry.all(eventSlotPadding),
-              child: Text(event.subject),
+              child: Text(event.subject,
+                style: config.event.textStyle,
+              ),
             ),
             if (event.parentId != null) Positioned(
               left: 0.0,

@@ -45,7 +45,7 @@ class SlotEditor extends StatelessWidget {
                 modifier.take(modifier.layout!, SlotAction.dragging);
                 modifier.start();
               },
-              child: SlotEvent(layout: layout, selected: true),
+              child: SlotEvent(event: layout.event, selected: true),
             ),
           ),
           if (modifier.isResizing) Positioned(

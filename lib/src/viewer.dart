@@ -1,24 +1,8 @@
-import 'package:calendar/src/source.dart';
-import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'utils/datetime.dart';
+import 'source.dart';
+import 'config.dart';
 import 'enums.dart';
-
-
-extension CalendarDate on Date {
-  Date get start => this;
-  Date get stop => this;
-}
-
-extension CalendarWeek on Week {
-  Date get start => mon;
-  Date get stop => sun;
-}
-
-extension CalendarMonth on Month {
-  Date get start => first.weekStart.date;
-  Date get stop => last.weekEnd.date;
-}
 
 
 class CalendarViewer extends ChangeNotifier {
@@ -29,7 +13,10 @@ class CalendarViewer extends ChangeNotifier {
   late DateTime _datetime;
   CalendarSwipe? _swiping;
 
-  CalendarViewer(this.source, this.view) : controller = CalendarController() {
+  CalendarViewer(this.source, {
+    required this.view,
+    required CalendarScroll scroll,
+  }) : controller = CalendarController(scroll) {
     switch (view) {
       case CalendarView.daily:   _datetime = Date.now();
       case CalendarView.weekly:  _datetime = Week.now();
@@ -95,8 +82,8 @@ class CalendarViewer extends ChangeNotifier {
     switch (view) {
       case CalendarView.weekly:
         final week = asWeek;
-        return "${week.mon.format(header.format)}"
-            " ─ ${week.sun.format(header.format)}";
+        return "${week.mon.format(header.format ?? "dd/mm/yyyy")}"
+            " ─ ${week.sun.format(header.format ?? "dd/mm/yyyy")}";
       default:
         return datetime.format(header.format);
     }
@@ -104,9 +91,12 @@ class CalendarViewer extends ChangeNotifier {
 }
 
 class CalendarController extends ScrollController {
+  final CalendarScroll scroll;
   final key = GlobalKey();
   late DateTime datetime;
   double distance = 0.0;
+
+  CalendarController(this.scroll);
 
   @override
   void jumpTo(double value) {

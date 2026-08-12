@@ -64,6 +64,14 @@ class MyApp extends StatelessWidget {
         color:  Colors.grey,
         subject: "Later",
       ),
+      Event(
+        id: "event10",
+        start: now.add(Duration(days: -26, hours: 6, minutes: 30)),
+        stop: now.add(Duration(days: -26, hours: 8, minutes: 30)),
+        color:  Colors.grey,
+        subject: "Recurrence",
+        pattern: Pattern(type: PatternType.weekly, count: 10),
+      ),
     ]);
 
     return MaterialApp(

@@ -1,22 +1,22 @@
-import 'package:calendar/src/metrics.dart';
 import 'package:flutter/material.dart';
 import 'tools/slot_date.dart';
 import '../utils/datetime.dart';
 import '../viewer.dart';
 import '../config.dart';
+import '../const.dart';
+import 'tabled_metrics.dart';
 
 
+class TabledHeader extends StatelessWidget {
 
-class ViewHeader extends StatelessWidget {
-
-  const ViewHeader({
+  const TabledHeader({
     super.key,
     required this.metrics,
     required this.config,
     this.controller,
   });
 
-  final CalendarMetrics metrics;
+  final TabledMetrics metrics;
   final TextConfig config;
   final CalendarController? controller;
 
@@ -31,7 +31,7 @@ class ViewHeader extends StatelessWidget {
       widgets.add(Expanded(
         child: DateSlot(
           date: date,
-          dateFormat: config.format,
+          dateFormat: config.format ?? defaultDateFormat,
           datePadding: config.padding,
           dateTextStyle: config.textStyle,
           dateBackground: config.background,

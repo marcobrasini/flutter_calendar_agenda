@@ -14,8 +14,8 @@ import '../const.dart';
 import '../enums.dart';
 
 
-class WidgetPaged extends StatelessWidget {
-  const WidgetPaged({
+class TabledPaged extends StatelessWidget {
+  const TabledPaged({
     super.key,
     required this.date,
     required this.width,
@@ -136,9 +136,10 @@ class PagedSlotEvent extends StatelessWidget {
         child: (slot.editing && slot.action == SlotAction.resizing)
             ? const SizedBox.shrink()
             : SlotEvent(
-          layout: layout,
-          dragging: slot.editing && slot.action == SlotAction.dragging,
-        ),
+              event: layout.event,
+              offset: Offset(layout.left, 0.0),
+              dragging: slot.editing && slot.action == SlotAction.dragging,
+            ),
       ),
     );
   }

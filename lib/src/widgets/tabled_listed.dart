@@ -1,34 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../slots/slot_event.dart';
-import '../slots/slot_layout.dart';
-import '../slots/slot_modify.dart';
-import '../../utils/datetime.dart';
-import '../../utils/schemes.dart';
-import '../../data/event.dart';
-import '../../modifier.dart';
-import '../../source.dart';
-import '../../enums.dart';
+import 'tools/pointer_date.dart';
+import 'slots/slot_event.dart';
+import 'slots/slot_layout.dart';
+import 'slots/slot_modify.dart';
+import 'slots/slot_string.dart';
+import '../utils/datetime.dart';
+import '../utils/schemes.dart';
+import '../data/event.dart';
+import '../modifier.dart';
+import '../source.dart';
+import '../enums.dart';
 
 
-class AgendaSlot extends StatelessWidget {
-  const AgendaSlot({
+class TabledListed extends StatelessWidget {
+  TabledListed({
     super.key,
     required this.date,
     required this.width,
+    required this.height,
     required this.callbacks,
-  });
+  }) : template = SlotString(string: "", width: width, maxLines: 1);
 
   final Date date;
   final double width;
+  final double? height;
   final CallbackScheme callbacks;
+  final SlotString template;
+  double get tileHeight => template.layout.height * 1.25;
 
-  List<SlotLayout> layouts(List<Event> events, double spanning) {
+  List<SlotLayout> layouts(List<Event> events) {
     final containers = <SlotLayout>[];
     for (int i = 0; i < events.length; i++) {
       containers.add(SlotLayout(
         event: events[i],
-        container: Rect.fromLTWH(0.0, 0.0, width, spanning),
+        container: Rect.fromLTWH(0.0, 0.0, width, tileHeight),
         tile: true,
       ));
     }
@@ -41,15 +47,17 @@ class AgendaSlot extends StatelessWidget {
     final events = source.forDate(date);
     return SizedBox(
       width: width,
+      height: height,
       child: Column(
         children: [
-          for (var layout in layouts(events, 50.0))
+          DatePointer(date: date),
+          for (var layout in layouts(events))
             SizedBox(
               width: layout.width,
               height: layout.height,
               child: ListedSlotEvent(
-                layout: layout,
-                callbacks: callbacks,
+                  layout: layout,
+                  callbacks: callbacks,
               ),
             )
         ],
@@ -93,7 +101,7 @@ class ListedSlotEvent extends StatelessWidget {
       },
       child: (slot.editing)
           ? const SizedBox.shrink()
-          : SlotEvent(layout: layout),
+          : SlotEvent(event: layout.event),
     );
   }
 }

@@ -33,22 +33,25 @@ const textLineSpacing = 1.5;
 const textSlotPadding = 4.0;
 const textSlotLines = 1;
 
+const defaultTimeFormat = "hh:mm";
+const defaultDateFormat = "yyyy/mm/dd";
+
 const dailyHeaderFormat = "d MMMM yyyy";
 const dailyHeaderPadding = 0.0;
 const dailyDateFormat = "EEEE";
-const dailyDatePadding = 0.0;
+const dailyDatePadding = 4.0;
 
 const weeklyHeaderFormat = "d MMMM yyyy";
 const weeklyHeaderPadding = 0.0;
 const weeklyDateFormat = "EEE\nd";
-const weeklyDatePadding = 0.0;
+const weeklyDatePadding = 4.0;
 
 const monthlyHeaderFormat = "MMMM yyyy";
 const monthlyHeaderPadding = 0.0;
 const monthlyWeekFormat = "EEE";
-const monthlyWeekPadding = 0.0;
+const monthlyWeekPadding = 4.0;
 const monthlyDateFormat = "d";
-const monthlyDatePadding = 0.0;
+const monthlyDatePadding = 4.0;
 
 const timeHeaderFormat = "HH:mm";
 const timeHeaderRound = 15;

@@ -64,9 +64,9 @@ Map<CalendarView, OffsetConverter> converterView(
 };
 
 
-class CalendarMetrics extends ChangeNotifier {
+class TabledMetrics extends ChangeNotifier {
 
-  CalendarMetrics({
+  TabledMetrics({
     required this.view,
     required this.timeScheme,
     required this.dateScheme,
@@ -129,9 +129,9 @@ class CalendarMetrics extends ChangeNotifier {
     double cursor = 0.0;
     for (var i = 0;; i++) {
       final m = _metrics[i];
-      if (m?.size == null) break;
+      if (m?.extent == null) break;
       m!.offset = cursor;
-      cursor += m.size!;
+      cursor += m.extent!;
     }
   }
 
@@ -139,8 +139,8 @@ class CalendarMetrics extends ChangeNotifier {
     double cursor = 0.0;
     for (var i = -1;; i--) {
       final m = _metrics[i];
-      if (m?.size == null) break;
-      cursor -= m!.size!;
+      if (m?.extent == null) break;
+      cursor -= m!.extent!;
       m.offset = cursor;
     }
   }
@@ -161,8 +161,8 @@ class CalendarMetrics extends ChangeNotifier {
 
   void set(int index, double size, [bool snap = true]) {
     final metric = _metrics[index];
-    if (metric != null && metric.size != size) {
-      metric.size = size;
+    if (metric != null && metric.extent != size) {
+      metric.extent = size;
       metric.snap = snap;
       if (index > 0) _measureForward();
       if (index < 0) _measureBackward();
@@ -170,18 +170,18 @@ class CalendarMetrics extends ChangeNotifier {
   }
 
   Map<int, double?> get sizes => _metrics
-      .map((key, val) => MapEntry(key, val.size));
+      .map((key, val) => MapEntry(key, val.extent));
 
   Map<int, double> get offsets => _metrics
       .map((key, val) => MapEntry(key, val.offset));
 
   Iterable<int> get snaps => _metrics.entries
-      .where((entry) => entry.value.snap && entry.value.size != null)
+      .where((entry) => entry.value.snap && entry.value.extent != null)
       .map((entry) => entry.key);
 
   double offset(int index) => _metrics[index]?.offset ?? double.infinity;
 
-  double? size(int index) => _metrics[index]?.size;
+  double? size(int index) => _metrics[index]?.extent;
 
   int snap(double position) {
     int? best;
@@ -223,7 +223,7 @@ class CalendarMetrics extends ChangeNotifier {
 class WidgetMetrics with Diagnosticable {
   final GlobalKey key;
   double offset = 0.0;
-  double? size;
+  double? extent;
   bool snap = false;
 
   WidgetMetrics(this.key);
@@ -233,6 +233,6 @@ class WidgetMetrics with Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<GlobalKey>('key', key));
     properties.add(DoubleProperty('offset', offset));
-    properties.add(DoubleProperty('size', size));
+    properties.add(DoubleProperty('size', extent));
   }
 }

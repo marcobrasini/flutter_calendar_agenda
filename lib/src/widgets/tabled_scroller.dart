@@ -1,41 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'widget_slot.dart';
-import '../metrics.dart';
 import '../viewer.dart';
 import '../enums.dart';
 import '../const.dart';
+import 'tabled_slot.dart';
+import 'tabled_metrics.dart';
 
 
-typedef ScrollBuilder = WidgetSlot Function(GlobalKey, DateTime);
+typedef ScrollBuilder = TabledSlot Function(GlobalKey, DateTime);
 
 
-class CalendarScroller extends StatefulWidget {
-  const CalendarScroller({
+class TabledScroller extends StatefulWidget {
+  const TabledScroller({
     super.key,
     required this.direction,
-    required this.controller,
     required this.metrics,
     required this.builder,
   });
 
   final Axis direction;
-  final CalendarController controller;
-  final CalendarMetrics metrics;
+  final TabledMetrics metrics;
   final ScrollBuilder builder;
 
   @override
-  State<CalendarScroller> createState() => _CalendarScrollerState();
+  State<TabledScroller> createState() => _TabledScrollerState();
 }
 
-class _CalendarScrollerState extends State<CalendarScroller> {
+class _TabledScrollerState extends State<TabledScroller> {
   static final Key _centerKey = UniqueKey();
   late final CalendarViewer _viewer;
-  late final SnapPhysics _physics;
+  late final ScrollPhysics _physics;
   bool _snapping = false;
 
+  CalendarController get _controller => _viewer.controller;
   DateTime get recorded => widget.metrics.indexer(_viewer.datetime, 0);
-  DateTime get scrolled => widget.controller.datetime;
+  DateTime get scrolled => _controller.datetime;
 
   Widget _build(int index) {
     final metric = widget.metrics.metric(index);
@@ -73,8 +72,8 @@ class _CalendarScrollerState extends State<CalendarScroller> {
       viewerUpdate(index, datetime);
       if (notification is ScrollEndNotification) {
         _snapping = true;
-        widget.controller.datetime = recorded;
-        widget.controller.jumpTo(notification.metrics.pixels - offset);
+        _controller.datetime = recorded;
+        _controller.jumpTo(notification.metrics.pixels - offset);
         widget.metrics.shift(index);
         setState(() {});
         _snapping = false;
@@ -85,10 +84,10 @@ class _CalendarScrollerState extends State<CalendarScroller> {
   }
 
   void _animate(CalendarSwipe swipe) {
-    if (!widget.controller.hasClients) return;
+    if (!_controller.hasClients) return;
     final snap = widget.metrics.swipe(swipe);
     if (snap != 0) {
-      widget.controller.animateTo(
+      _controller.animateTo(
         widget.metrics.offset(snap),
         duration: viewSwipeDelay,
         curve: Curves.easeInOut,
@@ -99,8 +98,10 @@ class _CalendarScrollerState extends State<CalendarScroller> {
   @override
   void initState() {
     _viewer = context.read<CalendarViewer>();
-    _physics = SnapPhysics(metrics: widget.metrics);
-    widget.controller.datetime = recorded;
+    _physics = (_controller.scroll == CalendarScroll.snapping)
+        ? SnapPhysics(metrics: widget.metrics)
+        : ScrollPhysics();
+    _controller.datetime = recorded;
     super.initState();
   }
 
@@ -117,7 +118,7 @@ class _CalendarScrollerState extends State<CalendarScroller> {
     return NotificationListener<ScrollNotification>(
       onNotification: _scrolling,
       child: CustomScrollView(
-        controller: widget.controller,
+        controller: _controller,
         scrollDirection: widget.direction,
         cacheExtent: widget.metrics.caching,
         center: _centerKey,
@@ -143,7 +144,7 @@ class _CalendarScrollerState extends State<CalendarScroller> {
 
 class SnapPhysics extends ScrollPhysics {
   const SnapPhysics({super.parent, required this.metrics});
-  final CalendarMetrics metrics;
+  final TabledMetrics metrics;
 
   @override
   bool get allowImplicitScrolling => false;

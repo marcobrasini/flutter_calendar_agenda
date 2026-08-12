@@ -1,6 +1,6 @@
-import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'utils/datetime.dart';
+import 'config.dart';
 
 
 extension CalendarDimensions on BuildContext {
@@ -17,9 +17,12 @@ extension CalendarDimensions on BuildContext {
   double timeOffset() {
     final timeConfig = config.time;
     if (timeConfig == null) return 0.0;
+    final Time time = Time(0, 0);
     final layout = TextPainter(
       text: TextSpan(
-          text: Time(0, 0).format(timeConfig.format),
+          text: (timeConfig.format != null)
+              ? time.format(timeConfig.format!)
+              : time.toString(),
           style: timeConfig.textStyle ?? DefaultTextStyle.of(this).style
       ),
       textDirection: TextDirection.ltr,
@@ -34,13 +37,16 @@ extension CalendarDimensions on BuildContext {
   double dateOffset() {
     final dateConfig = config.date;
     if (dateConfig == null) return 0.0;
+    final date = Date.now();
     final layout = TextPainter(
       text: TextSpan(
-          text: Date.now().format(dateConfig.format),
+          text: (dateConfig.format != null)
+              ? date.format(dateConfig.format!)
+              : date.toString(),
           style: dateConfig.textStyle ?? DefaultTextStyle.of(this).style
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    return layout.height + dateConfig.padding*2;
+    return layout.height + dateConfig.padding * 2;
   }
 }

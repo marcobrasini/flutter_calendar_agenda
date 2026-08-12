@@ -1,7 +1,22 @@
-import 'data/event.dart';
-import 'utils/datetime.dart';
 import 'package:flutter/material.dart';
-import 'viewer.dart';
+import 'utils/datetime.dart';
+import 'data/event.dart';
+
+
+extension CalendarDate on Date {
+  Date get start => this;
+  Date get stop => this;
+}
+
+extension CalendarWeek on Week {
+  Date get start => mon;
+  Date get stop => sun;
+}
+
+extension CalendarMonth on Month {
+  Date get start => first.weekStart.date;
+  Date get stop => last.weekEnd.date;
+}
 
 
 class CalendarEvents extends ChangeNotifier {
@@ -68,7 +83,7 @@ class CalendarEvents extends ChangeNotifier {
   // ── Query pubbliche ─────────────────────────────────────────────────────
 
   List<Event> forDate(Date date) {
-    build((date - cacheRange).toMonth.start, (date - cacheRange).toMonth.stop);
+    build((date - cacheRange).toMonth.start, (date + cacheRange).toMonth.stop);
     return _cache[date] ?? [];
   }
 

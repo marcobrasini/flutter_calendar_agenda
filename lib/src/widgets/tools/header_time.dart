@@ -1,3 +1,4 @@
+import 'package:calendar/src/const.dart';
 import 'package:flutter/material.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
@@ -32,6 +33,7 @@ class TimeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
+    final format = config.time!.format ?? defaultTimeFormat;
     final headerWidth = width;
     final headerHeight = height == null ? null : height! + context.timeMargin();
     return Container(
@@ -47,7 +49,7 @@ class TimeHeader extends StatelessWidget {
                 horizontal: config.time!.padding,
               ),
               child: Text(
-                time.format(config.time!.format),
+                time.format(format),
                 textAlign: TextAlign.center,
                 style: config.time!.textStyle,
               ),
