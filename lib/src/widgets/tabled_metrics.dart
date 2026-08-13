@@ -181,7 +181,7 @@ class TabledMetrics extends ChangeNotifier {
 
   double offset(int index) => _metrics[index]?.offset ?? double.infinity;
 
-  double? size(int index) => _metrics[index]?.extent;
+  double? extentOf(int index) => _metrics[index]?.extent;
 
   int snap(double position) {
     int? best;

@@ -3,6 +3,7 @@ import 'package:calendar/src/config.dart';
 import 'package:calendar/src/source.dart';
 import 'package:calendar/src/utils/schemes.dart';
 import 'package:calendar/src/viewer.dart';
+import 'package:calendar/src/widgets/agenda_metrics.dart';
 import 'package:calendar/src/widgets/agenda_scroller.dart';
 import 'package:calendar/src/widgets/agenda_tile.dart';
 import 'package:flutter/material.dart';

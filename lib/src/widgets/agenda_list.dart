@@ -1,4 +1,5 @@
 import 'package:calendar/src/config.dart';
+import 'package:calendar/src/const.dart';
 import 'package:calendar/src/context.dart';
 import 'package:calendar/src/source.dart';
 import 'package:calendar/src/utils/datetime.dart';
@@ -40,14 +41,16 @@ class AgendaList extends StatelessWidget {
           children: [
             DateSlot(
               date: date,
-              dateFormat: "EEE\ndd",
-              datePadding: cardMargin,
+              dateFormat: config.date.format ?? defaultDateFormat,
+              datePadding: config.date.padding,
+              dateTextStyle: config.date.textStyle,
+              dateBackground: config.date.background,
               width: dateWidth,
             ),
             Container(
               width: cardWidth,
               padding: EdgeInsets.only(
-                  left: cardMargin, top: cardMargin, bottom: cardMargin
+                left: cardMargin, top: cardMargin, bottom: cardMargin,
               ),
               decoration: BoxDecoration(
                 border: Border(

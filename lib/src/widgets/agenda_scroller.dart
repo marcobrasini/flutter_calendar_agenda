@@ -1,45 +1,19 @@
 import 'package:calendar/src/config.dart';
 import 'package:calendar/src/enums.dart';
-import 'package:calendar/src/widgets/tabled_metrics.dart';
+import 'package:calendar/src/widgets/agenda_metrics.dart';
+import 'package:calendar/src/widgets/agenda_metrics.dart';
 import 'package:calendar/src/source.dart';
 import 'package:calendar/src/utils/datetime.dart';
 import 'package:calendar/src/utils/schemes.dart';
 import 'package:calendar/src/viewer.dart';
 import 'package:calendar/src/widgets/agenda_tile.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 
 typedef ScrollBuilder = AgendaTile Function(GlobalKey, DateTime);
-
-
-class AgendaMetrics {
-
-  final Map<int, WidgetMetrics> _metrics = {};
-  final dateScheme = DateScheme.weekly();
-  final snapper = null;
-
-  dynamic indexer(dynamic datetime, int index) {
-    return datetime + index;
-  }
-
-  WidgetMetrics find(GlobalKey key) =>
-      _metrics.values.singleWhere((m) => m.key == key);
-
-  WidgetMetrics metric(int index) =>
-      _metrics.putIfAbsent(index, () => WidgetMetrics(GlobalKey()));
-
-  void set(int index, double size, [bool snap = true]) {
-    final metric = _metrics[index];
-    if (metric != null && metric.extent != size) {
-      metric.extent = size;
-      metric.snap = snap;
-      // if (index > 0) _measureForward();
-      // if (index < 0) _measureBackward();
-    }
-  }
-}
 
 
 class AgendaScroller extends StatefulWidget {
@@ -190,19 +164,12 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   Widget _build(int index) {
     final metric = widget.metrics.metric(index);
     final datetime = widget.metrics.indexer(scrolled, index);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final box = metric.key.currentContext?.findRenderObject() as RenderBox?;
-      if (box != null && box.hasSize) {
-        final snap = widget.metrics.snapper?.call(datetime) ?? true;
-        final size = switch (widget.direction) {
-          Axis.horizontal => box.size.width,
-          Axis.vertical => box.size.height,
-        };
-        widget.metrics.set(index, size, snap);
-      }
-    });
-    return widget.builder(metric.key, datetime);
+    final snap = widget.metrics.snapper?.call(datetime) ?? true;
+    return MeasuredTile(
+      axis: widget.direction,
+      child: widget.builder(metric.key, datetime),
+      onExtent: (extent) => widget.metrics.set(index, extent, snap),
+    );
   }
 
   Widget _buildAnchor(CalendarSwipe swipe) {
@@ -249,7 +216,12 @@ class _AgendaScrollerState extends State<AgendaScroller> {
     final scrollView = CustomScrollView(
       center: _centerKey,
       physics: _sequential
-          ? const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics())
+          ? AgendaSnapPhysics(
+            metrics: widget.metrics,
+            parent: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+          )
           : null,
       slivers: [
         SliverList(
@@ -284,4 +256,71 @@ class _AgendaScrollerState extends State<AgendaScroller> {
       ),
     ) : scrollView;
   }
+}
+
+
+class AgendaSnapPhysics extends ScrollPhysics {
+  const AgendaSnapPhysics({
+    required this.metrics,
+    this.fling = kMinFlingVelocity,
+    super.parent,
+  });
+
+  final AgendaMetrics metrics;
+  final double fling;
+
+  @override
+  AgendaSnapPhysics applyTo(ScrollPhysics? ancestor) => AgendaSnapPhysics(
+    metrics: metrics,
+    fling: fling,
+    parent: buildParent(ancestor),
+  );
+
+  double? _target(ScrollMetrics position, double velocity) {
+    final bounds = metrics.around(position.pixels);
+    final prev = bounds.prev;
+    final next = bounds.next;
+    if (prev == null && next == null) return null;
+
+    // Blocco più alto del viewport: lo snap impedirebbe di leggerne il fondo.
+    final extent = bounds.extent;
+    if (extent != null && extent > position.viewportDimension) return null;
+
+    double? target;
+    if (velocity.abs() > fling) {
+      target = velocity > 0 ? next : prev;
+    }
+    target ??= switch ((prev, next)) {
+      (final p?, final n?) =>
+      (position.pixels - p).abs() <= (n - position.pixels).abs() ? p : n,
+      (final p?, null) => p,
+      (null, final n?) => n,
+      _ => null,
+    };
+    return target?.clamp(position.minScrollExtent, position.maxScrollExtent);
+  }
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    // Fuori range: lascia il rimbalzo al parent, così il pull-to-load resta intatto.
+    if (position.outOfRange) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final target = _target(position, velocity);
+    if (target == null) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final tolerance = toleranceFor(position);
+    if ((target - position.pixels).abs() < tolerance.distance &&
+        velocity.abs() < tolerance.velocity) {
+      return null;
+    }
+    return ScrollSpringSimulation(
+      spring, position.pixels, target, velocity,
+      tolerance: tolerance,
+    );
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }

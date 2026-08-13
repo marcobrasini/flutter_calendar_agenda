@@ -24,6 +24,10 @@ class AgendaTile extends StatefulWidget {
   final bool negligible;
   final bool shrinkable;
 
+  Date get start => datetime.first;
+  Date get stop => datetime.last;
+  int get count => stop % start;
+
   @override
   State<AgendaTile> createState() => _AgendaTileState();
 }
@@ -31,14 +35,10 @@ class AgendaTile extends StatefulWidget {
 class _AgendaTileState extends State<AgendaTile> {
   bool _expanded = true;
 
-  Date get start => widget.datetime.first;
-  Date get stop => widget.datetime.last;
-  int get count => stop % start;
-
   bool get isEmpty {
     final source = context.watch<CalendarEvents>();
-    for (int i = 0; i < count; i++) {
-      if (source.forDate(start + i).isNotEmpty) return false;
+    for (int i = 0; i < widget.count; i++) {
+      if (source.forDate(widget.start + i).isNotEmpty) return false;
     }
     return true;
   }
@@ -49,26 +49,27 @@ class _AgendaTileState extends State<AgendaTile> {
     return Column(
       children: [
         AgendaHeader(
-          dateStart: start,
-          dateStop: stop,
+          datetime: widget.datetime,
           onTap: widget.shrinkable
               ? () => setState(() => _expanded = !_expanded)
               : null,
         ),
-        (_expanded) ? Column(
-          children: [
-            for (int i = 0; i < count; i++)
-              AgendaList(
-                date: start + i,
-                width: widget.width,
-                callbacks: widget.callbacks,
-              ),
-            if (isEmpty) const Padding(
-              padding: EdgeInsets.all(textSlotPadding),
-              child: Center(child: Text("No events")),
-            ),
-          ],
-        ) : const SizedBox.shrink(),
+        (_expanded)
+            ? Column(
+              children: [
+                for (int i = 0; i < widget.count; i++)
+                  AgendaList(
+                    date: widget.start + i,
+                    width: widget.width,
+                    callbacks: widget.callbacks,
+                  ),
+                if (isEmpty) const Padding(
+                  padding: EdgeInsets.all(textSlotPadding),
+                  child: Center(child: Text("No events")),
+                ),
+              ],
+            )
+            : const SizedBox.shrink(),
       ],
     );
   }

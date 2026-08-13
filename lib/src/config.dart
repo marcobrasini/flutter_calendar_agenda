@@ -126,8 +126,8 @@ class CalendarConfig extends InheritedWidget {
     required this.line,
     required this.event,
     required this.header,
+    required this.date,
     this.time,
-    this.date,
     this.week,
   });
 
@@ -135,8 +135,8 @@ class CalendarConfig extends InheritedWidget {
   final LineConfig line;
   final EventConfig event;
   final HeaderConfig header;
+  final TextConfig date;
   final TextConfig? time;
-  final TextConfig? date;
   final TextConfig? week;
 
   static CalendarConfig? maybeOf(BuildContext context) {

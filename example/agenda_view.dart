@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final now = (Date.now() - 3) & Time(9, 0);
+    final now = (Date.now()) & Time(9, 0);
     final scheme = Theme.of(context).colorScheme;
     final source = CalendarSource(events: [
       Event(
@@ -76,7 +76,7 @@ class _MyAppState extends State<MyApp> {
         id: "event8",
         start: now.add(Duration(days: 7, hours: 3, minutes: 30)),
         stop: now.add(Duration(days: 7, hours: 4, minutes: 30)),
-        color:  Colors.grey,
+        color:  Colors.green,
         subject: "Future",
       ),
       Event(
@@ -90,9 +90,17 @@ class _MyAppState extends State<MyApp> {
         id: "event10",
         start: now.add(Duration(days: -26, hours: 6, minutes: 30)),
         stop: now.add(Duration(days: -26, hours: 8, minutes: 30)),
-        color:  Colors.grey,
+        color:  Colors.purple,
         subject: "Recurrence",
         pattern: Pattern(type: PatternType.weekly, count: 10),
+      ),
+      Event(
+        id: "event11",
+        start: now.add(Duration(days: -14)),
+        stop: now.add(Duration(days: -14)),
+        color:  Colors.amber,
+        subject: "Close",
+        pattern: Pattern(type: PatternType.weekly, count: 3, step: 2),
       ),
     ]);
 
@@ -120,29 +128,22 @@ class _MyAppState extends State<MyApp> {
                 view: CalendarView.weekly,
                 source: source,
                 scroll: CalendarScroll.sequential,
-                headerTextStyle: TextStyle(fontSize: 12),
-                headerBuilder: (context, start, stop) {
-                  return Stack(
+                headerBuilder: (context, start, stop) => Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(start.format("dd MMMM yyyy"),
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          const Expanded(child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Divider(),
-                          )),
-                          Text(stop.format("dd MMMM yyyy"),
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
+                      Text(start.format("dd MMMM yyyy"),
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      const Expanded(child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Divider(),
+                      )),
+                      Text(stop.format("dd MMMM yyyy"),
+                        style: TextStyle(fontSize: 14),
                       ),
                     ],
-                  );
-                },
+                  ),
                 eventBuilder: (context, event) => Center(
                   child: Text(event.subject,
                     style: TextStyle(fontSize: 16),
