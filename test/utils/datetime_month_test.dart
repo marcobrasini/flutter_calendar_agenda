@@ -51,6 +51,17 @@ void main() {
       expect(datetime.second, 0);
     });
 
+    test('Month as Date', () {
+      final datetime = current as Date;
+      expect(datetime, isA<Date>());
+      expect(datetime.year, now.year);
+      expect(datetime.month, now.month);
+      expect(datetime.day, 1);
+      expect(datetime.hour, 0);
+      expect(datetime.minute, 0);
+      expect(datetime.second, 0);
+    });
+
     test('Month constructor', () {
       final month = Month(current.year, current.month);
       expect(month, isA<Month>());

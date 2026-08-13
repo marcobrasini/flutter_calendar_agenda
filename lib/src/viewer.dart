@@ -26,6 +26,15 @@ class CalendarViewer extends ChangeNotifier {
   }
 
   dynamic get datetime => _datetime;
+  set datetime(DateTime datetime) {
+    if (datetime == _datetime) return;
+    switch (view) {
+      case CalendarView.daily:    _datetime = datetime.date;
+      case CalendarView.weekly:   _datetime = datetime.toWeek;
+      case CalendarView.monthly:  _datetime = datetime.toMonth;
+    }
+  }
+
   Date  get asDate  => _datetime.date;
   Week  get asWeek  => _datetime.toWeek;
   Month get asMonth => _datetime.toMonth;
@@ -49,14 +58,10 @@ class CalendarViewer extends ChangeNotifier {
     CalendarView.monthly => type(_datetime).stop,
   };
 
-  void set(DateTime datetime) {
-    switch(view) {
-      case CalendarView.daily:    _datetime = datetime.date;
-      case CalendarView.weekly:   _datetime = datetime.toWeek;
-      case CalendarView.monthly:  _datetime = datetime.toMonth;
-    }
-    notifyListeners();
-  }
+  // void set(DateTime datetime) {
+  //   this.datetime = datetime;
+  //   notifyListeners();
+  // }
 
   void next([bool swiping = false]) {
     _datetime = (_datetime as dynamic) + 1;

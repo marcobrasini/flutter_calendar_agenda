@@ -34,6 +34,17 @@ void main() {
       expect(datetime.second, 0);
     });
 
+    test('Year as Date', () {
+      final datetime = current as Date;
+      expect(datetime, isA<Date>());
+      expect(datetime.year, now.year);
+      expect(datetime.month, 1);
+      expect(datetime.day, 1);
+      expect(datetime.hour, 0);
+      expect(datetime.minute, 0);
+      expect(datetime.second, 0);
+    });
+
     test('Year constructor', () {
       final year = Year(current.year);
       expect(year, isA<Year>());

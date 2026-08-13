@@ -172,6 +172,17 @@ void main() {
       expect(datetime.second, 0);
     });
 
+    test('Week as Date constructor', () {
+      final datetime = current as Date;
+      expect(datetime, isA<Date>());
+      expect(datetime.year, current.year);
+      expect(datetime.month, current.month);
+      expect(datetime.day, current.day);
+      expect(datetime.hour, 0);
+      expect(datetime.minute, 0);
+      expect(datetime.second, 0);
+    });
+
     test('Week constructor new year', () {
       final week = Week(current.year);
       final year = current.year - ((week.month == 12) ? 1 : 0);

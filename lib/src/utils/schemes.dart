@@ -41,8 +41,8 @@ class DateScheme {
   int get count => end - beg;
   double scale(double space) => count / space;
 
-  factory DateScheme.daily() => DateScheme(beg:0, end:1, step:1);
-  factory DateScheme.weekly() => DateScheme(beg:0, end:7, step:7);
+  const DateScheme.daily()  : this(beg: 0, end: 1, step: 1);
+  const DateScheme.weekly() : this(beg: 0, end: 7, step: 7);
 }
 
 

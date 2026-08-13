@@ -167,24 +167,24 @@ class _MyAppState extends State<MyApp> {
                     )
                   ),
                 ),
-                // swipedLeftBuilder: (context) => ColoredBox(
-                //   color: scheme.tertiaryContainer,
-                //   child: Align(
-                //     alignment: Alignment.centerRight,
-                //     child: Padding(
-                //       padding: const EdgeInsets.only(right: 24.0),
-                //       child: Row(
-                //         mainAxisSize: MainAxisSize.min,
-                //         children: [
-                //           Icon(Icons.delete, color: scheme.onTertiaryContainer),
-                //           Text("Delete",
-                //             style: TextStyle(color: scheme.onTertiaryContainer),
-                //           )
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
+                swipedLeftBuilder: (context) => ColoredBox(
+                  color: scheme.tertiaryContainer,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 24.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.delete, color: scheme.onTertiaryContainer),
+                          Text("Delete",
+                            style: TextStyle(color: scheme.onTertiaryContainer),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 onEventSwipedLeft: (event, fixture) {
                   print("left ${event.get()}");
                 },

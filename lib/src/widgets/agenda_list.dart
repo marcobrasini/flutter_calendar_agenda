@@ -27,7 +27,7 @@ class AgendaList extends StatelessWidget {
     final config = CalendarConfig.of(context);
     final source = context.read<CalendarEvents>();
     final events = source.forDate(date);
-    final cardMargin = config.date?.padding ?? 8.0;
+    final cardMargin = config.date.padding;
     final dateWidth = context.dateOffset() + cardMargin;
     final cardWidth = width - dateWidth;
     return (events.isNotEmpty) ? Column(
