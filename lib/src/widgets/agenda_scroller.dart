@@ -1,5 +1,3 @@
-import 'package:calendar/src/config.dart';
-import 'package:calendar/src/widgets/agenda_header.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
@@ -43,8 +41,8 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   int _nextIndex = 0;
   bool get _sequential => _scroll == CalendarScroll.sequential;
   bool get _continuous => _scroll == CalendarScroll.continuous;
-  Date get _maxDate => widget.registry.indexer(recorded, _nextIndex);
-  Date get _minDate => widget.registry.indexer(recorded, _lastIndex);
+  dynamic get _maxDate => widget.registry.indexer(recorded, _nextIndex);
+  dynamic get _minDate => widget.registry.indexer(recorded, _lastIndex);
   DateTime get recorded => _viewer.datetime;
   DateTime get scrolled => _controller.datetime;
 
@@ -54,8 +52,8 @@ class _AgendaScrollerState extends State<AgendaScroller> {
     final dates = _source.dates;
     while (dates.contains(_maxDate)) {
       _nextIndex++;
-      for (int i = 0; i < widget.registry.dateScheme.count; i++) {
-        if (_source.forDate(_maxDate.date + i).isNotEmpty) return _nextIndex;
+      for (Date date in _maxDate.iterate(widget.registry.dateScheme)) {
+        if (_source.forDate(date).isNotEmpty) return _nextIndex;
       }
     }
     _nextIndex = index;
@@ -67,8 +65,8 @@ class _AgendaScrollerState extends State<AgendaScroller> {
     final dates = _source.dates;
     while (dates.contains(_minDate)) {
       _lastIndex--;
-      for (int i = 0; i < widget.registry.dateScheme.count; i++) {
-        if (_source.forDate(_minDate.date + i).isNotEmpty) return _lastIndex;
+      for (Date date in _minDate.iterate(widget.registry.dateScheme)) {
+        if (_source.forDate(date).isNotEmpty) return _lastIndex;
       }
     }
     _lastIndex = index;

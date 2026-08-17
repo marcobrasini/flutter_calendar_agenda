@@ -38,13 +38,13 @@ class SlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context);
+    final config = CalendarConfig.of(context).event;
     final scheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsets.all(config.event.padding),
+      padding: EdgeInsets.all(config.eventPadding),
       child: Material(
         elevation: 1.0,
-        borderRadius: BorderRadius.all(Radius.circular(config.event.rounded)),
+        borderRadius: BorderRadius.all(Radius.circular(config.eventRounded)),
         clipBehavior: Clip.antiAlias,
         color: scheme.surfaceContainerLow,
         child: Dismissible(
@@ -56,7 +56,7 @@ class SlotCard extends StatelessWidget {
             DismissDirection.startToEnd: 0.70,
             DismissDirection.endToStart: 0.70,
           },
-          movementDuration: config.event.duration,
+          movementDuration: config.eventDuration,
           confirmDismiss: (direction) async {
             switch (direction) {
               case DismissDirection.startToEnd:
@@ -73,7 +73,7 @@ class SlotCard extends StatelessWidget {
             height: height,
             color: scheme.surfaceContainerLow,
             child: AnimatedContainer(
-              duration: config.event.duration,
+              duration: config.eventDuration,
               curve: Curves.easeOutCubic,
               child: SlotEvent(
                 event: event,
@@ -96,15 +96,15 @@ class SwipeCard extends StatelessWidget {
   final SwipeRole _role;
   const SwipeCard._(this._role);
 
-  const SwipeCard.left() : this._(SwipeRole.left);
+  const SwipeCard.left()  : this._(SwipeRole.left);
   const SwipeCard.right() : this._(SwipeRole.right);
 
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
     return switch (_role) {
-      SwipeRole.left => config.event.leftSwipeBuilder?.call(context),
-      SwipeRole.right => config.event.rightSwipeBuilder?.call(context),
+      SwipeRole.left => config.leftSwipeBuilder?.call(context),
+      SwipeRole.right => config.rightSwipeBuilder?.call(context),
     } ?? SizedBox.expand();
   }
 }

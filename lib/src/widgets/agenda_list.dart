@@ -1,13 +1,13 @@
-import 'package:calendar/src/config.dart';
-import 'package:calendar/src/const.dart';
-import 'package:calendar/src/context.dart';
-import 'package:calendar/src/source.dart';
-import 'package:calendar/src/utils/datetime.dart';
-import 'package:calendar/src/utils/schemes.dart';
-import 'package:calendar/src/widgets/slots/slot_card.dart';
-import 'package:calendar/src/widgets/tools/slot_date.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'slots/slot_card.dart';
+import 'tools/slot_date.dart';
+import '../utils/datetime.dart';
+import '../utils/schemes.dart';
+import '../context.dart';
+import '../source.dart';
+import '../config.dart';
+import '../const.dart';
 
 
 class AgendaList extends StatelessWidget {
@@ -25,24 +25,38 @@ class AgendaList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
+    final colors = Theme.of(context).colorScheme;
     final source = context.read<CalendarEvents>();
     final events = source.forDate(date);
-    final cardMargin = config.date.padding;
+    final cardMargin = config.date.textPadding;
     final dateWidth = context.dateOffset() + cardMargin;
     final cardWidth = width - dateWidth;
+    final lineColor = config.line.color ?? colors.outlineVariant;
+    final widgets = Column(
+      children: [
+        for (final event in events)
+          SlotCard(
+            event: event,
+            width: cardWidth - cardMargin,
+            height: config.event.extent,
+            onEventSwipedLeft: callbacks.onEventSwipedLeft,
+            onEventSwipedRight: callbacks.onEventSwipedRight,
+          ),
+      ],
+    );
     return (events.isNotEmpty) ? Column(
       children: [
         Divider(
           height: 0.0,
-          color: config.line.color,
+          color: lineColor,
         ),
-        Row(
+        (config.showFrame) ? Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             DateSlot(
               date: date,
               dateFormat: config.date.format ?? defaultDateFormat,
-              datePadding: config.date.padding,
+              datePadding: config.date.textPadding,
               dateTextStyle: config.date.textStyle,
               dateBackground: config.date.background,
               width: dateWidth,
@@ -53,25 +67,12 @@ class AgendaList extends StatelessWidget {
                 left: cardMargin, top: cardMargin, bottom: cardMargin,
               ),
               decoration: BoxDecoration(
-                border: Border(
-                  left: BorderSide(color: config.line.color),
-                ),
+                border: Border(left: BorderSide(color: lineColor,)),
               ),
-              child: Column(
-                children: [
-                  for (final event in events)
-                    SlotCard(
-                      event: event,
-                      width: cardWidth - cardMargin,
-                      height: config.event.extent,
-                      onEventSwipedLeft: callbacks.onEventSwipedLeft,
-                      onEventSwipedRight: callbacks.onEventSwipedRight,
-                    ),
-                ],
-              ),
+              child: widgets,
             ),
           ],
-        ),
+        ) : widgets,
       ],
     ) : SizedBox.shrink();
   }

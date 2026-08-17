@@ -1,4 +1,5 @@
 import 'package:calendar/src/agenda.dart';
+import 'package:calendar/src/config.dart';
 import 'package:calendar/src/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/calendar.dart';
@@ -144,12 +145,13 @@ class _MyAppState extends State<MyApp> {
                       ),
                     ],
                   ),
+                eventConfig: EventConfig(extent: 60),
                 eventBuilder: (context, event) => Center(
                   child: Text(event.subject,
                     style: TextStyle(fontSize: 16),
                   ),
                 ),
-                swipedRightBuilder: (context) => ColoredBox(
+                rightSwipeBuilder: (context) => ColoredBox(
                   color: scheme.secondaryContainer,
                   child: Align(
                     alignment: Alignment.centerLeft,
@@ -167,7 +169,7 @@ class _MyAppState extends State<MyApp> {
                     )
                   ),
                 ),
-                swipedLeftBuilder: (context) => ColoredBox(
+                leftSwipeBuilder: (context) => ColoredBox(
                   color: scheme.tertiaryContainer,
                   child: Align(
                     alignment: Alignment.centerRight,
@@ -191,6 +193,9 @@ class _MyAppState extends State<MyApp> {
                 onEventSwipedRight: (event, fixture) {
                   print("right ${event.get()}");
                 },
+                // begDay: -2,
+                // endDay: 3,
+                // dateStep: 3,
               );
             }
           ),

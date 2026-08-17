@@ -1,4 +1,9 @@
 // ── Calendar enums ────────────────────────────────────────────────────────
+enum CalendarStyle {
+  tabled,
+  agenda,
+}
+
 enum CalendarView {
   daily,
   weekly,

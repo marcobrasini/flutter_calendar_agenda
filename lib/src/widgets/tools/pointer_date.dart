@@ -15,14 +15,13 @@ class DatePointer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context);
-    final color = config.view.indicatorColor
-        ?? Theme.of(context).primaryColor;
+    final config = CalendarConfig.of(context).clock;
+    final colors = Theme.of(context).colorScheme;
     return Center(
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: focus ? color : null,
+          color: focus ? (config.clockColor ?? colors.primary) : null,
         ),
         child: Padding(
           padding: const EdgeInsets.all(4.0),

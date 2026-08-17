@@ -27,7 +27,7 @@ extension CalendarDimensions on BuildContext {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    return layout.width + timeConfig.padding*2;
+    return layout.width + (timeConfig.padding ?? 0.0) * 2;
   }
 
   double dateMargin() {
@@ -36,7 +36,6 @@ extension CalendarDimensions on BuildContext {
 
   double dateOffset() {
     final dateConfig = config.date;
-    if (dateConfig == null) return 0.0;
     final date = Date.now();
     final layout = TextPainter(
       text: TextSpan(
@@ -47,6 +46,6 @@ extension CalendarDimensions on BuildContext {
       ),
       textDirection: TextDirection.ltr,
     )..layout();
-    return layout.height + dateConfig.padding * 2;
+    return layout.height + (dateConfig.padding ?? 0.0) * 2;
   }
 }

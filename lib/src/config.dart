@@ -3,62 +3,215 @@ import 'enums.dart';
 import 'const.dart';
 
 
-class TextConfig{
-  const TextConfig({
-    this.format,
-    this.padding = 0.0,
-    this.textStyle,
-    this.background,
-  });
+class LineConfig {
 
-  final String? format;
-  final double padding;
-  final TextStyle? textStyle;
-  final Color? background;
-}
-
-
-class LineConfig{
   const LineConfig({
-    this.style = lineFrameStyle,
-    this.color = lineFrameColor,
-    this.width = lineFrameWidth,
-    this.offsetX = lineFrameOffsetX,
-    this.offsetY = lineFrameOffsetY,
+    this.style,
+    this.width,
+    this.offsetX,
+    this.offsetY,
+    this.color,
     this.length,
     this.dashedWidth,
     this.dashedSpace,
   });
 
-  final LineStyle style;
-  final Color color;
-  final double width;
-  final double offsetX;
-  final double offsetY;
+  final LineStyle? style;
+  final Color? color;
+  final double? width;
   final double? length;
+  final double? offsetX;
+  final double? offsetY;
   final double? dashedWidth;
   final double? dashedSpace;
+
+  LineStyle get lineStyle => style ?? LineStyle.solid;
+  double get lineOffsetX => offsetX ?? 0.0;
+  double get lineOffsetY => offsetY ?? 0.0;
+  double get lineWidth => width ?? 1.0;
+  Color? get lineColor => color;
+
+  LineConfig merge(LineConfig? other) => other == null ? this : LineConfig(
+    style:        other.style       ?? style,
+    color:        other.color       ?? color,
+    width:        other.width       ?? width,
+    offsetX:      other.offsetX     ?? offsetX,
+    offsetY:      other.offsetY     ?? offsetY,
+    length:       other.length      ?? length,
+    dashedWidth:  other.dashedWidth ?? dashedWidth,
+    dashedSpace:  other.dashedSpace ?? dashedSpace,
+  );
+
+  LineConfig resolve(BuildContext context) {
+    if (color != null) return this;
+    return merge(LineConfig(
+      color: Theme.of(context).colorScheme.outlineVariant,
+    ));
+  }
+
+  factory LineConfig.of(BuildContext context) => LineConfig(
+    color: Theme.of(context).colorScheme.outlineVariant,
+  );
 }
 
 
-class ViewConfig{
-  const ViewConfig({
-    this.showHeader = true,
-    this.showHeaderButton = true,
-    this.showIndicator = true,
-    this.indicatorPeriod = timeIndicatorPeriod,
-    this.indicatorRadius = timeIndicatorPointRadius,
-    this.indicatorWidth = timeIndicatorLineWidth,
-    this.indicatorColor,
+class TextConfig{
+  const TextConfig({
+    this.format,
+    this.padding,
+    this.textStyle,
+    this.background,
   });
 
+  final String? format;
+  final double? padding;
+  final TextStyle? textStyle;
+  final Color? background;
+
+  double get textPadding => padding ?? 0.0;
+
+  TextConfig merge(TextConfig? other) => other == null ? this : TextConfig(
+    format:     other.format     ?? format,
+    padding:    other.padding    ?? padding,
+    textStyle:  other.textStyle  ?? textStyle,
+    background: other.background ?? background,
+  );
+}
+
+
+class HeaderConfig extends TextConfig {
+  const HeaderConfig({
+    this.builder,
+    super.format,
+    super.padding,
+    super.textStyle,
+    super.background,
+  });
+
+  final HeaderBuilder? builder;
+
+  @override
+  HeaderConfig merge(covariant HeaderConfig? other) => other == null ? this : HeaderConfig(
+    builder:    other.builder    ?? builder,
+    format:     other.format     ?? format,
+    padding:    other.padding    ?? padding,
+    textStyle:  other.textStyle  ?? textStyle,
+    background: other.background ?? background,
+  );
+}
+
+
+class ClockConfig{
+  const ClockConfig({
+    this.period,
+    this.radius,
+    this.width,
+    this.color,
+  });
+
+  final Duration? period;
+  final double? radius;
+  final double? width;
+  final Color? color;
+
+  Duration get clockPeriod => period ?? Duration(minutes: 1);
+  double get clockRadius => radius ?? 5.0;
+  double get clockWidth => width ?? 1.0;
+  Color? get clockColor => color;
+
+  ClockConfig merge(ClockConfig? other) => other == null ? this : ClockConfig(
+    period:  other.period ?? period,
+    radius:  other.radius ?? radius,
+    width:   other.width  ?? width,
+    color:   other.color  ?? color,
+  );
+
+  factory ClockConfig.of(BuildContext context) => ClockConfig(
+    color: Theme.of(context).colorScheme.primary,
+  );
+}
+
+
+class EventConfig{
+  const EventConfig({
+    this.duration,
+    this.padding,
+    this.rounded,
+    this.extent,
+    this.textStyle,
+    this.overflow,
+    this.maxLines,
+  });
+
+  final Duration? duration;
+  final double? padding;
+  final double? rounded;
+  final double? extent;
+  final TextStyle? textStyle;
+  final TextOverflow? overflow;
+  final int? maxLines;
+
+  Duration get eventDuration => duration ?? Duration(milliseconds: 200);
+  double get eventPadding => padding ?? 0.0;
+  double get eventRounded => rounded ?? 0.0;
+  double get eventExtent => extent ?? 0.0;
+
+  EventConfig merge(EventConfig? other) => other == null ? this : EventConfig(
+    duration:           other.duration ?? duration,
+    padding:            other.padding ?? padding,
+    rounded:            other.rounded ?? rounded,
+    extent:             other.extent ?? extent,
+    textStyle:          other.textStyle ?? textStyle,
+    maxLines:           other.maxLines ?? maxLines,
+    overflow:           other.overflow ?? overflow,
+  );
+}
+
+
+class CalendarConfig extends InheritedWidget {
+  const CalendarConfig({
+    super.key,
+    required super.child,
+    required this.line,
+    required this.event,
+    required this.clock,
+    required this.header,
+    required this.date,
+    this.time,
+    this.week,
+    this.showFrame = true,
+    this.showHeader = true,
+    this.showHeaderWidget = true,
+    this.showHeaderButton = true,
+    this.showIndicator = true,
+    this.eventDraggable = false,
+    this.eventResizable = false,
+    this.eventSwipeable = false,
+    this.headerBuilder,
+    this.eventBuilder,
+    this.leftSwipeBuilder,
+    this.rightSwipeBuilder,
+  });
+
+  final LineConfig line;
+  final EventConfig event;
+  final ClockConfig clock;
+  final HeaderConfig header;
+  final TextConfig date;
+  final TextConfig? time;
+  final TextConfig? week;
+  final bool showFrame;
   final bool showHeader;
+  final bool showHeaderWidget;
   final bool showHeaderButton;
   final bool showIndicator;
-  final Duration indicatorPeriod;
-  final double indicatorRadius;
-  final double indicatorWidth;
-  final Color? indicatorColor;
+  final bool eventDraggable;
+  final bool eventResizable;
+  final bool eventSwipeable;
+  final HeaderBuilder? headerBuilder;
+  final EventBuilder? eventBuilder;
+  final WidgetBuilder? leftSwipeBuilder;
+  final WidgetBuilder? rightSwipeBuilder;
 
   Axis scrollDirection(CalendarView view) => switch(view) {
     CalendarView.daily    => Axis.horizontal,
@@ -71,73 +224,6 @@ class ViewConfig{
     CalendarView.weekly   => Axis.vertical,
     CalendarView.monthly  => Axis.horizontal,
   };
-}
-
-
-class EventConfig{
-  const EventConfig({
-    this.builder,
-    required this.duration,
-    required this.draggable,
-    required this.resizable,
-    required this.swipeable,
-    required this.padding,
-    required this.rounded,
-    required this.extent,
-    this.textStyle,
-    this.overflow,
-    this.maxLines,
-    this.leftSwipeBuilder,
-    this.rightSwipeBuilder,
-  });
-
-  final EventBuilder? builder;
-  final Duration duration;
-  final bool draggable;
-  final bool resizable;
-  final bool swipeable;
-  final double padding;
-  final double rounded;
-  final double extent;
-  final TextStyle? textStyle;
-  final TextOverflow? overflow;
-  final int? maxLines;
-  final WidgetBuilder? leftSwipeBuilder;
-  final WidgetBuilder? rightSwipeBuilder;
-}
-
-class HeaderConfig extends TextConfig {
-  const HeaderConfig({
-    this.builder,
-    super.format,
-    super.padding,
-    super.textStyle,
-    super.background,
-  });
-
-  final HeaderBuilder? builder;
-}
-
-class CalendarConfig extends InheritedWidget {
-  const CalendarConfig({
-    super.key,
-    required super.child,
-    required this.view,
-    required this.line,
-    required this.event,
-    required this.header,
-    required this.date,
-    this.time,
-    this.week,
-  });
-
-  final ViewConfig view;
-  final LineConfig line;
-  final EventConfig event;
-  final HeaderConfig header;
-  final TextConfig date;
-  final TextConfig? time;
-  final TextConfig? week;
 
   static CalendarConfig? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<CalendarConfig>();
@@ -153,6 +239,7 @@ class CalendarConfig extends InheritedWidget {
   bool updateShouldNotify(CalendarConfig oldWidget) {
     return line != oldWidget.line
         || event != oldWidget.event
+        || clock != oldWidget.clock
         || header != oldWidget.header
         || time != oldWidget.time
         || date != oldWidget.date

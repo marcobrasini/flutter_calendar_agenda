@@ -54,10 +54,12 @@ class SlotEvent extends StatelessWidget {
         // TODO correct the recurrences icon for better visualization.
         child: Stack(
           children: [
-            config.event.builder?.call(context, event) ?? Padding(
+            config.eventBuilder?.call(context, event) ?? Padding(
               padding: EdgeInsetsGeometry.all(eventSlotPadding),
               child: Text(event.subject,
                 style: config.event.textStyle,
+                maxLines: config.event.maxLines,
+                overflow: config.event.overflow,
               ),
             ),
             if (event.parentId != null) Positioned(

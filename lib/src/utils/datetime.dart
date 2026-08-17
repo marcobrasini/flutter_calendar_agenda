@@ -1,3 +1,4 @@
+import 'package:calendar/src/utils/schemes.dart';
 import 'package:intl/intl.dart';
 
 
@@ -99,8 +100,17 @@ class TimeBeg extends Time {
   int get hashCode => Object.hash(super.hashCode, 'TimeBeg');
 }
 
+mixin DateRange {
+  Date get first;
+  Date get last;
+  int get days;
 
-class Date extends DateTime {
+  List<Date> iterate([DateScheme? dateScheme]) => List<Date>.generate(
+      dateScheme?.count ?? days, (i) => first.date + (dateScheme?.beg ?? 0) + i
+  );
+}
+
+class Date extends DateTime with DateRange {
   Date(super.year, super.month, super.day);
 
   static Date now() => DateTime.now().date;
@@ -155,12 +165,13 @@ class Date extends DateTime {
   ).inDays;
 
   DateTime get end => DateTime(year, month, day + 1);
-  Date get first => this;
-  Date get last => this;
+  @override Date get first => this;
+  @override Date get last => this;
+  @override int get days => 1;
 }
 
 
-class Week extends Date {
+class Week extends DateTime with DateRange {
   static final weekDays = Week(2024, 0);
 
   final int week;
@@ -187,7 +198,6 @@ class Week extends Date {
   @override
   String toString() => "$mon,$sun";
 
-  @override
   String format(String fmt) => DateFormat(fmt).format(this);
 
   @override
@@ -201,25 +211,18 @@ class Week extends Date {
     return year == other.year && month == other.month && day == other.day;
   }
 
-  @override
   bool operator <(DateTime dateTime) => sun < dateTime.date;
 
-  @override
   bool operator >(DateTime dateTime) => mon > dateTime.date;
 
-  @override
   bool operator <=(DateTime dateTime) => mon <= dateTime.date;
 
-  @override
   bool operator >=(DateTime dateTime) => sun >= dateTime.date;
 
-  @override
   Week operator +(int weeks) => (date + (7 * weeks)).toWeek;
 
-  @override
   Week operator -(int weeks) => (date - (7 * weeks)).toWeek;
 
-  @override
   int operator %(DateTime dateTime) => (date % dateTime) ~/ 7;
   
   DateTime newMonth(int month) => this;
@@ -230,10 +233,11 @@ class Week extends Date {
 
   @override Date get first => mon;
   @override Date get last => sun;
+  @override int get days => 7;
 }
 
 
-class Month extends Date {
+class Month extends DateTime with DateRange {
   Month(int year, int month) : super(year, month, 1);
 
   static Month now() {
@@ -244,7 +248,6 @@ class Month extends Date {
   @override
   String toString([String fmt = "yyyy-MM"]) => format(fmt);
 
-  @override
   String format(String fmt) => DateFormat(fmt).format(this);
 
   factory Month.fromString(String dateString) {
@@ -264,34 +267,27 @@ class Month extends Date {
     return year == other.year && month == other.month;
   }
 
-  @override
   bool operator <(DateTime dateTime) => isBefore(dateTime.toMonth);
 
-  @override
   bool operator >(DateTime dateTime) => isAfter(dateTime.toMonth);
 
-  @override
   bool operator <=(DateTime dateTime) => this == dateTime || this < dateTime;
 
-  @override
   bool operator >=(DateTime dateTime) => this == dateTime || this > dateTime;
 
-  @override
   Month operator +(int months) => Month(year, month + months);
 
-  @override
   Month operator -(int months) => Month(year, month - months);
 
-  @override
   int operator %(DateTime dateTime) => (year - dateTime.year)*12 + (month - dateTime.month);
 
   @override Date get first => DateTime(year, month, 1).date;
   @override Date get last => DateTime(year, month + 1, 0).date;
-  int get days => last.day;
+  @override int get days => last.day;
 }
 
 
-class Year extends Date {
+class Year extends DateTime with DateRange {
   Year(int year) : super(year, 1, 1);
 
   static Year now() {
@@ -302,7 +298,6 @@ class Year extends Date {
   @override
   String toString([String fmt = "yyyy"]) => format(fmt);
 
-  @override
   String format(String fmt) => DateFormat(fmt).format(this);
 
   @override
@@ -315,30 +310,23 @@ class Year extends Date {
     return year == other.year;
   }
 
-  @override
   bool operator <(DateTime dateTime) => isBefore(dateTime.toYear);
 
-  @override
   bool operator >(DateTime dateTime) => isAfter(dateTime.toYear);
 
-  @override
   bool operator <=(DateTime dateTime) => this == dateTime || this < dateTime;
 
-  @override
   bool operator >=(DateTime dateTime) => this == dateTime || this > dateTime;
 
-  @override
   Year operator +(int years) => Year(year + years);
 
-  @override
   Year operator -(int years) => Year(year - years);
 
-  @override
   int operator %(DateTime dateTime) => year - dateTime.year;
 
   @override Date get first => DateTime(year, 1, 1).date;
   @override Date get last => DateTime(year + 1, 1, 0).date;
-  int get days => isLeapYear ? 366 : 365;
+  @override int get days => isLeapYear ? 366 : 365;
 }
 
 
@@ -371,13 +359,10 @@ extension DateAndTime on DateTime {
   int get dayNumber => date % Year(year);
 
   DateTime get weekStart => DateTime(year, month, day - (weekday - 1));
-  // DateTime get weekLast => DateTime(year, month, day + (7 - weekday));
   DateTime get weekEnd => DateTime(year, month, day + (8 - weekday));
   DateTime get monthStart => DateTime(year, month);
-  // DateTime get monthLast => DateTime(year, month + 1, 0);
   DateTime get monthEnd => DateTime(year, month + 1);
   DateTime get yearStart => DateTime(year);
-  // DateTime get yearLast => DateTime(year + 1, 1, 0);
   DateTime get yearEnd => DateTime(year + 1, 1);
 
   DateTime operator &(DateTime datetime) => DateTime(

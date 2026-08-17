@@ -31,13 +31,14 @@ class CalendarTabled extends StatefulWidget {
   final WeekScheme? weekScheme;
   final TimeScheme? timeScheme;
   final CallbackScheme callbacks;
-  final Widget? cornerWidget;
+  final WidgetBuilder? cornerWidget;
 
   @override
   State<CalendarTabled> createState() => _CalendarTabledState();
 }
 
 class _CalendarTabledState extends State<CalendarTabled> {
+  final GlobalKey _viewport = GlobalKey();
   final ScrollController _slider = ScrollController();
   late final CalendarViewer _viewer;
   TabledMetrics? _metrics;
@@ -47,12 +48,14 @@ class _CalendarTabledState extends State<CalendarTabled> {
   @override
   void initState() {
     super.initState();
-    _viewer =  context.read<CalendarViewer>();
+    _viewer = context.read<CalendarViewer>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
-      final renderer = _controller.key.currentContext?.findRenderObject();
-      modifier.attachRenderer(renderer as RenderBox);
+      final viewport = _viewport.currentContext?.findRenderObject();
+      final content = _controller.key.currentContext?.findRenderObject();
+      modifier.attachViewport(viewport as RenderBox?);
+      modifier.attachContent(content as RenderBox?);
       modifier.attachSlider(_slider);
       modifier.reset();
     });
@@ -68,9 +71,11 @@ class _CalendarTabledState extends State<CalendarTabled> {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
-    final scrollDirection = config.view.scrollDirection(_viewer.view);
-    final slideDirection = config.view.slideDirection(_viewer.view);
-    final modifier = context.read<CalendarModifier>();
+    final scrollDirection = config.scrollDirection(_viewer.view);
+    final slideDirection = config.slideDirection(_viewer.view);
+    final showIndicator = config.showIndicator && (
+        widget.timeScheme != null || widget.weekScheme != null
+    );
     final metrics = _metrics ??= TabledMetrics(
       view: _viewer.view,
       timeScheme: widget.timeScheme,
@@ -80,24 +85,28 @@ class _CalendarTabledState extends State<CalendarTabled> {
     );
     return LayoutBuilder(
       builder: (context, constraints) {
+
         final timeMargin = context.timeMargin();
         final timeOffset = context.timeOffset();
         final dateOffset = context.dateOffset();
-        final pageHeight = (widget.timeScheme?.ratio == 0 || widget.timeScheme == null)
-            ? constraints.maxHeight - timeMargin - dateOffset
+        final pageHeight = (
+            widget.timeScheme == null || widget.timeScheme?.ratio == 0
+        )   ? constraints.maxHeight - timeMargin - dateOffset
             : widget.timeScheme!.minutes * widget.timeScheme!.ratio;
-        final pageWidth = constraints.maxWidth - (widget.timeScheme != null ? timeOffset : 0.0);
+        final pageWidth = constraints.maxWidth - (
+            widget.timeScheme != null ? timeOffset : 0.0
+        );
         final slotHeight = pageHeight / (widget.weekScheme?.count ?? 1);
         metrics.resize(pageWidth, pageHeight);
-        modifier.attachConverter(metrics.converter);
+        // modifier.attachConverter(metrics.converter);
         return Column(
           children: [
-            if (config.view.showHeader) Row(
+            if (config.showHeaderWidget) Row(
               children: [
                 if (widget.timeScheme != null) SizedBox(
                   width: timeOffset,
                   height: dateOffset,
-                  child: widget.cornerWidget,
+                  child: widget.cornerWidget?.call(context),
                 ),
                 SizedBox(
                   width: pageWidth,
@@ -112,6 +121,7 @@ class _CalendarTabledState extends State<CalendarTabled> {
             ),
             Expanded(
               child: SingleChildScrollView(
+                key: _viewport,
                 scrollDirection: slideDirection,
                 controller: _slider,
                 physics: (widget.timeScheme == null)
@@ -140,11 +150,10 @@ class _CalendarTabledState extends State<CalendarTabled> {
                               height: slotHeight,
                               timeScheme: widget.timeScheme,
                               dateScheme: widget.dateScheme,
-                              converter: metrics.converter,
                               callbacks: widget.callbacks,
                             ),
                           ),
-                          if (widget.timeScheme != null || widget.weekScheme != null) TimeIndicator(
+                          if (showIndicator) TimeIndicator(
                             metrics: metrics,
                             controller: _controller,
                             direction: scrollDirection,

@@ -1,0 +1,282 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'utils/schemes.dart';
+import 'data/fixture.dart';
+import 'data/event.dart';
+import 'modifier.dart';
+import 'viewer.dart';
+import 'source.dart';
+import 'config.dart';
+import 'enums.dart';
+import 'const.dart';
+
+
+class CalendarDefaults {
+  const CalendarDefaults({
+    required this.dateScheme,
+    required this.timeScheme,
+    required this.weekScheme,
+    required this.headerConfig,
+    required this.dateConfig,
+    this.timeConfig,
+    this.weekConfig,
+  });
+
+  final DateScheme dateScheme;
+  final TimeScheme? timeScheme;
+  final WeekScheme? weekScheme;
+  final HeaderConfig headerConfig;
+  final TextConfig dateConfig;
+  final TextConfig? timeConfig;
+  final TextConfig? weekConfig;
+
+  static const LineConfig lineConfig = LineConfig(
+    style: lineFrameStyle,
+    width: lineFrameWidth,
+    offsetX: lineFrameOffsetX,
+    offsetY: lineFrameOffsetY,
+  );
+
+  static const ClockConfig clockConfig = ClockConfig(
+    period: timeIndicatorPeriod,
+    radius: timeIndicatorPointRadius,
+    width: timeIndicatorLineWidth,
+  );
+
+  static const EventConfig eventConfig = EventConfig(
+    duration: eventSlotDuration,
+    padding: eventSlotPadding,
+    rounded: eventSlotRounded,
+  );
+
+  static const _daily = CalendarDefaults(
+    dateScheme: DateScheme.daily(),
+    timeScheme: TimeScheme.allDay(),
+    weekScheme: null,
+    headerConfig: HeaderConfig(format: dailyHeaderFormat, padding: dailyHeaderPadding),
+    dateConfig:   TextConfig(format: dailyDateFormat, padding: dailyDatePadding),
+    timeConfig:   TextConfig(format: timeHeaderFormat, padding: timeHeaderPadding),
+  );
+
+  static const _weekly = CalendarDefaults(
+    dateScheme: DateScheme.weekly(),
+    timeScheme: TimeScheme.allDay(),
+    weekScheme: null,
+    headerConfig: HeaderConfig(format: weeklyHeaderFormat, padding: weeklyHeaderPadding),
+    dateConfig:   TextConfig(format: weeklyDateFormat, padding: weeklyDatePadding),
+    timeConfig:   TextConfig(format: timeHeaderFormat, padding: timeHeaderPadding),
+  );
+
+  static const _monthly = CalendarDefaults(
+    dateScheme: DateScheme.weekly(),
+    timeScheme: null,
+    weekScheme: WeekScheme.general(),
+    headerConfig: HeaderConfig(format: monthlyHeaderFormat, padding: monthlyHeaderPadding),
+    dateConfig:   TextConfig(format: monthlyDateFormat, padding: monthlyDatePadding),
+    weekConfig:   TextConfig(format: monthlyWeekFormat, padding: monthlyWeekPadding),
+  );
+
+  static CalendarDefaults of(BuildContext context, CalendarView view) => switch (view) {
+    CalendarView.daily   => _daily,
+    CalendarView.weekly  => _weekly,
+    CalendarView.monthly => _monthly,
+  };
+}
+
+
+abstract class CalendarBase<T extends Event> extends StatelessWidget {
+
+  const CalendarBase({
+    super.key,
+    required this.source,
+    required this.view,
+    required this.scroll,
+    this.dateScheme,
+    this.timeScheme,
+    this.weekScheme,
+    //
+    this.headerConfig,
+    this.eventConfig,
+    this.clockConfig,
+    this.dateConfig,
+    this.timeConfig,
+    this.weekConfig,
+    this.lineConfig,
+    //
+    this.headerBuilder,
+    this.eventBuilder,
+    this.leftSwipeBuilder,
+    this.rightSwipeBuilder,
+    this.cornerBuilder,
+    //
+    this.draggableEvent = false,
+    this.resizableEvent = false,
+    this.swipeableEvent = false,
+    //
+    this.showFrame = true,
+    this.showHeader = true,
+    this.showHeaderWidget = true,
+    this.showHeaderButton = true,
+    this.showIndicator = true,
+    //
+    this.onEventTap,
+    this.onEventDoubleTap,
+    this.onEventLongPress,
+    this.onFrameTap,
+    this.onFrameDoubleTap,
+    this.onFrameLongPress,
+    this.onEventDragged,
+    this.onEventResized,
+    this.onEventSwipedLeft,
+    this.onEventSwipedRight,
+  });
+
+  final CalendarSource<T> source;
+  final CalendarView view;
+  final CalendarScroll scroll;
+  final DateScheme? dateScheme;
+  final TimeScheme? timeScheme;
+  final WeekScheme? weekScheme;
+  // //
+  // final int begDay;
+  // final int endDay;
+  // final int? dateStep;
+  // final int begWeek;
+  // final int endWeek;
+  // //
+  // final int begHour;
+  // final int endHour;
+  // final int timeRound;
+  // final double timeRatio;
+  // final TimeStep timeStep;
+  //
+  final bool showFrame;
+  final bool showHeader;
+  final bool showHeaderWidget;
+  final bool showHeaderButton;
+  final bool showIndicator;
+  //
+  final HeaderBuilder? headerBuilder;
+  final EventBuilder? eventBuilder;
+  final WidgetBuilder? leftSwipeBuilder;
+  final WidgetBuilder? rightSwipeBuilder;
+  final WidgetBuilder? cornerBuilder;
+  final bool draggableEvent;
+  final bool resizableEvent;
+  final bool swipeableEvent;
+  //
+  final SlotCallback<T>? onEventTap;
+  final SlotCallback<T>? onEventDoubleTap;
+  final SlotCallback<T>? onEventLongPress;
+  final PageCallback? onFrameTap;
+  final PageCallback? onFrameDoubleTap;
+  final PageCallback? onFrameLongPress;
+  final ModifyCallback<T>? onEventDragged;
+  final ModifyCallback<T>? onEventResized;
+  final ModifyCallback<T>? onEventSwipedLeft;
+  final ModifyCallback<T>? onEventSwipedRight;
+  //
+  final HeaderConfig? headerConfig;
+  final EventConfig? eventConfig;
+  final ClockConfig? clockConfig;
+  final TextConfig? timeConfig;
+  final TextConfig? dateConfig;
+  final TextConfig? weekConfig;
+  final LineConfig? lineConfig;
+
+
+  CallbackScheme get callbacks => CallbackScheme(
+    onFrameTap: onFrameTap,
+    onFrameDoubleTap: onFrameDoubleTap,
+    onFrameLongPress: onFrameLongPress,
+    onEventTap: onEventTap != null
+        ? (Event e) => onEventTap!(e as T)
+        : null,
+    onEventDoubleTap: onEventDoubleTap != null
+        ? (Event e) => onEventDoubleTap!(e as T)
+        : null,
+    onEventLongPress: onEventLongPress != null
+        ? (Event e) => onEventLongPress!(e as T)
+        : null,
+    onEventDragged: draggableEvent
+        ? (onEventDragged != null
+            ? (Event e, Fixture f) => onEventDragged!(e as T, f)
+            : null
+        ) : null,
+    onEventResized: resizableEvent
+        ? (onEventResized != null
+            ? (Event e, Fixture f) => onEventResized!(e as T, f)
+            : null
+        ) : null,
+    onEventSwipedLeft: swipeableEvent
+        ? (onEventSwipedLeft != null
+            ? (Event e, Fixture f) => onEventSwipedLeft!(e as T, f)
+            : null
+        ) : null,
+    onEventSwipedRight: swipeableEvent
+        ? (onEventSwipedRight != null
+            ? (Event e, Fixture f) => onEventSwipedRight!(e as T, f)
+            : null
+        ) : null,
+  );
+
+
+  Widget buildViewer(
+      BuildContext context,
+      DateScheme dateScheme,
+      TimeScheme? timeScheme,
+      WeekScheme? weekScheme,
+    );
+
+  @nonVirtual
+  @override
+  Widget build(BuildContext context) {
+    final defaults = CalendarDefaults.of(context, view);
+    final calendar = CalendarConfig(
+      header: defaults.headerConfig.merge(headerConfig),
+      date: defaults.dateConfig.merge(dateConfig),
+      time: defaults.timeConfig?.merge(timeConfig),
+      week: defaults.weekConfig?.merge(weekConfig),
+      line: CalendarDefaults.lineConfig.merge(lineConfig),
+      clock: CalendarDefaults.clockConfig.merge(clockConfig),
+      event: CalendarDefaults.eventConfig.merge(eventConfig),
+      showFrame: showFrame,
+      showHeader: showHeader,
+      showHeaderWidget: showHeaderWidget,
+      showHeaderButton: showHeaderButton,
+      showIndicator: showIndicator,
+      eventDraggable: draggableEvent,
+      eventResizable: resizableEvent,
+      eventSwipeable: swipeableEvent,
+      headerBuilder: headerBuilder,
+      eventBuilder: eventBuilder,
+      leftSwipeBuilder: leftSwipeBuilder,
+      rightSwipeBuilder: rightSwipeBuilder,
+      child: buildViewer(context,
+        dateScheme ?? defaults.dateScheme,
+        timeScheme ?? defaults.timeScheme,
+        weekScheme ?? defaults.weekScheme,
+      ),
+    );
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<CalendarEvents>.value(value: source),
+        ChangeNotifierProvider(create: (_) => CalendarViewer(source,
+          view: view,
+          scroll: scroll,
+        )),
+        ChangeNotifierProvider(create: (_) => CalendarModifier(
+          onEventDragged: callbacks.onEventDragged,
+          onEventResized: callbacks.onEventResized,
+          swipingDirection: calendar.scrollDirection(view),
+          slidingDirection: calendar.slideDirection(view),
+        ))
+      ],
+      builder: (context, _) {
+        context.read<CalendarModifier>().attachSwiper(context.read<CalendarViewer>());
+        return calendar;
+      },
+    );
+  }
+}

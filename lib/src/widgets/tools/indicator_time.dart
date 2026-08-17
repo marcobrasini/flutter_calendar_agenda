@@ -50,9 +50,9 @@ class TimeIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context);
+    final config = CalendarConfig.of(context).clock;
     return TimerBuilder.periodic(
-      config.view.indicatorPeriod,
+      config.clockPeriod,
       builder: (context) {
         return ListenableBuilder(
           listenable: Listenable.merge([controller, metrics]),

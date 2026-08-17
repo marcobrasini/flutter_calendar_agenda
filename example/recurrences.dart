@@ -67,9 +67,7 @@ class MyApp extends StatelessWidget {
           child: Calendar(
             source: source,
             view: CalendarView.weekly,
-            timeRound: 15,
-            begHour: 6,
-            endHour: 22,
+            timeScheme: TimeScheme(6, 22, round: 15),
             onEventDragged: (event, fixture) {
               if (event.isInstance) {
                 final recurrence = source.find(event.parentId!);

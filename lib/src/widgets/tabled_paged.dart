@@ -55,7 +55,7 @@ class TabledPaged extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context);
+    final config = CalendarConfig.of(context).event;
     final source = context.read<CalendarEvents>();
     final events = source.forDate(date);
     return SizedBox(
@@ -63,7 +63,7 @@ class TabledPaged extends StatelessWidget {
       height: height,
       child: Stack(
         children: [
-          for (final layout in layouts(events, config.event.padding))
+          for (final layout in layouts(events, config.eventPadding))
             Positioned(
               key: ValueKey(layout.event.hashCode),
               left: 0.0,

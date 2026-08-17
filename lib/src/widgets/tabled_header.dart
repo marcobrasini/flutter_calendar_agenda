@@ -32,7 +32,7 @@ class TabledHeader extends StatelessWidget {
         child: DateSlot(
           date: date,
           dateFormat: config.format ?? defaultDateFormat,
-          datePadding: config.padding,
+          datePadding: config.textPadding,
           dateTextStyle: config.textStyle,
           dateBackground: config.background,
         ),
@@ -52,27 +52,25 @@ class TabledHeader extends StatelessWidget {
               builder: (context, _) {
                 final date = controller!.datetime.date;
                 return ClipRect(
-                  child: SizedBox(
+                  child: Container(
                     width: metrics.width,
                     height: metrics.height,
+                    color: config.background,
                     child: AnimatedBuilder(
                       animation: controller!,
                       builder: (context, _) {
                         double fraction = controller!.offset / metrics.width;
                         final base = fraction.floor();
                         return Stack(
-                          clipBehavior: Clip.none,
-                          children: [base, base + 1].map((i) =>
-                              Positioned(
-                                left: (i - fraction) * metrics.width,
-                                top: 0,
-                                width: metrics.width,
-                                height: metrics.height,
-                                child: Row(
-                                  children: slots(date + i * metrics.dateStep),
-                                ),
-                              ),
-                          ).toList(),
+                          children: [base, base + 1].map((i) => Positioned(
+                            left: (i - fraction) * metrics.width,
+                            top: 0,
+                            width: metrics.width,
+                            height: metrics.height,
+                            child: Row(
+                              children: slots(date + i * metrics.dateStep),
+                            ),
+                          )).toList(),
                         );
                       },
                     ),

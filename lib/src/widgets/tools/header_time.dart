@@ -32,26 +32,26 @@ class TimeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context);
-    final format = config.time!.format ?? defaultTimeFormat;
+    final config = CalendarConfig.of(context).time!;
+    final format = config.format ?? defaultTimeFormat;
     final headerWidth = width;
     final headerHeight = height == null ? null : height! + context.timeMargin();
     return Container(
       width: headerWidth,
       height: headerHeight,
-      color: config.time!.background,
+      color: config.background,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           for (Time time in times)
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: config.time!.padding,
+                horizontal: config.textPadding,
               ),
               child: Text(
                 time.format(format),
                 textAlign: TextAlign.center,
-                style: config.time!.textStyle,
+                style: config.textStyle,
               ),
             ),
         ],

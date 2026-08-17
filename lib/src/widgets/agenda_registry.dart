@@ -22,15 +22,22 @@ class AgendaRegistry {
   });
 
   final CalendarViewer viewer;
-  final DateScheme dateScheme;
+  final DateScheme? dateScheme;
   final Axis direction;
 
   final Set<RenderRegistry> _anchors = {};
   List<SnapPoint> _sorted = const [];
   double _height = double.infinity;
   double _width = double.infinity;
-  bool _registering = true;
+  bool _rendering = true;
   bool _scheduled = false;
+
+  double get width => _width;
+  double get height => _height;
+
+  int get dateBeg => dateScheme?.beg ?? 0;
+  int get dateStep => dateScheme?.step ?? 0;
+  int? get dateCount => dateScheme?.count;
 
   double get caching => switch(direction) {
     Axis.horizontal => _width,
@@ -50,11 +57,11 @@ class AgendaRegistry {
   }
 
   void invalidate() {
-    _registering = true;
+    _rendering = true;
     if (_scheduled) return; _scheduled = true;
     SchedulerBinding.instance..addPostFrameCallback((_) {
       _scheduled = false;
-      if (_registering) _rebuild();
+      if (_rendering) _rebuild();
     })..scheduleFrame();
   }
 
@@ -69,9 +76,10 @@ class AgendaRegistry {
     for (final box in _anchors) {
       if (!box.snap || !box.attached || !box.hasSize) continue;
       final viewport = RenderAbstractViewport.maybeOf(box);
-      if (viewport == null) continue;
-      final offset = viewport.getOffsetToReveal(box, 0.0).offset;
-      if (offset.isFinite) points.add(SnapPoint(offset, box.datetime));
+      if (viewport != null) {
+        final offset = viewport.getOffsetToReveal(box, 0.0).offset;
+        if (offset.isFinite) points.add(SnapPoint(offset, box.datetime));
+      }
     }
     points.sort((a, b) => a.offset.compareTo(b.offset));
     final unique = <SnapPoint>[];
@@ -81,13 +89,12 @@ class AgendaRegistry {
       }
     }
     _sorted = unique;
-    _registering = false;
+    _rendering = false;
   }
 
   void resize(double width, double height) {
     if (_width == width && _height == height) return;
-    _width = width;
-    _height = height;
+    this.._width = width.._height = height;
     invalidate();
   }
 
@@ -160,16 +167,16 @@ class WidgetRegistry extends SingleChildRenderObjectWidget {
 
 
 class RenderRegistry extends RenderProxyBox {
-  RenderRegistry(this._registry, this._datetime, this._snap);
+  RenderRegistry(this._registry, this._dateTime, this._snap);
 
   AgendaRegistry _registry;
-  dynamic _datetime;
+  DateTime _dateTime;
   bool _snap;
 
-  dynamic get datetime => _datetime;
-  set datetime(dynamic value) {
-    if (value == _datetime) return;
-    _datetime = value;
+  DateTime get datetime => _dateTime;
+  set datetime(DateTime value) {
+    if (value == _dateTime) return;
+    _dateTime = value;
     _registry.invalidate();
   }
 
@@ -180,6 +187,7 @@ class RenderRegistry extends RenderProxyBox {
     _registry.invalidate();
   }
 
+  AgendaRegistry get registry => _registry;
   set registry(AgendaRegistry value) {
     if (identical(value, _registry)) return;
     if (attached) { _registry.remove(this); value.add(this); }

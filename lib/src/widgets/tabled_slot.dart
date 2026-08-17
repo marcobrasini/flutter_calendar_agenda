@@ -3,7 +3,8 @@ import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../source.dart';
-import 'tabled_metrics.dart';
+import '../modifier.dart';
+import 'calendar_target.dart';
 import 'tabled_listed.dart';
 import 'tabled_paged.dart';
 import 'tabled_frame.dart';
@@ -19,36 +20,39 @@ class TabledSlot extends StatelessWidget {
     required this.callbacks,
     required this.timeScheme,
     required this.dateScheme,
-    required this.converter,
     this.offset = Offset.zero,
   });
 
   final Date date;
   final double width;
-  final double? height;
+  final double height;
   final CallbackScheme callbacks;
-  final OffsetConverter converter;
   final DateScheme dateScheme;
   final TimeScheme? timeScheme;
   final Offset offset;
   double get frameWidth => width - offset.dx;
-  double get frameHeight => (height ?? 0.0) - offset.dy;
+  double get frameHeight => height - offset.dy;
+  Size get size => Size(width, height);
 
   @override
   Widget build(BuildContext context) {
     context.watch<CalendarEvents>();
+    final modifier = context.read<CalendarModifier>();
+    final delegate = (timeScheme != null)
+        ? SlotDropDelegate(date, timeScheme!, dateScheme)
+        : TileDropDelegate(date, dateScheme);
     final space = frameWidth / dateScheme.count;
     return Stack(
       children: [
-        if (height != null) TabledFrame(
+        TabledFrame(
           width: width,
-          height: height!,
+          height: height,
           offset: offset,
           timeScheme: timeScheme,
           dateScheme: dateScheme,
-          onTap: (local, [_]) => callbacks.onFrameTap?.call(converter(date, local)),
-          onDoubleTap: (local, [_]) => callbacks.onFrameDoubleTap?.call(converter(date, local)),
-          onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(converter(date, local)),
+          onTap: (local, [_]) => callbacks.onFrameTap?.call(delegate.at(local, size)),
+          onDoubleTap: (local, [_]) => callbacks.onFrameDoubleTap?.call(delegate.at(local, size)),
+          onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(delegate.at(local, size)),
         ),
         for (int i = dateScheme.beg; i < dateScheme.end; i++)
           Positioned(
@@ -56,20 +60,27 @@ class TabledSlot extends StatelessWidget {
             left: offset.dx + (i - dateScheme.beg) * space,
             child: Column(
               children: [
-                (timeScheme != null && height != null)
-                    ? TabledPaged(
-                      date: date + i,
-                      width: space,
-                      height: height!,
-                      timeScheme: timeScheme!,
-                      callbacks: callbacks,
+                (timeScheme != null)
+                    ? DropWidget(
+                      registry: modifier.registry,
+                      delegate: SlotDropDelegate(date + i, timeScheme!),
+                      child: TabledPaged(
+                        date: date + i,
+                        width: space,
+                        height: height,
+                        timeScheme: timeScheme!,
+                        callbacks: callbacks,
+                      ),
+                    ) : DropWidget(
+                      registry: modifier.registry,
+                      delegate: TileDropDelegate(date + i),
+                      child: TabledListed(
+                        date: date + i,
+                        width: space,
+                        height: height,
+                        callbacks: callbacks,
+                      ),
                     )
-                    : TabledListed(
-                      date: date + i,
-                      width: space,
-                      height: height,
-                      callbacks: callbacks,
-                    ),
               ],
             ),
           ),

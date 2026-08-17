@@ -1,3 +1,4 @@
+import 'package:calendar/calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/src/calendar.dart';
 import 'package:calendar/src/enums.dart';
@@ -109,9 +110,7 @@ class MyApp extends StatelessWidget {
           child: Calendar<Appointment>(
             source: source,
             view: CalendarView.weekly,
-            timeRound: 15,
-            begHour: 6,
-            endHour: 22,
+            timeScheme: TimeScheme(6, 22, round: 10),
             onEventDragged: (event, fixture) {
               source.modifyEvent(event.set({
                 "start": fixture.start,

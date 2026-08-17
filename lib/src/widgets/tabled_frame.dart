@@ -36,6 +36,7 @@ class TabledFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
+    final colors = Theme.of(context).colorScheme;
     return SizedBox(
       height: height,
       width: width,
@@ -49,10 +50,10 @@ class TabledFrame extends StatelessWidget {
               size: Size.infinite,
               painter: LinesPainter(
                 divisions: timeScheme?.count ?? 1,
-                lineStyle: config.line.style,
-                lineColor: config.line.color,
-                lineWidth: config.line.width,
-                offset: offset + Offset(config.line.offsetX, 0.0),
+                lineStyle: config.line.lineStyle,
+                lineWidth: config.line.lineWidth,
+                lineColor: config.line.lineColor ?? colors.outlineVariant,
+                offset: offset + Offset(config.line.lineOffsetX, 0.0),
                 dashedSpace: config.line.dashedSpace,
                 dashedWidth: config.line.dashedWidth,
                 direction: LineDirection.horizontal,
@@ -62,10 +63,10 @@ class TabledFrame extends StatelessWidget {
               size: Size.infinite,
               painter: LinesPainter(
                 divisions: dateScheme?.count ?? 1,
-                lineStyle: config.line.style,
-                lineColor: config.line.color,
-                lineWidth: config.line.width,
-                offset: offset + Offset(0.0, config.line.offsetY),
+                lineStyle: config.line.lineStyle,
+                lineWidth: config.line.lineWidth,
+                lineColor: config.line.lineColor ?? colors.outlineVariant,
+                offset: offset + Offset(0.0, config.line.lineOffsetY),
                 dashedSpace: config.line.dashedSpace,
                 dashedWidth: config.line.dashedWidth,
                 direction: LineDirection.vertical,

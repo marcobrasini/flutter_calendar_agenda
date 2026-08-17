@@ -15,9 +15,8 @@ class TimePointer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context);
-    final color = config.view.indicatorColor
-        ?? Theme.of(context).primaryColor;
+    final config = CalendarConfig.of(context).clock;
+    final color = config.color ?? Theme.of(context).primaryColor;
     return SizedBox(
       width: size.width,
       height: size.height,
@@ -27,12 +26,12 @@ class TimePointer extends StatelessWidget {
           positions: [0.0],
           lineStyle: LineStyle.solid,
           lineColor: color,
-          lineWidth: config.view.indicatorWidth,
+          lineWidth: config.clockWidth,
           direction: LineDirection.horizontal,
           points: [
             PointPainter(
               offset: Offset.zero,
-              radius: config.view.indicatorRadius,
+              radius: config.clockRadius,
               color: color,
             )
           ],

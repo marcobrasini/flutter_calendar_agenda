@@ -4,13 +4,13 @@ import 'package:calendar/src/utils/datetime.dart';
 
 
 class TimeScheme {
-  const TimeScheme({
-    this.beg = initialHour,
-    this.end = finalHour,
+  const TimeScheme(
+    this.beg, this.end, {
     this.step = TimeStep.minutes60,
     this.ratio = 1.0,
     this.round = 1,
   });
+
   final int beg;
   final int end;
   final TimeStep step;
@@ -23,40 +23,44 @@ class TimeScheme {
   int get count   => (to % from) ~/ step.minutes;
   double scale(double space) => minutes / space;
 
-  factory TimeScheme.allDay() => TimeScheme(
-      beg: 0, end: 24,
-      step: TimeStep.hours24
-  );
+  const TimeScheme.allDay() : this(0, 24, step: TimeStep.hours24);
 }
 
+
 class DateScheme {
-  const DateScheme({
-    this.beg = initialDay,
-    this.end = finalDay,
-    this.step = DateTime.daysPerWeek,
-  });
+  const DateScheme(
+    this.beg, this.end, {
+    int? step,
+  }) : step = step ?? end - beg;
+
   final int beg;
   final int end;
   final int step;
   int get count => end - beg;
   double scale(double space) => count / space;
 
-  const DateScheme.daily()  : this(beg: 0, end: 1, step: 1);
-  const DateScheme.weekly() : this(beg: 0, end: 7, step: 7);
+  const DateScheme.daily()  : this(0, 1);
+  const DateScheme.weekly() : this(0, 7);
+
+  List<Date> iterate(Date date) => List<Date>.generate(
+      count, (i) => date.date - beg + i
+  );
 }
 
 
 class WeekScheme {
-  const WeekScheme({
-    this.beg = initialWeek,
-    this.end = finalWeek,
-  });
+  const WeekScheme(
+    this.beg, this.end,
+  );
   final int beg;
   final int end;
   static const int step = 7;
   int get count => end - beg;
   double scale(double space) => count / space;
+
+  const WeekScheme.general() : this(0, 6);
 }
+
 
 class CallbackScheme {
   const CallbackScheme({
@@ -74,6 +78,7 @@ class CallbackScheme {
     this.onEventSwipedLeft,
     this.onEventSwipedRight,
   });
+
   final SlotCallback? onEventTap;
   final SlotCallback? onEventDoubleTap;
   final SlotCallback? onEventLongPress;

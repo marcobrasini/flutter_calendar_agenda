@@ -5,4 +5,5 @@ export 'src/enums.dart' show CalendarView;
 export 'src/data/event.dart' show Event, EventType;
 export 'src/data/fixture.dart' show Fixture;
 export 'src/data/pattern.dart' show Pattern, PatternType;
+export 'src/utils/schemes.dart' show DateScheme, TimeScheme, WeekScheme;
 export 'src/utils/datetime.dart';

@@ -1,10 +1,9 @@
 import 'dart:async';
-
-import 'package:calendar/src/enums.dart';
-import 'package:calendar/src/utils/datetime.dart';
-import 'package:calendar/src/utils/schemes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../utils/datetime.dart';
+import '../utils/schemes.dart';
+import '../enums.dart';
 
 
 typedef OffsetConverter = DateTime Function(DateTime, Offset);
@@ -34,35 +33,6 @@ Map<CalendarView, SnapConverter> snapperView(DateScheme dateScheme) => {
   },
 };
 
-Map<CalendarView, OffsetConverter> converterView(
-    Size size,
-    TimeScheme? timeScheme,
-    DateScheme? dateScheme,
-    WeekScheme? weekScheme,
-) => {
-  CalendarView.daily: (DateTime datetime, Offset local) {
-    final timeScale = timeScheme?.scale(size.height) ?? 0.0;
-    final step = timeScheme?.round ?? 1;
-    final minutes = (local.dy * timeScale / step).round() * step;
-    return datetime.date & Time(timeScheme?.beg ?? 0, minutes);
-  },
-  CalendarView.weekly: (DateTime datetime, Offset local) {
-    final dateScale = dateScheme?.scale(size.width) ?? 0.0;
-    final timeScale = timeScheme?.scale(size.height) ?? 0.0;
-    final step = timeScheme?.round ?? 1;
-    final days = (local.dx * dateScale).floor() + (dateScheme?.beg ?? 0);
-    final minutes = (local.dy * timeScale / step).round() * step;
-    return (datetime.date + days) & Time(timeScheme?.beg ?? 0, minutes);
-  },
-  CalendarView.monthly: (DateTime datetime, Offset local) {
-    final dateScale = dateScheme?.scale(size.width) ?? 0.0;
-    final weekScale = weekScheme?.scale(size.height) ?? 0.0;
-    final days = (local.dx * dateScale).floor() + (dateScheme?.beg ?? 0);
-    final weeks = (local.dy * weekScale).floor() + (weekScheme?.beg ?? 0);
-    return datetime.date + (days + weeks * DateTime.daysPerWeek);
-  },
-};
-
 
 class TabledMetrics extends ChangeNotifier {
 
@@ -80,9 +50,12 @@ class TabledMetrics extends ChangeNotifier {
   final WeekScheme? weekScheme;
   final Axis direction;
   final Map<int, WidgetMetrics> _metrics = {};
-  double width = double.infinity;
-  double height = double.infinity;
+  double _width = double.infinity;
+  double _height = double.infinity;
   bool _measuring = false;
+
+  double get width => _width;
+  double get height => _height;
 
   int get dateBeg => dateScheme?.beg ?? 0;
   int get timeBeg => timeScheme?.beg ?? 0;
@@ -92,20 +65,18 @@ class TabledMetrics extends ChangeNotifier {
   int get weekCount => weekScheme?.count ?? 0;
   int get dateStep => dateScheme?.step ?? 0;
   int get timeStep => timeScheme?.step.minutes ?? 0;
-  double get dateScale => dateScheme?.scale(width) ?? 0.0;
-  double get timeScale => timeScheme?.scale(height) ?? 0.0;
-  double get weekScale => weekScheme?.scale(height) ?? 0.0;
-  double get dateSpace => width / (dateScheme?.count ?? 0.0);
-  double get timeSpace => height / (timeScheme?.count ?? 0.0);
-  double get weekSpace => height / (weekScheme?.count ?? 0.0);
+  double get dateScale => dateScheme?.scale(_width) ?? 0.0;
+  double get timeScale => timeScheme?.scale(_height) ?? 0.0;
+  double get weekScale => weekScheme?.scale(_height) ?? 0.0;
+  double get dateSpace => _width / (dateScheme?.count ?? 0.0);
+  double get timeSpace => _height / (timeScheme?.count ?? 0.0);
+  double get weekSpace => _height / (weekScheme?.count ?? 0.0);
 
-  OffsetConverter get converter => converterView(
-      Size(width, height), timeScheme, dateScheme, weekScheme)[view]!;
   IndexConverter get indexer => indexerView(dateScheme!)[view]!;
   SnapConverter? get snapper => snapperView(dateScheme!)[view];
   double get caching => switch(direction) {
-    Axis.horizontal => width,
-    Axis.vertical   => height,
+    Axis.horizontal => _width,
+    Axis.vertical   => _height,
   };
 
   void refresh() {
@@ -117,10 +88,9 @@ class TabledMetrics extends ChangeNotifier {
     });
   }
 
-  void resize(double w, double h) {
-    if (w == width && h == height) return;
-    width = w;
-    height = h;
+  void resize(double width, double height) {
+    if (_width == width && _height == height) return;
+    this.._width = width.._height = height;
     _metrics.clear();
     refresh();
   }

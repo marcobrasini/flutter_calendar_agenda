@@ -37,7 +37,7 @@ class SlotEditor extends StatelessWidget {
         children: [
           Positioned(
             left: container.left + offset.dx,
-            top: container.top,
+            top: container.top + offset.dy,
             width: container.width,
             height: container.height,
             child: GestureDetector(

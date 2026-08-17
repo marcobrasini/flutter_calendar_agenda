@@ -58,11 +58,6 @@ class CalendarViewer extends ChangeNotifier {
     CalendarView.monthly => type(_datetime).stop,
   };
 
-  // void set(DateTime datetime) {
-  //   this.datetime = datetime;
-  //   notifyListeners();
-  // }
-
   void next([bool swiping = false]) {
     _datetime = (_datetime as dynamic) + 1;
     if (swiping) return swipe(CalendarSwipe.forward);
