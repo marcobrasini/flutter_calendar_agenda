@@ -33,6 +33,10 @@ class Agenda<T extends Event> extends CalendarBase<T> {
     super.showHeaderWidget = true,
     super.showHeaderButton = true,
     super.showIndicator = true,
+    super.fixLastAnchor = true,
+    super.fixNextAnchor = true,
+    super.negligibleAgenda = false,
+    super.shrinkableAgenda = false,
     //
     super.onEventTap,
     super.onEventDoubleTap,
@@ -43,6 +47,11 @@ class Agenda<T extends Event> extends CalendarBase<T> {
     super.onEventDragged,
     super.onEventSwipedLeft,
     super.onEventSwipedRight,
+    super.lastAnchorBuilder,
+    super.nextAnchorBuilder,
+    super.appbar = const [],
+    super.emptyBuilder,
+    super.centredView,
   });
 
   @override
@@ -54,5 +63,6 @@ class Agenda<T extends Event> extends CalendarBase<T> {
     dateScheme: dateScheme,
     callbacks: callbacks,
     scrolling: scroll,
+    appbar: appbar,
   );
 }

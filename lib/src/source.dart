@@ -140,6 +140,27 @@ class CalendarEvents extends ChangeNotifier {
     _events.remove(event);
     _cancel(event);
   }
+
+
+  DateTime? hasBefore(DateTime datetime) {
+    final dates = <DateTime>[];
+    for (Event event in _events) {
+      if (event.start.isBefore(datetime)) dates.add(event.start);
+    }
+    return (dates.isNotEmpty)
+        ? dates.reduce((a, b) => a.isAfter(b) ? a : b).weekStart
+        : null;
+  }
+
+  DateTime? hasAfter(DateTime datetime) {
+    final dates = <DateTime>[];
+    for (Event event in _events) {
+      if (event.stop.isAfter(datetime)) dates.add(event.stop);
+    }
+    return (dates.isNotEmpty)
+        ? dates.reduce((a, b) => a.isBefore(b) ? a : b).weekStart
+        : null;
+  }
 }
 
 

@@ -1,3 +1,4 @@
+import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
@@ -18,11 +19,13 @@ class AgendaScroller extends StatefulWidget {
     required this.direction,
     required this.registry,
     required this.builder,
+    this.appbar = const [],
   });
 
   final Axis direction;
   final AgendaRegistry registry;
   final ScrollBuilder builder;
+  final List<Widget> appbar;
 
   @override
   State<AgendaScroller> createState() => _AgendaScrollerState();
@@ -41,8 +44,8 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   int _nextIndex = 0;
   bool get _sequential => _scroll == CalendarScroll.sequential;
   bool get _continuous => _scroll == CalendarScroll.continuous;
-  dynamic get _maxDate => widget.registry.indexer(recorded, _nextIndex);
-  dynamic get _minDate => widget.registry.indexer(recorded, _lastIndex);
+  dynamic get _nextDate => widget.registry.indexer(recorded, _nextIndex);
+  dynamic get _lastDate => widget.registry.indexer(recorded, _lastIndex);
   DateTime get recorded => _viewer.datetime;
   DateTime get scrolled => _controller.datetime;
 
@@ -50,9 +53,9 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   int? findNext() {
     final index = _nextIndex;
     final dates = _source.dates;
-    while (dates.contains(_maxDate)) {
+    while (dates.contains(_nextDate)) {
       _nextIndex++;
-      for (Date date in _maxDate.iterate(widget.registry.dateScheme)) {
+      for (Date date in _nextDate.iterate(widget.registry.dateScheme)) {
         if (_source.forDate(date).isNotEmpty) return _nextIndex;
       }
     }
@@ -63,9 +66,9 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   int? findLast() {
     final index = _lastIndex;
     final dates = _source.dates;
-    while (dates.contains(_minDate)) {
+    while (dates.contains(_lastDate)) {
       _lastIndex--;
-      for (Date date in _minDate.iterate(widget.registry.dateScheme)) {
+      for (Date date in _lastDate.iterate(widget.registry.dateScheme)) {
         if (_source.forDate(date).isNotEmpty) return _lastIndex;
       }
     }
@@ -117,6 +120,13 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   @override
   Widget build(BuildContext context) {
     context.watch<CalendarViewer>();
+    final config = CalendarConfig.of(context);
+    if (_sequential && (!config.fixLastAnchor || !config.fixNextAnchor)) {
+      context.watch<CalendarEvents>();
+    }
+    final centred = config.centred && widget.appbar.isEmpty;
+    final showLastAnchor = config.fixLastAnchor || _source.hasBefore(_lastDate) != null;
+    final showNextAnchor = config.fixNextAnchor || _source.hasAfter(_nextDate) != null;
     if (_viewer.swiping != null) {
       final swipe = _viewer.swiping!;
       _viewer.clear();
@@ -130,31 +140,38 @@ class _AgendaScrollerState extends State<AgendaScroller> {
         controller: _viewer.controller,
         scrollDirection: widget.direction,
         cacheExtent: widget.registry.caching,
-        center: _centerKey,
+        center: (centred) ? _centerKey : null,
         slivers: [
-          if (_sequential) SliverToBoxAdapter(
-            child: IconButton(
-              icon: Icon(Icons.keyboard_double_arrow_up),
-              onPressed: () => setState(() {
+          ...widget.appbar,
+          if (_sequential && showLastAnchor) SliverToBoxAdapter(
+            child: GestureDetector(
+              child: config.lastAnchorBuilder?.call(context) ?? Icon(Icons.keyboard_double_arrow_up),
+              onTap: () => setState(() {
                 findLast();
               }),
             ),
           ),
-          SliverList(
+          if (centred) SliverList(
             delegate: SliverChildBuilderDelegate(
               childCount: (_sequential) ? _lastIndex.abs() : null,
                   (context, index) => _build(-(index + 1)),
             ),
           ),
-          SliverList(
+          if (!centred) SliverList(
+            delegate: SliverChildBuilderDelegate(
+              childCount: (_sequential) ? 1 + _nextIndex - _lastIndex : null,
+                  (context, index) => _build(_lastIndex + index),
+            ),
+          ),
+          if (centred) SliverList(
             key: _centerKey,
             delegate: SliverChildBuilderDelegate(
               childCount: (_sequential) ? 1 + _nextIndex : null,
                   (context, index) => _build(index),
             ),
           ),
-          if (_sequential) SliverToBoxAdapter(
-            child: IconButton(
+          if (_sequential && showNextAnchor) SliverToBoxAdapter(
+            child: config.nextAnchorBuilder?.call(context) ?? IconButton(
               icon: Icon(Icons.keyboard_double_arrow_down),
               onPressed: () => setState(() {
                 (_until != null) ? _until = null : findNext();

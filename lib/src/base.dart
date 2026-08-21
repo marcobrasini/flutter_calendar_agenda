@@ -130,6 +130,16 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
     this.onEventResized,
     this.onEventSwipedLeft,
     this.onEventSwipedRight,
+    //
+    this.centredView = true,
+    this.shrinkableAgenda = false,
+    this.negligibleAgenda = false,
+    this.fixLastAnchor = true,
+    this.fixNextAnchor = true,
+    this.lastAnchorBuilder,
+    this.nextAnchorBuilder,
+    this.emptyBuilder,
+    this.appbar = const [],
   });
 
   final CalendarSource<T> source;
@@ -158,7 +168,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
   final bool showIndicator;
   //
   final HeaderBuilder? headerBuilder;
-  final EventBuilder? eventBuilder;
+  final EventBuilder<T>? eventBuilder;
   final WidgetBuilder? leftSwipeBuilder;
   final WidgetBuilder? rightSwipeBuilder;
   final WidgetBuilder? cornerBuilder;
@@ -184,6 +194,16 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
   final TextConfig? dateConfig;
   final TextConfig? weekConfig;
   final LineConfig? lineConfig;
+  //
+  final bool centredView;
+  final bool shrinkableAgenda;
+  final bool negligibleAgenda;
+  final bool fixLastAnchor;
+  final bool fixNextAnchor;
+  final WidgetBuilder? lastAnchorBuilder;
+  final WidgetBuilder? nextAnchorBuilder;
+  final WidgetBuilder? emptyBuilder;
+  final List<Widget> appbar;
 
 
   CallbackScheme get callbacks => CallbackScheme(
@@ -241,6 +261,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
       line: CalendarDefaults.lineConfig.merge(lineConfig),
       clock: CalendarDefaults.clockConfig.merge(clockConfig),
       event: CalendarDefaults.eventConfig.merge(eventConfig),
+      centred: centredView,
       showFrame: showFrame,
       showHeader: showHeader,
       showHeaderWidget: showHeaderWidget,
@@ -249,10 +270,19 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
       eventDraggable: draggableEvent,
       eventResizable: resizableEvent,
       eventSwipeable: swipeableEvent,
+      fixLastAnchor: fixLastAnchor,
+      fixNextAnchor: fixNextAnchor,
+      shrinkableAgenda: shrinkableAgenda,
+      negligibleAgenda: negligibleAgenda,
+      emptyBuilder: emptyBuilder,
       headerBuilder: headerBuilder,
-      eventBuilder: eventBuilder,
+      eventBuilder: eventBuilder != null
+          ? (context, e) => eventBuilder!(context, e as T)
+          : null,
       leftSwipeBuilder: leftSwipeBuilder,
       rightSwipeBuilder: rightSwipeBuilder,
+      lastAnchorBuilder: lastAnchorBuilder,
+      nextAnchorBuilder: nextAnchorBuilder,
       child: buildViewer(context,
         dateScheme ?? defaults.dateScheme,
         timeScheme ?? defaults.timeScheme,

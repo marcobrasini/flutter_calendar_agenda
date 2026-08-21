@@ -179,18 +179,26 @@ class CalendarConfig extends InheritedWidget {
     required this.date,
     this.time,
     this.week,
+    this.centred = true,
     this.showFrame = true,
     this.showHeader = true,
     this.showHeaderWidget = true,
     this.showHeaderButton = true,
+    this.fixLastAnchor = true,
+    this.fixNextAnchor = true,
     this.showIndicator = true,
     this.eventDraggable = false,
     this.eventResizable = false,
     this.eventSwipeable = false,
+    this.shrinkableAgenda = false,
+    this.negligibleAgenda = false,
     this.headerBuilder,
     this.eventBuilder,
     this.leftSwipeBuilder,
     this.rightSwipeBuilder,
+    this.lastAnchorBuilder,
+    this.nextAnchorBuilder,
+    this.emptyBuilder,
   });
 
   final LineConfig line;
@@ -200,18 +208,26 @@ class CalendarConfig extends InheritedWidget {
   final TextConfig date;
   final TextConfig? time;
   final TextConfig? week;
+  final bool centred;
   final bool showFrame;
   final bool showHeader;
   final bool showHeaderWidget;
   final bool showHeaderButton;
+  final bool fixLastAnchor;
+  final bool fixNextAnchor;
   final bool showIndicator;
   final bool eventDraggable;
   final bool eventResizable;
   final bool eventSwipeable;
+  final bool shrinkableAgenda;
+  final bool negligibleAgenda;
   final HeaderBuilder? headerBuilder;
   final EventBuilder? eventBuilder;
   final WidgetBuilder? leftSwipeBuilder;
   final WidgetBuilder? rightSwipeBuilder;
+  final WidgetBuilder? lastAnchorBuilder;
+  final WidgetBuilder? nextAnchorBuilder;
+  final WidgetBuilder? emptyBuilder;
 
   Axis scrollDirection(CalendarView view) => switch(view) {
     CalendarView.daily    => Axis.horizontal,

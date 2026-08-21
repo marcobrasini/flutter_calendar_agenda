@@ -1,7 +1,8 @@
 export 'src/calendar.dart' show Calendar;
+export 'src/agenda.dart' show Agenda;
 export 'src/source.dart' show CalendarSource;
 export 'src/viewer.dart' show CalendarViewer;
-export 'src/enums.dart' show CalendarView;
+export 'src/enums.dart' show CalendarView, CalendarScroll;
 export 'src/data/event.dart' show Event, EventType;
 export 'src/data/fixture.dart' show Fixture;
 export 'src/data/pattern.dart' show Pattern, PatternType;

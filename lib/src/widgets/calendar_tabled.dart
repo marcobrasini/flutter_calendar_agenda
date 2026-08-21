@@ -23,8 +23,8 @@ class CalendarTabled extends StatefulWidget {
     required this.dateScheme,
     required this.weekScheme,
     required this.callbacks,
-    //
     this.cornerWidget,
+    this.slider,
   });
 
   final DateScheme dateScheme;
@@ -32,6 +32,7 @@ class CalendarTabled extends StatefulWidget {
   final TimeScheme? timeScheme;
   final CallbackScheme callbacks;
   final WidgetBuilder? cornerWidget;
+  final ScrollController? slider;
 
   @override
   State<CalendarTabled> createState() => _CalendarTabledState();
@@ -39,7 +40,7 @@ class CalendarTabled extends StatefulWidget {
 
 class _CalendarTabledState extends State<CalendarTabled> {
   final GlobalKey _viewport = GlobalKey();
-  final ScrollController _slider = ScrollController();
+  late final ScrollController _slider;
   late final CalendarViewer _viewer;
   TabledMetrics? _metrics;
 
@@ -49,12 +50,12 @@ class _CalendarTabledState extends State<CalendarTabled> {
   void initState() {
     super.initState();
     _viewer = context.read<CalendarViewer>();
+    _slider = widget.slider ?? ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
-      final viewport = _viewport.currentContext?.findRenderObject();
       final content = _controller.key.currentContext?.findRenderObject();
-      modifier.attachViewport(viewport as RenderBox?);
+      modifier.attachViewport(_viewport);
       modifier.attachContent(content as RenderBox?);
       modifier.attachSlider(_slider);
       modifier.reset();
@@ -64,7 +65,7 @@ class _CalendarTabledState extends State<CalendarTabled> {
   @override
   void dispose() {
     _metrics?.dispose();
-    _slider.dispose();
+    if (widget.slider == null) _slider.dispose();
     super.dispose();
   }
 
@@ -85,7 +86,6 @@ class _CalendarTabledState extends State<CalendarTabled> {
     );
     return LayoutBuilder(
       builder: (context, constraints) {
-
         final timeMargin = context.timeMargin();
         final timeOffset = context.timeOffset();
         final dateOffset = context.dateOffset();
@@ -98,7 +98,6 @@ class _CalendarTabledState extends State<CalendarTabled> {
         );
         final slotHeight = pageHeight / (widget.weekScheme?.count ?? 1);
         metrics.resize(pageWidth, pageHeight);
-        // modifier.attachConverter(metrics.converter);
         return Column(
           children: [
             if (config.showHeaderWidget) Row(

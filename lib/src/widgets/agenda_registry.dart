@@ -44,6 +44,8 @@ class AgendaRegistry {
     Axis.vertical   => _height,
   };
 
+  bool get isBlank => _sorted.length <= 1;
+
   dynamic indexer(dynamic datetime, int index) => datetime + index;
 
   void add(RenderRegistry a) {

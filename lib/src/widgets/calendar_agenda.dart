@@ -17,11 +17,13 @@ class CalendarAgenda extends StatefulWidget {
     required this.callbacks,
     required this.scrolling,
     this.dateScheme,
+    this.appbar = const [],
   });
 
   final CalendarScroll scrolling;
   final CallbackScheme callbacks;
   final DateScheme? dateScheme;
+  final List<Widget> appbar;
 
   @override
   State<CalendarAgenda> createState() => _CalendarAgendaState();
@@ -39,9 +41,8 @@ class _CalendarAgendaState extends State<CalendarAgenda> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
-      final viewport = _viewportKey.currentContext?.findRenderObject();
       final content = _viewer.controller.key.currentContext?.findRenderObject();
-      modifier.attachViewport(viewport as RenderBox);
+      modifier.attachViewport(_viewportKey);
       modifier.attachContent(content as RenderBox);
     });
   }
@@ -65,6 +66,7 @@ class _CalendarAgendaState extends State<CalendarAgenda> {
               key: _viewer.controller.key,
               direction: Axis.vertical,
               registry: registry,
+              appbar: widget.appbar,
               builder: (datetime, until) => AgendaTile(
                 datetime: datetime,
                 dateScheme: widget.dateScheme,

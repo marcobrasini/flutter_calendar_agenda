@@ -1,3 +1,4 @@
+import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
@@ -15,8 +16,6 @@ class AgendaTile extends StatefulWidget {
     required this.datetime,
     required this.dateScheme,
     required this.callbacks,
-    this.negligible = false,
-    this.shrinkable = true,
     this.until,
   });
 
@@ -24,8 +23,6 @@ class AgendaTile extends StatefulWidget {
   final dynamic datetime;
   final DateScheme? dateScheme;
   final CallbackScheme callbacks;
-  final bool negligible;
-  final bool shrinkable;
   final Date? until;
 
   @override
@@ -45,13 +42,16 @@ class _AgendaTileState extends State<AgendaTile> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.negligible && isEmpty) return SizedBox.shrink();
+    context.watch<CalendarEvents>();
+    final config = CalendarConfig.of(context);
+    final forced = widget.datetime.iterate(widget.dateScheme).contains(Date.now());
+    if (!forced && config.negligibleAgenda && isEmpty) return SizedBox.shrink();
     return Column(
       children: [
         AgendaHeader(
           datetime: widget.datetime,
           dateScheme: widget.dateScheme,
-          onTap: widget.shrinkable
+          onTap: config.shrinkableAgenda
               ? () => setState(() => _expanded = !_expanded)
               : null,
         ),
@@ -63,7 +63,7 @@ class _AgendaTileState extends State<AgendaTile> {
                 width: widget.width,
                 callbacks: widget.callbacks,
               ),
-          if (isEmpty) const Padding(
+          if (isEmpty) config.emptyBuilder?.call(context) ?? const Padding(
             padding: EdgeInsets.all(textSlotPadding),
             child: Center(child: Text("No events")),
           ),

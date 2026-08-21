@@ -89,10 +89,11 @@ class CalendarModifier extends ChangeNotifier {
   bool get isResizing => modifying && _action == SlotAction.resizing;
   bool get isDragging => modifying && _action == SlotAction.dragging;
 
-  RenderBox? _viewport;
-  void attachViewport(RenderBox? box) => _viewport = box;
-  bool get hasViewport => (_viewport != null)
-      ? (_viewport!.attached && _viewport!.hasSize)
+  GlobalKey? _viewport;
+  RenderBox? get viewport => _viewport?.currentContext?.findRenderObject() as RenderBox?;
+  void attachViewport(GlobalKey viewport) => _viewport = viewport;
+  bool get hasViewport => (viewport != null)
+      ? (viewport!.attached && viewport!.hasSize)
       : false;
 
   RenderBox? _content;
@@ -171,10 +172,10 @@ class CalendarModifier extends ChangeNotifier {
   //
   double _slidingEdge() {
     double space = 0;
-    final local = _viewport!.globalToLocal(_actualOffset!);
+    final local = viewport!.globalToLocal(_actualOffset!);
     switch (slidingDirection!) {
       case Axis.vertical:
-        final height = _viewport!.size.height;
+        final height = viewport!.size.height;
         final offset = (isDragging) ? _localOffset! : Offset.zero;
         final delta = (isDragging) ? _container.height : 0.0;
         final top = (local - offset).dy;
@@ -185,7 +186,7 @@ class CalendarModifier extends ChangeNotifier {
           space = bottom - (height - slideMargin);
         }
       case Axis.horizontal:
-        final width = _viewport!.size.width;
+        final width = viewport!.size.width;
         final left = (local - _localOffset!).dx;
         final right = left + _container.width;
         if (left < slideMargin) {
@@ -224,14 +225,14 @@ class CalendarModifier extends ChangeNotifier {
 
   //
   int swipingEdge() {
-    final local = _viewport!.globalToLocal(_actualOffset!);
+    final local = viewport!.globalToLocal(_actualOffset!);
     switch (swipingDirection!) {
       case Axis.horizontal:
-        final width = _viewport!.constraints.maxWidth;
+        final width = viewport!.constraints.maxWidth;
         if (local.dx <= swipeMargin) return -1;
         if (local.dx >= width - swipeMargin) return 1;
       case Axis.vertical:
-        final height = _viewport!.constraints.maxHeight;
+        final height = viewport!.constraints.maxHeight;
         if (local.dy <= swipeMargin) return -1;
         if (local.dy >= height - swipeMargin) return 1;
     }
