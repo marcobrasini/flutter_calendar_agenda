@@ -90,11 +90,17 @@ class CalendarViewer extends ChangeNotifier {
         return datetime.format(header.format);
     }
   }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 }
 
 class CalendarController extends ScrollController {
+  final GlobalKey key = GlobalKey();
   final CalendarScroll scroll;
-  final key = GlobalKey();
   late DateTime datetime;
   double distance = 0.0;
 

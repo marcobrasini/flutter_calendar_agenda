@@ -71,6 +71,7 @@ class MyApp extends StatelessWidget {
             onEventDragged: (event, fixture) {
               if (event.isInstance) {
                 final recurrence = source.find(event.parentId!);
+                if (recurrence == null) return;
                 final delta = fixture.start.difference(event.start);
                 source.modifyEvent(recurrence.set({
                   "start": recurrence.start.add(delta),

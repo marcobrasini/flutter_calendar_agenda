@@ -61,7 +61,7 @@ class CalendarEvents extends ChangeNotifier {
 
   void append(List<Event> others) => _events.addAll(others);
 
-  Event find(String id) => _events.singleWhere((e) => e.id == id);
+  Event? find(String id) => _events.where((e) => e.id == id).singleOrNull;
 
   static List<Event> sort(List<Event> events) {
     events.sort((a, b) {
@@ -165,14 +165,28 @@ class CalendarEvents extends ChangeNotifier {
 
 
 class CalendarSource<T extends Event> extends CalendarEvents {
-  CalendarSource({List<T>? events, super.cacheRange})
-      : super(events: events);
+  CalendarSource({
+    List<T>? events,
+    super.cacheRange,
+    this.label,
+    bool visible = true,
+  }) :  _visible = visible,
+        super(events: events);
+
+  final String? label;
+  bool _visible;
+  bool get visible => _visible;
+  set visible(bool value) {
+    if (_visible == value) return;
+    _visible = value;
+    notifyListeners();
+  }
 
   @override
   List<T> get events => _events.cast<T>();
 
   @override
-  T find(String id) => super.find(id) as T;
+  T? find(String id) => super.find(id) as T;
 
   void insertEvent(T event, [bool notify = true]) {
     super.addEvent(event);
@@ -187,5 +201,98 @@ class CalendarSource<T extends Event> extends CalendarEvents {
   void removeEvent(T event, [bool notify = true]) {
     super.delEvent(event.id!);
     if (notify) notifyListeners();
+  }
+}
+
+
+class CalendarSources<T extends Event> extends CalendarSource<T> {
+  CalendarSources(this._sources) {
+    for (final source in _sources) {
+      source.addListener(notifyListeners);
+    }
+  }
+
+  final Set<CalendarSource<T>> _sources;
+
+  List<CalendarSource<T>> get sources => List.unmodifiable(_sources);
+  Iterable<CalendarSource<T>> get _active => _sources.where((s) => s.visible);
+
+  CalendarSource<T> source(String label) =>
+      _sources.singleWhere((s) => s.label == label);
+
+  void toggle(CalendarSource<T> source, [bool? value]) =>
+      source.visible = value ?? !source.visible;
+
+  @override
+  void dispose() {
+    for (final source in _sources) {
+      source.removeListener(notifyListeners);
+    }
+    super.dispose();
+  }
+
+  // ── Query ───────────────────────────────────────────────────────────────
+
+  @override
+  List<T> get events => [for (final s in _active) ...s.events];
+
+  @override
+  List<Date> get dates {
+    final keys = <Date>{for (final s in _active) ...s.dates}.toList();
+    keys.sort((a, b) => a.compareTo(b));
+    return keys;
+  }
+
+  @override
+  bool get built => _active.every((s) => s.built);
+
+  @override
+  List<Event> forDate(Date date) => CalendarEvents.sort([
+    for (final s in _active) ...s.forDate(date),
+  ]);
+
+  @override
+  void build(Date from, Date to) {
+    for (var s in _active) {
+      s.build(from, to);
+    }
+  }
+
+  @override
+  void clear() {
+    for (final s in _sources) {
+      s.clear();
+    }
+    notifyListeners();
+  }
+
+  @override
+  DateTime? hasBefore(DateTime datetime) {
+    final all = [for (final s in _active) s.hasBefore(datetime)].nonNulls;
+    return all.isEmpty ? null : all.reduce((a, b) => a.isAfter(b) ? a : b);
+  }
+
+  @override
+  DateTime? hasAfter(DateTime datetime) {
+    final all = [for (final s in _active) s.hasAfter(datetime)].nonNulls;
+    return all.isEmpty ? null : all.reduce((a, b) => a.isBefore(b) ? a : b);
+  }
+
+  // ── Routing delle mutazioni ─────────────────────────────────────────────
+
+  CalendarSource<T>? owner(String id) {
+    for (final source in _sources) {
+      if (source.events.any((e) => e.id == id)) return source;
+    }
+    return null;
+  }
+
+  @override
+  T? find(String id) {
+    for (final source in _sources) {
+      final match = source.find(id);
+      if (match != null) return match;
+    }
+    return null;
   }
 }

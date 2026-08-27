@@ -17,13 +17,11 @@ class CalendarAgenda extends StatefulWidget {
     required this.callbacks,
     required this.scrolling,
     this.dateScheme,
-    this.appbar = const [],
   });
 
   final CalendarScroll scrolling;
   final CallbackScheme callbacks;
   final DateScheme? dateScheme;
-  final List<Widget> appbar;
 
   @override
   State<CalendarAgenda> createState() => _CalendarAgendaState();
@@ -66,7 +64,6 @@ class _CalendarAgendaState extends State<CalendarAgenda> {
               key: _viewer.controller.key,
               direction: Axis.vertical,
               registry: registry,
-              appbar: widget.appbar,
               builder: (datetime, until) => AgendaTile(
                 datetime: datetime,
                 dateScheme: widget.dateScheme,

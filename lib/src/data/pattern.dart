@@ -9,10 +9,20 @@ enum PatternType {
   yearly,
 }
 
-String? patternProperty(String source, String property) {
+String? patternRRULE(String source, String property) {
   final index = source.indexOf(property);
   if (index == -1) return null;
   final start = index + ("$property=").length;
+  final stop = source.indexOf(";", start);
+  return stop == -1
+      ? source.substring(start)
+      : source.substring(start, stop);
+}
+
+String? patternEXDATE(String source) {
+  final index = source.indexOf("EXDATE:");
+  if (index == -1) return null;
+  final start = index + ("EXDATE:").length;
   final stop = source.indexOf(";", start);
   return stop == -1
       ? source.substring(start)
@@ -52,12 +62,13 @@ class Pattern with Diagnosticable {
         recurrences = recurrences ?? <Date>[];
 
   factory Pattern.fromICSString(String string) {
+    final rrule = string.replaceAll("\n", ";");
     final properties = {
-      "type": patternProperty(string, "FREQ"),
-      "step": patternProperty(string, "INTERVAL"),
-      "count": patternProperty(string, "COUNT"),
-      "until": patternProperty(string, "UNTIL"),
-      "exceptions": patternProperty(string, "EXDATE"),
+      "type": patternRRULE(rrule, "FREQ"),
+      "step": patternRRULE(rrule, "INTERVAL"),
+      "count": patternRRULE(rrule, "COUNT"),
+      "until": patternRRULE(rrule, "UNTIL"),
+      "exceptions": patternEXDATE(rrule),
     };
     return Pattern(
       type: _icsToType[properties["type"]!]!,
@@ -72,15 +83,16 @@ class Pattern with Diagnosticable {
   }
 
   String toICSString() {
-    final strings = <String>["FREQ=${_typeToIcs[type]}"];
-    if (step != 1) strings.add("INTERVAL=$step");
-    if (count != null) strings.add("COUNT=$count");
-    if (until != null) strings.add("UNTIL=${until!.toISOString()}");
+    final rrule = <String>["FREQ=${_typeToIcs[type]}"];
+    if (step != 1) rrule.add("INTERVAL=$step");
+    if (count != null) rrule.add("COUNT=$count");
+    if (until != null) rrule.add("UNTIL=${until!.toISOString()}");
+    String string = "RRULE:${rrule.join(";")}";
     if (exceptions.isNotEmpty) {
-      final dates = exceptions.map((date) => date.toISOString()).toList();
-      strings.add("EXDATE=${dates.join(",")}");
+      final exdate = exceptions.map((date) => date.toISOString()).toList();
+      string = "$string\nEXDATE:${exdate.join(",")}";
     }
-    return "RRULE:${strings.join(";")};";
+    return string;
   }
 
   PatternIterator iterator(DateTime datetime) {

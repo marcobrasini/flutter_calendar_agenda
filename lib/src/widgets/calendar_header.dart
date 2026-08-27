@@ -8,22 +8,18 @@ import '../enums.dart';
 
 class CalendarTabledHeader extends StatelessWidget {
 
-  final bool showButtons;
-
   const CalendarTabledHeader({
     super.key,
-    this.showButtons = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final viewer = context.watch<CalendarViewer>();
     final modifier = context.watch<CalendarModifier>();
+    final config = CalendarConfig.of(context);
     final header = CalendarConfig.of(context).header;
-    final colors = Theme.of(context).colorScheme;
-    final color = header.background ?? colors.primary;
-    final style = header.textStyle?.copyWith(color: colors.onPrimary)
-        ?? TextStyle(color: colors.onPrimary);
+    final color = header.background;
+    final style = header.textStyle;
     return LayoutBuilder(
       builder: (context, constraints) => Container(
         color: color,
@@ -31,30 +27,32 @@ class CalendarTabledHeader extends StatelessWidget {
           children: [
             Row(
               children: [
-                if (showButtons) IconButton(
+                if (config.showHeaderButton) IconButton(
                   onPressed: (modifier.isResizing) ? null : () {
                     viewer.swipe(CalendarSwipe.backward);
                   },
                   icon: Icon(Icons.arrow_left,
-                    color: style.color,
-                    size: style.fontSize,
+                    color: style?.color,
+                    size: style?.fontSize,
                   ),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text(
+                    child: config.headerBuilder?.call(
+                        context, viewer.datetime.first, viewer.datetime.last
+                    ) ?? Text(
                       viewer.title(context),
                       style: style,
                     ),
                   ),
                 ),
-                if (showButtons) IconButton(
+                if (config.showHeaderButton) IconButton(
                   onPressed: (modifier.isResizing) ? null : () {
                     viewer.swipe(CalendarSwipe.forward);
                   },
                   icon: Icon(Icons.arrow_right,
-                    color: style.color,
-                    size: style.fontSize,
+                    color: style?.color,
+                    size: style?.fontSize,
                   ),
                 ),
               ],

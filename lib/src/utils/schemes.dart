@@ -42,8 +42,8 @@ class DateScheme {
   const DateScheme.daily()  : this(0, 1);
   const DateScheme.weekly() : this(0, 7);
 
-  List<Date> iterate(Date date) => List<Date>.generate(
-      count, (i) => date.date - beg + i
+  List<Date> iterate(DateTime datetime) => List<Date>.generate(
+      count, (i) => datetime.date - beg + i
   );
 }
 

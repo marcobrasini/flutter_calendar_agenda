@@ -88,6 +88,7 @@ class MyApp extends StatelessWidget {
             view: CalendarView.monthly,
             onEventDragged: (event, fixture) {
               final e = source.find(event.id ?? event.parentId!);
+              if (e == null) return;
               source.modifyEvent(e.set({
                 "start": fixture.start,
                 "stop": fixture.stop,

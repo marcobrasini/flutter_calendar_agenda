@@ -1,6 +1,6 @@
 export 'src/calendar.dart' show Calendar;
 export 'src/agenda.dart' show Agenda;
-export 'src/source.dart' show CalendarSource;
+export 'src/source.dart' show CalendarSource, CalendarSources;
 export 'src/viewer.dart' show CalendarViewer;
 export 'src/enums.dart' show CalendarView, CalendarScroll;
 export 'src/data/event.dart' show Event, EventType;

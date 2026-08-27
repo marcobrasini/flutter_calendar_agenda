@@ -49,7 +49,6 @@ class Agenda<T extends Event> extends CalendarBase<T> {
     super.onEventSwipedRight,
     super.lastAnchorBuilder,
     super.nextAnchorBuilder,
-    super.appbar = const [],
     super.emptyBuilder,
     super.centredView,
   });
@@ -59,10 +58,29 @@ class Agenda<T extends Event> extends CalendarBase<T> {
       DateScheme dateScheme,
       TimeScheme? timeScheme,
       WeekScheme? weekScheme,
-  ) => CalendarAgenda(
-    dateScheme: dateScheme,
-    callbacks: callbacks,
-    scrolling: scroll,
-    appbar: appbar,
-  );
+  ) {
+    // return CustomScrollView(
+    //   primary: false,
+    //   slivers: [
+    //     SliverLayoutBuilder(
+    //       builder: (context, constraints) => SliverToBoxAdapter(
+    //         child: SizedBox(
+    //           height: constraints.viewportMainAxisExtent -
+    //           constraints.precedingScrollExtent,
+    //           child: CalendarAgenda(
+    //             dateScheme: dateScheme,
+    //             callbacks: callbacks,
+    //             scrolling: scroll,
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //   ],
+    // );
+    return CalendarAgenda(
+      dateScheme: dateScheme,
+      callbacks: callbacks,
+      scrolling: scroll,
+    );
+  }
 }

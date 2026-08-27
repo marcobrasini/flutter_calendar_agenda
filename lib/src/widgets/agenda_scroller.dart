@@ -19,13 +19,11 @@ class AgendaScroller extends StatefulWidget {
     required this.direction,
     required this.registry,
     required this.builder,
-    this.appbar = const [],
   });
 
   final Axis direction;
   final AgendaRegistry registry;
   final ScrollBuilder builder;
-  final List<Widget> appbar;
 
   @override
   State<AgendaScroller> createState() => _AgendaScrollerState();
@@ -124,7 +122,6 @@ class _AgendaScrollerState extends State<AgendaScroller> {
     if (_sequential && (!config.fixLastAnchor || !config.fixNextAnchor)) {
       context.watch<CalendarEvents>();
     }
-    final centred = config.centred && widget.appbar.isEmpty;
     final showLastAnchor = config.fixLastAnchor || _source.hasBefore(_lastDate) != null;
     final showNextAnchor = config.fixNextAnchor || _source.hasAfter(_nextDate) != null;
     if (_viewer.swiping != null) {
@@ -140,9 +137,8 @@ class _AgendaScrollerState extends State<AgendaScroller> {
         controller: _viewer.controller,
         scrollDirection: widget.direction,
         cacheExtent: widget.registry.caching,
-        center: (centred) ? _centerKey : null,
+        center: (config.centred) ? _centerKey : null,
         slivers: [
-          ...widget.appbar,
           if (_sequential && showLastAnchor) SliverToBoxAdapter(
             child: GestureDetector(
               child: config.lastAnchorBuilder?.call(context) ?? Icon(Icons.keyboard_double_arrow_up),
@@ -151,19 +147,19 @@ class _AgendaScrollerState extends State<AgendaScroller> {
               }),
             ),
           ),
-          if (centred) SliverList(
+          if (config.centred) SliverList(
             delegate: SliverChildBuilderDelegate(
               childCount: (_sequential) ? _lastIndex.abs() : null,
                   (context, index) => _build(-(index + 1)),
             ),
           ),
-          if (!centred) SliverList(
+          if (!config.centred) SliverList(
             delegate: SliverChildBuilderDelegate(
               childCount: (_sequential) ? 1 + _nextIndex - _lastIndex : null,
                   (context, index) => _build(_lastIndex + index),
             ),
           ),
-          if (centred) SliverList(
+          if (config.centred) SliverList(
             key: _centerKey,
             delegate: SliverChildBuilderDelegate(
               childCount: (_sequential) ? 1 + _nextIndex : null,

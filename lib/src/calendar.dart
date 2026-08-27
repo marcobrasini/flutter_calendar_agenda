@@ -57,6 +57,37 @@ class Calendar<T extends Event> extends CalendarBase<T> {
       TimeScheme? timeScheme,
       WeekScheme? weekScheme,
   ) {
+    // return CustomScrollView(
+    //   primary: false,
+    //   slivers: [
+    //     SliverAppBar(
+    //       pinned: true,
+    //       automaticallyImplyLeading: false,
+    //       automaticallyImplyActions: false,
+    //       centerTitle: true,
+    //       backgroundColor: headerConfig?.background,
+    //       title: CalendarTabledHeader(),
+    //     ),
+    //     SliverLayoutBuilder(
+    //       builder: (context, constraints) => SliverToBoxAdapter(
+    //         child: SizedBox(
+    //           height: constraints.viewportMainAxisExtent -
+    //               constraints.precedingScrollExtent,
+    //           child: CalendarTabled(
+    //             slider: PrimaryScrollController.maybeOf(context),
+    //             dateScheme: (view == CalendarView.daily)
+    //                 ? DateScheme.daily()
+    //                 : dateScheme,
+    //             timeScheme: (view == CalendarView.monthly) ? null : timeScheme,
+    //             weekScheme: (view == CalendarView.monthly) ? weekScheme : null,
+    //             callbacks: callbacks,
+    //             cornerWidget: cornerBuilder,
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //   ],
+    // );
     return Column(
       children: [
         CalendarTabledHeader(),
