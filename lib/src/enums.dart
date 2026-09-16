@@ -18,6 +18,7 @@ enum CalendarSwipe {
 enum CalendarScroll {
   continuous,
   sequential,
+  individual,
   snapping,
 }
 

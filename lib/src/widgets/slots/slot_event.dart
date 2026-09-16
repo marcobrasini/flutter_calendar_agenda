@@ -44,32 +44,37 @@ class SlotEvent extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(eventSlotRounded),
           border: (selected) ? Border.all(
             color: event.color.dimmer(eventSlotLineDimmed),
             width: eventSlotLineWidth,
           ) : null,
-          borderRadius: BorderRadius.circular(eventSlotRounded),
           color: event.color.withAlpha(alpha),
         ),
-        // TODO correct the recurrences icon for better visualization.
         child: Stack(
           children: [
-            config.eventBuilder?.call(context, event) ?? Padding(
-              padding: EdgeInsetsGeometry.all(eventSlotPadding),
-              child: Text(event.subject,
-                style: config.event.textStyle,
-                maxLines: config.event.maxLines,
-                overflow: config.event.overflow,
+            config.eventBuilder?.call(context, event) ?? Container(
+              padding: EdgeInsets.only(
+                bottom: (event.parentId != null) ? 3 * eventSlotPadding : 0.0,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(eventSlotPadding),
+                child: Text(event.subject,
+                  style: config.event.textStyle,
+                  maxLines: config.event.maxLines,
+                  overflow: config.event.overflow,
+                ),
               ),
             ),
             if (event.parentId != null) Positioned(
-              left: 0.0,
-              bottom: 0.0,
+              left: eventSlotPadding,
+              bottom: eventSlotPadding,
               child: Icon(
                 (event.pattern == null) ? Icons.sync_disabled : Icons.sync,
-                size: 12.0,
+                color: config.event.textStyle?.color,
+                size: 3 * eventSlotPadding,
               ),
-            )
+            ),
           ],
         ),
       ),

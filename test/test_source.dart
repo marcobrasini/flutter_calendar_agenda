@@ -126,14 +126,14 @@ void main() {
 
     test('CalendarSource build', () {
       final source = CalendarEvents(events: events);
-      source.build(yesterday, tomorrow + 1);
+      source.load(yesterday, tomorrow + 1);
       expect(source.built, isTrue);
       expect(source.dates, [yesterday, today, tomorrow]);
     },);
 
     test('CalendarSource forDate', () {
       final source = CalendarEvents(events: events);
-      source.build(yesterday, tomorrow + 1);
+      source.load(yesterday, tomorrow + 1);
       for (var date in source.dates) {
         expect(source.forDate(date), cached[date]);
       }
@@ -142,12 +142,12 @@ void main() {
 
     test('CalendarSource shift', () {
       final source = CalendarEvents(events: events);
-      source.build(yesterday, tomorrow + 1);
+      source.load(yesterday, tomorrow + 1);
       expect(source.dates, [yesterday, today, tomorrow]);
       for (var date in source.dates) {
         expect(source.forDate(date), cached[date]);
       }
-      source.build(yesterday+1, tomorrow + 2);
+      source.load(yesterday+1, tomorrow + 2);
       expect(source.dates, [today, tomorrow, tomorrow + 1]);
       for (var date in source.dates) {
         expect(source.forDate(date), cached[date]);

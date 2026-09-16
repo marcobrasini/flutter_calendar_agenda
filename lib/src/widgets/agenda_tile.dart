@@ -8,7 +8,6 @@ import '../const.dart';
 import 'agenda_header.dart';
 import 'agenda_list.dart';
 
-
 class AgendaTile extends StatefulWidget {
   const AgendaTile({
     super.key,
@@ -16,6 +15,8 @@ class AgendaTile extends StatefulWidget {
     required this.datetime,
     required this.dateScheme,
     required this.callbacks,
+    this.onCollapse,
+    this.onNeglect,
     this.until,
   });
 
@@ -23,6 +24,8 @@ class AgendaTile extends StatefulWidget {
   final dynamic datetime;
   final DateScheme? dateScheme;
   final CallbackScheme callbacks;
+  final VoidCallback? onCollapse;
+  final VoidCallback? onNeglect;
   final Date? until;
 
   @override
@@ -44,15 +47,23 @@ class _AgendaTileState extends State<AgendaTile> {
   Widget build(BuildContext context) {
     context.watch<CalendarEvents>();
     final config = CalendarConfig.of(context);
-    final forced = widget.datetime.iterate(widget.dateScheme).contains(Date.now());
-    if (!forced && config.negligibleAgenda && isEmpty) return SizedBox.shrink();
+    final forced = widget.datetime
+        .iterate(widget.dateScheme)
+        .contains(Date.now());
+    if (!forced && config.negligibleAgenda && isEmpty) {
+      widget.onNeglect?.call();
+      return SizedBox.shrink();
+    }
     return Column(
       children: [
         AgendaHeader(
           datetime: widget.datetime,
           dateScheme: widget.dateScheme,
           onTap: config.shrinkableAgenda
-              ? () => setState(() => _expanded = !_expanded)
+              ? () => setState(() {
+                  if (_expanded) widget.onCollapse?.call();
+                  _expanded = !_expanded;
+                })
               : null,
         ),
         if (_expanded) ...[
@@ -63,13 +74,14 @@ class _AgendaTileState extends State<AgendaTile> {
                 width: widget.width,
                 callbacks: widget.callbacks,
               ),
-          if (isEmpty) config.emptyBuilder?.call(context) ?? const Padding(
-            padding: EdgeInsets.all(textSlotPadding),
-            child: Center(child: Text("No events")),
-          ),
-        ]
+          if (isEmpty)
+            config.emptyBuilder?.call(context) ??
+                const Padding(
+                  padding: EdgeInsets.all(textSlotPadding),
+                  child: Center(child: Text("No events")),
+                ),
+        ],
       ],
     );
   }
 }
-

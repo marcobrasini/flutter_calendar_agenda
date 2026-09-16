@@ -5,6 +5,8 @@ import 'data/event.dart';
 import 'enums.dart';
 
 //
+typedef EditEvent<T extends Event> = bool Function(T);
+//
 typedef SlotCallback<T extends Event> = void Function(T);
 typedef PageCallback<T extends Event> = void Function(DateTime);
 typedef FrameCallback<T extends Event> = void Function(Offset, [T?]);

@@ -141,6 +141,9 @@ class EventConfig{
     this.textStyle,
     this.overflow,
     this.maxLines,
+    this.draggable,
+    this.resizable,
+    this.swipeable,
   });
 
   final Duration? duration;
@@ -150,6 +153,9 @@ class EventConfig{
   final TextStyle? textStyle;
   final TextOverflow? overflow;
   final int? maxLines;
+  final EditEvent? draggable;
+  final EditEvent? resizable;
+  final EditEvent? swipeable;
 
   Duration get eventDuration => duration ?? Duration(milliseconds: 200);
   double get eventPadding => padding ?? 0.0;
@@ -164,6 +170,9 @@ class EventConfig{
     textStyle:          other.textStyle ?? textStyle,
     maxLines:           other.maxLines ?? maxLines,
     overflow:           other.overflow ?? overflow,
+    draggable:          other.draggable ?? draggable,
+    resizable:          other.draggable ?? resizable,
+    swipeable:          other.draggable ?? swipeable,
   );
 }
 

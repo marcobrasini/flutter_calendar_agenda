@@ -31,7 +31,7 @@ class CalendarEvents extends ChangeNotifier {
   Date? cacheFrom;
   Date? cacheTo;
 
-  void build(Date from, Date to) {
+  void load(Date from, Date to) {
     if (cacheFrom == null || cacheTo == null) {
       _fetch(from, to);
       cacheFrom = from;
@@ -83,7 +83,7 @@ class CalendarEvents extends ChangeNotifier {
   // ── Query pubbliche ─────────────────────────────────────────────────────
 
   List<Event> forDate(Date date) {
-    build((date - cacheRange).toMonth.start, (date + cacheRange).toMonth.stop);
+    load((date - cacheRange).toMonth.start, (date + cacheRange).toMonth.stop);
     return _cache[date] ?? [];
   }
 
@@ -188,6 +188,8 @@ class CalendarSource<T extends Event> extends CalendarEvents {
   @override
   T? find(String id) => super.find(id) as T;
 
+  void set(List<T> events) => this..clear()..append(events);
+
   void insertEvent(T event, [bool notify = true]) {
     super.addEvent(event);
     if (notify) notifyListeners();
@@ -252,9 +254,9 @@ class CalendarSources<T extends Event> extends CalendarSource<T> {
   ]);
 
   @override
-  void build(Date from, Date to) {
+  void load(Date from, Date to) {
     for (var s in _active) {
-      s.build(from, to);
+      s.load(from, to);
     }
   }
 

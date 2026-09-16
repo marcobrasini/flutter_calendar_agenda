@@ -361,9 +361,7 @@ class CalendarModifier extends ChangeNotifier {
   void dispose() {
     _removePointerRoutes();
     _slidingStop();
-    _slider?.dispose();
     _swipingStop();
-    _viewer?.dispose();
     super.dispose();
   }
 }

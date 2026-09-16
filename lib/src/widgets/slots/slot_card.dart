@@ -1,9 +1,11 @@
 import 'package:calendar/src/config.dart';
 import 'package:calendar/src/const.dart';
+import 'package:calendar/src/modifier.dart';
 import 'package:calendar/src/widgets/slots/slot_event.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/src/data/event.dart';
 import 'package:calendar/src/data/fixture.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 class SlotCard extends StatelessWidget {
@@ -38,6 +40,7 @@ class SlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final modifier = context.read<CalendarModifier>();
     final config = CalendarConfig.of(context).event;
     final scheme = Theme.of(context).colorScheme;
     return Padding(
@@ -61,8 +64,10 @@ class SlotCard extends StatelessWidget {
             switch (direction) {
               case DismissDirection.startToEnd:
                 onEventSwipedRight?.call(event, fixture);
+                modifier.reset();
               case DismissDirection.endToStart:
                 onEventSwipedLeft?.call(event, fixture);
+                modifier.reset();
               default:
                 break;
             }

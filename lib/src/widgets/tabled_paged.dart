@@ -97,8 +97,15 @@ class PagedSlotEvent extends StatelessWidget {
   final SlotLayout layout;
   final CallbackScheme callbacks;
 
+  bool resizable(CalendarConfig config) =>
+      config.event.resizable?.call(layout.event) ?? config.eventResizable;
+
+  bool draggable(CalendarConfig config) =>
+      config.event.draggable?.call(layout.event) ?? config.eventDraggable;
+
   @override
   Widget build(BuildContext context) {
+    final config = CalendarConfig.of(context);
     final modifier = context.read<CalendarModifier>();
     final slot = context.select<CalendarModifier, SlotModifier>((modifier) {
       final selected = modifier.layout?.event == layout.event;
@@ -117,17 +124,23 @@ class PagedSlotEvent extends StatelessWidget {
       bottom: 0.0,
       left: (container?.left ?? layout.left),
       width: container?.width ?? layout.width,
-      onEnd: () => modifier.start(),
+      onEnd: (draggable(config) || resizable(config))
+          ? () => modifier.start()
+          : null,
       child: GestureDetector(
         onDoubleTap: () {
           callbacks.onEventDoubleTap?.call(layout.event);
-          modifier.take(layout, SlotAction.resizing);
-          if (layout.isExpanded) modifier.start();
+          if (resizable(config)) {
+            modifier.take(layout, SlotAction.resizing);
+            if (layout.isExpanded) modifier.start();
+          }
         },
         onLongPress: () {
           callbacks.onEventLongPress?.call(layout.event);
-          modifier.take(layout, SlotAction.dragging);
-          if (layout.isExpanded) modifier.start();
+          if (draggable(config)) {
+            modifier.take(layout, SlotAction.dragging);
+            if (layout.isExpanded) modifier.start();
+          }
         },
         onTap: () {
           callbacks.onEventTap?.call(layout.event);

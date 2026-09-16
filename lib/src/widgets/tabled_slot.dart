@@ -45,6 +45,7 @@ class TabledSlot extends StatelessWidget {
     return Stack(
       children: [
         TabledFrame(
+          key: ValueKey(date),
           width: width,
           height: height,
           offset: offset,
@@ -65,6 +66,7 @@ class TabledSlot extends StatelessWidget {
                       registry: modifier.registry,
                       delegate: SlotDropDelegate(date + i, timeScheme!),
                       child: TabledPaged(
+                        key: ValueKey(date + i),
                         date: date + i,
                         width: space,
                         height: height,
@@ -75,6 +77,7 @@ class TabledSlot extends StatelessWidget {
                       registry: modifier.registry,
                       delegate: TileDropDelegate(date + i),
                       child: TabledListed(
+                        key: ValueKey(date + i),
                         date: date + i,
                         width: space,
                         height: height,
