@@ -1,8 +1,11 @@
-import 'package:flutter/foundation.dart';
+import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 import '../utils/datetime.dart';
 
 
-class Fixture with Diagnosticable {
+class Fixture extends Equatable {
+  final DateTime start;
+  final DateTime stop;
 
   Fixture({
     required this.start,
@@ -14,42 +17,27 @@ class Fixture with Diagnosticable {
     "stop": stop,
   };
 
-  Fixture set(Map<String, dynamic> data) {
-    if (data.containsKey("start")) start = data["start"] as DateTime;
-    if (data.containsKey("stop")) stop = data["stop"] as DateTime;
-    return this;
-  }
+  @useResult
+  Fixture set(Map<String, dynamic> data) => Fixture(
+    start: data['start'] ?? start,
+    stop: data['stop'] ?? stop,
+  );
 
-  DateTime start;
-  DateTime stop;
   Duration get duration => stop.difference(start);
   bool get isAllDay => start == start.date && stop == stop.date;
   bool get isSpanned => duration.inDays >= 1 && stop != start.date + 1;
 
   List<Date> get dates => [
-    for (var date = start.date; date < stop.date + 1; date += 1) date
+    for (var date = start.date; date < stop.date + 1; date += 1) date,
   ];
 
-  bool range(DateTime from, DateTime to) =>
-      start.isBefore(to) && stop.isAfter(from);
+  bool spans(DateTime? from, DateTime? to) =>
+      (to == null || start.isBefore(to)) &&
+      (from == null || stop.isAfter(from));
 
   @override
-  int get hashCode => Object.hash(start, stop);
+  bool get stringify => true;
 
   @override
-  bool operator ==(Object other) {
-    if (identical(other, this)) return true;
-    if (other is Fixture) {
-      return other.start == start &&
-          other.stop == stop;
-    }
-    return false;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<DateTime>('start', start));
-    properties.add(DiagnosticsProperty<DateTime>('stop', stop));
-  }
+  List<Object?> get props => [start, stop];
 }

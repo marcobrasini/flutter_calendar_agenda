@@ -89,10 +89,10 @@ class MyApp extends StatelessWidget {
             onEventDragged: (event, fixture) {
               final e = source.find(event.id ?? event.parentId!);
               if (e == null) return;
-              source.modifyEvent(e.set({
+              source.modifyEvents([e.set({
                 "start": fixture.start,
                 "stop": fixture.stop,
-              }));
+              })]);
               print("dragged $event -> $fixture");
             },
             onEventTap: (event) {

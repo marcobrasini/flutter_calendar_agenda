@@ -73,15 +73,15 @@ class MyApp extends StatelessWidget {
                 final recurrence = source.find(event.parentId!);
                 if (recurrence == null) return;
                 final delta = fixture.start.difference(event.start);
-                source.modifyEvent(recurrence.set({
+                source.modifyEvents([recurrence.set({
                   "start": recurrence.start.add(delta),
                   "stop": recurrence.stop.add(delta)
-                }));
+                })]);
               } else {
-                source.modifyEvent(event.set({
+                source.modifyEvents([event.set({
                   "start": fixture.start,
                   "stop": fixture.stop
-                }));
+                })]);
               }
               print("dragged $event -> $fixture");
             },

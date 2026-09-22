@@ -1,5 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:calendar/src/utils/datetime.dart';
+import 'package:meta/meta.dart';
 
 
 enum PatternType {
@@ -30,7 +32,7 @@ String? patternEXDATE(String source) {
 }
 
 
-class Pattern with Diagnosticable {
+class Pattern extends Equatable {
   static const _icsToType = {
     "DAILY": PatternType.daily,
     "WEEKLY": PatternType.weekly,
@@ -44,12 +46,14 @@ class Pattern with Diagnosticable {
     PatternType.yearly: "YEARLY",
   };
 
+  static const _prop = Object();
+
   final PatternType type;
   final int step;
-  int? count;
-  DateTime? until;
-  Set<DateTime> exceptions;
-  List<Date> recurrences;
+  final int? count;
+  final DateTime? until;
+  final Set<DateTime> exceptions;
+  final List<Date> recurrences;
 
   Pattern({
     required this.type,
@@ -58,8 +62,8 @@ class Pattern with Diagnosticable {
     this.until,
     Set<DateTime>? exceptions,
     List<Date>? recurrences,
-  }) : exceptions = exceptions ?? <DateTime>{},
-        recurrences = recurrences ?? <Date>[];
+  }) : exceptions = Set.unmodifiable(exceptions ?? const <DateTime>{}),
+        recurrences = List.unmodifiable(recurrences ?? const <Date>[]);
 
   factory Pattern.fromICSString(String string) {
     final rrule = string.replaceAll("\n", ";");
@@ -95,6 +99,35 @@ class Pattern with Diagnosticable {
     return string;
   }
 
+  @useResult
+  Pattern copyWith({
+    PatternType? type,
+    int? step,
+    Object? count = _prop,
+    Object? until = _prop,
+    Set<DateTime>? exceptions,
+    List<Date>? recurrences,
+  }) => Pattern(
+    type: type ?? this.type,
+    step: step ?? this.step,
+    count: identical(count, _prop) ? this.count : count as int?,
+    until: identical(until, _prop) ? this.until : until as DateTime?,
+    exceptions: exceptions ?? this.exceptions,
+    recurrences: recurrences ?? this.recurrences,
+  );
+
+  @useResult
+  Pattern addException(DateTime datetime) =>
+      copyWith(exceptions: {...exceptions, datetime});
+
+  @useResult
+  Pattern delException(DateTime datetime) =>
+      copyWith(exceptions: {...exceptions}..remove(datetime));
+
+  @useResult
+  Pattern shift(Duration duration) =>
+      copyWith(exceptions: exceptions.map((e) => e.add(duration)).toSet());
+
   PatternIterator iterator(DateTime datetime) {
     switch(type) {
       case PatternType.daily:
@@ -108,29 +141,14 @@ class Pattern with Diagnosticable {
     }
   }
 
-  @override
-  int get hashCode => Object.hash(type, step, count, until);
+  bool get limited => count != null || until != null;
 
   @override
-  bool operator ==(Object other) {
-    if (identical(other, this)) return true;
-    if (other is Pattern) {
-      return other.type == type
-          && other.step == step
-          && other.count == count
-          && other.until == until;
-    }
-    return false;
-  }
+  List<Object?> get props =>
+      [type, step, count, until, exceptions, recurrences];
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<PatternType>('type', type));
-    properties.add(IntProperty('step', step));
-    properties.add(IntProperty('count', count));
-    properties.add(DiagnosticsProperty<DateTime>('until', until));
-  }
+  bool get stringify => true;
 }
 
 
@@ -168,9 +186,7 @@ class PatternIterator implements Iterator<DateTime> {
 
 
 class PatternDaily extends PatternIterator {
-  PatternDaily(super.pattern, super.since) {
-    pattern.recurrences = [];
-  }
+  PatternDaily(super.pattern, super.since);
 
   @override
   DateTime nextDateTime() {

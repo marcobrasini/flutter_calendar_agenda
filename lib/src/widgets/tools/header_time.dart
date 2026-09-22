@@ -48,10 +48,12 @@ class TimeHeader extends StatelessWidget {
               padding: EdgeInsets.symmetric(
                 horizontal: config.textPadding,
               ),
-              child: Text(
-                time.format(format),
-                textAlign: TextAlign.center,
-                style: config.textStyle,
+              child: FittedBox(
+                child: Text(
+                  time.format(format),
+                  textAlign: TextAlign.center,
+                  style: config.textStyle,
+                ),
               ),
             ),
         ],

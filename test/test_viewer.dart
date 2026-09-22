@@ -49,7 +49,7 @@ void main() {
 
     test('CalendarSource append', () {
       final source = CalendarEvents();
-      source.append(events);
+      source.set(events);
       expect(source.events, events);
       expect(source.built, isFalse);
     },);

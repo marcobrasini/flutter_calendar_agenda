@@ -112,17 +112,17 @@ class MyApp extends StatelessWidget {
             view: CalendarView.weekly,
             timeScheme: TimeScheme(6, 22, round: 10),
             onEventDragged: (event, fixture) {
-              source.modifyEvent(event.set({
+              source.modifyEvents([event.set({
                 "start": fixture.start,
                 "stop": fixture.stop
-              }));
+              })]);
               print("dragged $event with ${event.infos} -> $fixture");
             },
             onEventResized:  (event, fixture) {
-              source.modifyEvent(event.set({
+              source.modifyEvents([event.set({
                 "start": fixture.start,
                 "stop": fixture.stop
-              }));
+              })]);
               print("resized $event with ${event.infos} -> $fixture");
             },
             onEventTap: (event) {

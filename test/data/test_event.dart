@@ -167,6 +167,7 @@ void main() {
         color: Color(0xFFFFFFFF),
       );
       final result = event.set(data);
+      expect(identical(result, event), isFalse);
       expect(result, isA<Event>());
       expect(result.id, isNull);
       expect(result.subject, data["subject"]);
@@ -270,25 +271,6 @@ void main() {
       expect(instance.isInstance, isTrue);
     });
 
-  });
-
-
-  group('Debug Properties', () {
-    test('debugFillProperties', () {
-      final event = Event(
-        id: id,
-        subject: subject,
-        start: start,
-        stop: stop,
-        color: color,
-        location: location,
-        parentId: parentId,
-        pattern: pattern,
-      );
-      final builder = DiagnosticPropertiesBuilder();
-      event.debugFillProperties(builder);
-      expect(builder.properties, isNotEmpty);
-    });
   });
 
 }

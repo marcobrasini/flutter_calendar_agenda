@@ -22,9 +22,10 @@ void main() {
         ((since.date + (i * step)) & since.time).round(),
     };
     final exceptionLength = exceptions.where((d) => d.isBefore(until)).length;
-    final rrule = "RRULE:FREQ=DAILY;INTERVAL=$step;COUNT=$count;"
-        "UNTIL=${until.toISOString()};EXDATE=${exceptions.map(
-            (e) => e.toISOString()).join(",")};";
+    final rrule = ""
+        "RRULE:FREQ=DAILY;INTERVAL=$step;"
+        "COUNT=$count;UNTIL=${until.toISOString()}"
+        "\nEXDATE:${exceptions.map((e) => e.toISOString()).join(",")}";
 
     test('Pattern constructor default', () {
       final pattern = Pattern(
@@ -259,7 +260,7 @@ void main() {
       for (var i = 0; i < dates.length; i++) {
         expect((dates[i].date % since) % (step * 7), 0);
         expect((dates[i].date % since), i * step * 7);
-        expect(dates[i], since.add(Duration(days: i * step * 7)).round());
+        expect(dates[i], (since.date + (i * step * 7)) & since.time);
       }
     });
 

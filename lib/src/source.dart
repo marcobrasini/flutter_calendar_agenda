@@ -8,10 +8,12 @@ extension CalendarDate on Date {
   Date get stop => this;
 }
 
+
 extension CalendarWeek on Week {
   Date get start => mon;
   Date get stop => sun;
 }
+
 
 extension CalendarMonth on Month {
   Date get start => first.weekStart.date;
@@ -23,10 +25,11 @@ class CalendarEvents extends ChangeNotifier {
   CalendarEvents({
     List<Event>? events,
     this.cacheRange = 1,
-  }) : _events = events ?? <Event>[];
+  }) :  _events = {for (final e in (events ?? const [])) e.id!: e},
+        _cache = {};
 
-  final List<Event> _events;
-  final Map<Date, List<Event>> _cache = {};
+  final Map<String, Event> _events;
+  final Map<Date, List<Event>> _cache;
   final int cacheRange;
   Date? cacheFrom;
   Date? cacheTo;
@@ -46,22 +49,69 @@ class CalendarEvents extends ChangeNotifier {
 
   void shift(Date from, Date to) {
     if (from == to) return;
-    (from < to)
-        ? _fetch(from, to)
-        : _loose(to, from);
+    (from < to) ? _fetch(from, to) : _loose(to, from);
   }
 
   void clear() {
-    cacheFrom = null;
-    cacheTo = null;
     _cache.clear();
     _events.clear();
-    notifyListeners();
+    cacheFrom = null;
+    cacheTo = null;
   }
 
-  void append(List<Event> others) => _events.addAll(others);
+  void set(Iterable<Event> events) {
+    _cache.clear();
+    _events..clear()..addAll({for (final event in events) event.id!: event});
+    cacheFrom = null;
+    cacheTo = null;
+  }
 
-  Event? find(String id) => _events.where((e) => e.id == id).singleOrNull;
+  bool sync(Iterable<Event> events) {
+    final next = {for (final e in events) e.id!: e};
+    final removed = _del(_events.values.where((e) => !next.containsKey(e.id)).toList());
+    final modified = _put(next.values.where((e) => _events.containsKey(e.id)).toList());
+    final inserted = _add(next.values.where((e) => !_events.containsKey(e.id)).toList());
+    return removed || modified || inserted;
+  }
+
+  bool _add(Iterable<Event> events) {
+    bool changed = false;
+    for (final event in events) {
+      _events.putIfAbsent(event.id!, () {
+        _inject(event);
+        changed = true;
+        return event;
+      });
+    }
+    return changed;
+  }
+
+  bool _put(Iterable<Event> events) {
+    bool changed = false;
+    for (final event in events) {
+      _events.update(event.id!, (other) {
+        if (other == event) return other;
+        _cancel(other);
+        _inject(event);
+        changed = true;
+        return event;
+      });
+    }
+    return changed;
+  }
+
+  bool _del(Iterable<Event> events) {
+    bool changed = false;
+    for (final event in events) {
+      if (_events.remove(event.id!) case final other?) {
+        _cancel(other);
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  Event? find(String id) => _events[id];
 
   static List<Event> sort(List<Event> events) {
     events.sort((a, b) {
@@ -72,28 +122,30 @@ class CalendarEvents extends ChangeNotifier {
     return events;
   }
 
-  List<Event> get events => _events;
+  List<Event> get events => _events.values.toList();
+
   List<Date> get dates {
     final keys = _cache.keys.toList();
     keys.sort((a, b) => a.compareTo(b));
     return keys;
   }
+
   bool get built => cacheFrom != null && cacheTo != null;
 
   // ── Query pubbliche ─────────────────────────────────────────────────────
 
   List<Event> forDate(Date date) {
     load((date - cacheRange).toMonth.start, (date + cacheRange).toMonth.stop);
-    return _cache[date] ?? [];
+    return _cache[date] ?? const [];
   }
 
   // ── Prefetch ────────────────────────────────────────────────────────────
 
   void _fetch(Date from, Date to) {
-    final events = _events.expand((e) => e.expand(from, to)).toList();
+    final instances = events.expand((e) => e.expand(from, to)).toList();
     for (var date = from; date < to; date += 1) {
-      _cache.putIfAbsent(date, () => sort(
-          events.where((e) => e.range(date, date+1)).toList()
+      _cache.putIfAbsent(date, () => List.unmodifiable(
+        sort(instances.where((e) => e.spans(date, date + 1)).toList()),
       ));
     }
   }
@@ -105,46 +157,41 @@ class CalendarEvents extends ChangeNotifier {
   }
 
   void _inject(Event event) {
-    final events = event.expand(cacheFrom!, cacheTo!);
-    for (final e in events) {
+    if (!built) return;
+    for (final e in event.expand(cacheFrom, cacheTo)) {
       for (final date in e.dates) {
         if (date < cacheFrom! || date >= cacheTo!) continue;
-        sort(_cache[date]!..add(e));
+        _cache[date] = List.unmodifiable(sort([...?_cache[date], e]));
       }
     }
   }
 
   void _cancel(Event event) {
-    final id = event.id;
-    for (var entry in _cache.entries) {
-      entry.value.removeWhere((e) => (e.id == id) || (e.parentId == id));
+    for (final entry in _cache.entries.toList()) {
+      if (entry.value.any((e) => event.owns(e))) {
+        _cache[entry.key] = List.unmodifiable(
+            entry.value.where((e) => !event.owns(e))
+        );
+      }
     }
   }
 
   // ── Mutazioni ───────────────────────────────────────────────────────────
-
-  void addEvent(Event event) {
-    _events.add(event);
-    _inject(event);
+  void insertEvents(Iterable<Event> events, [bool notify = true]) {
+    if (_add(events) && notify) notifyListeners();
   }
 
-  void setEvent(String id, Map<String, dynamic> data) {
-    final event = _events.singleWhere((e) => e.id == id);
-    _cancel(event);
-    event.set(data);
-    _inject(event);
+  void modifyEvents(Iterable<Event> events, [bool notify = true]) {
+    if (_put(events) && notify) notifyListeners();
   }
 
-  void delEvent(String id) {
-    final event = _events.singleWhere((e) => e.id == id);
-    _events.remove(event);
-    _cancel(event);
+  void removeEvents(Iterable<Event> events, [bool notify = true]) {
+    if (_del(events) && notify) notifyListeners();
   }
-
 
   DateTime? hasBefore(DateTime datetime) {
     final dates = <DateTime>[];
-    for (Event event in _events) {
+    for (Event event in events) {
       if (event.start.isBefore(datetime)) dates.add(event.start);
     }
     return (dates.isNotEmpty)
@@ -154,7 +201,7 @@ class CalendarEvents extends ChangeNotifier {
 
   DateTime? hasAfter(DateTime datetime) {
     final dates = <DateTime>[];
-    for (Event event in _events) {
+    for (Event event in events) {
       if (event.stop.isAfter(datetime)) dates.add(event.stop);
     }
     return (dates.isNotEmpty)
@@ -170,8 +217,8 @@ class CalendarSource<T extends Event> extends CalendarEvents {
     super.cacheRange,
     this.label,
     bool visible = true,
-  }) :  _visible = visible,
-        super(events: events);
+  }) : _visible = visible,
+       super(events: events);
 
   final String? label;
   bool _visible;
@@ -183,27 +230,10 @@ class CalendarSource<T extends Event> extends CalendarEvents {
   }
 
   @override
-  List<T> get events => _events.cast<T>();
+  List<T> get events => super.events.cast<T>();
 
   @override
-  T? find(String id) => super.find(id) as T;
-
-  void set(List<T> events) => this..clear()..append(events);
-
-  void insertEvent(T event, [bool notify = true]) {
-    super.addEvent(event);
-    if (notify) notifyListeners();
-  }
-
-  void modifyEvent(T event, [bool notify = true]) {
-    super.setEvent(event.id!, event.get());
-    if (notify) notifyListeners();
-  }
-
-  void removeEvent(T event, [bool notify = true]) {
-    super.delEvent(event.id!);
-    if (notify) notifyListeners();
-  }
+  T? find(String id) => super.find(id) as T?;
 }
 
 
@@ -250,7 +280,7 @@ class CalendarSources<T extends Event> extends CalendarSource<T> {
 
   @override
   List<Event> forDate(Date date) => CalendarEvents.sort([
-    for (final s in _active) ...s.forDate(date),
+    for (final s in _active) ...s.forDate(date)
   ]);
 
   @override
@@ -284,17 +314,36 @@ class CalendarSources<T extends Event> extends CalendarSource<T> {
 
   CalendarSource<T>? owner(String id) {
     for (final source in _sources) {
-      if (source.events.any((e) => e.id == id)) return source;
+      if (source.find(id) != null) return source;
     }
     return null;
   }
 
   @override
-  T? find(String id) {
-    for (final source in _sources) {
-      final match = source.find(id);
-      if (match != null) return match;
-    }
-    return null;
-  }
+  T? find(String id) => owner(id)?.find(id);
+
+  @override
+  void set(Iterable<Event> events) => throw UnsupportedError(
+      'CalendarSources: usa source(label).set(events)'
+  );
+
+  @override
+  bool sync(Iterable<Event> events) => throw UnsupportedError(
+      'CalendarSources: usa source(label).sync(events)'
+  );
+
+  @override
+  void insertEvents(Iterable<Event> events, [bool notify = true]) => throw UnsupportedError(
+      'CalendarSources: usa source(label).insertEvents(events)'
+  );
+
+  @override
+  void modifyEvents(Iterable<Event> events, [bool notify = true]) => throw UnsupportedError(
+      'CalendarSources: usa source(label).modifyEvents(events)'
+  );
+
+  @override
+  void removeEvents(Iterable<Event> events, [bool notify = true]) => throw UnsupportedError(
+      'CalendarSources: usa source(label).removeEvents(events)'
+  );
 }

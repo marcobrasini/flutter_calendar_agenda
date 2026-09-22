@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import 'dart:ui';
+import 'package:meta/meta.dart';
 import 'fixture.dart';
 import 'pattern.dart';
 
@@ -13,13 +13,12 @@ enum EventType {
 }
 
 
-class Event extends Fixture with Diagnosticable {
-
+class Event extends Fixture {
   final String? id;
-  Color color;
-  String subject;
-  String? location;
-  String? parentId;
+  final Color color;
+  final String subject;
+  final String? location;
+  final String? parentId;
   final Pattern? pattern;
 
   Event({
@@ -33,17 +32,14 @@ class Event extends Fixture with Diagnosticable {
     this.pattern,
   });
 
-  factory Event.make({
-    String? id,
-    required Map<String, dynamic> data
-  })  => Event(
+  factory Event.make({String? id, required Map<String, dynamic> data}) => Event(
     id: id,
-    start: data["start"],
-    stop: data["stop"],
-    color: data["color"],
-    subject: data["subject"],
-    location: data["location"],
-    parentId: data["parentId"],
+    start: data["start"] as DateTime,
+    stop: data["stop"] as DateTime,
+    color: data["color"] as Color,
+    subject: data["subject"] as String,
+    location: data["location"] as String?,
+    parentId: data["parentId"] as String?,
     pattern: data["pattern"],
   );
 
@@ -59,23 +55,25 @@ class Event extends Fixture with Diagnosticable {
   };
 
   @override
-  Event set(Map<String, dynamic> data) {
-    super.set(data);
-    if (data.containsKey("color")) color = data["color"] as Color;
-    if (data.containsKey("subject")) subject = data["subject"] as String;
-    if (data.containsKey("location")) location = data["location"] as String?;
-    return this;
-  }
+  @useResult
+  Event set(Map<String, dynamic> data) =>
+      Event.make(id: id, data: {...get(), ...data});
 
-  bool get isOccurrence => id != null && pattern==null && parentId == null;
+  bool get isOccurrence => id != null && pattern == null && parentId == null;
 
-  bool get isRecurrence => id != null && pattern!=null && parentId == null;
+  bool get isRecurrence => id != null && pattern != null && parentId == null;
 
-  bool get isException => id != null && pattern==null && parentId!=null;
+  bool get isException => id != null && pattern == null && parentId != null;
 
-  bool get isDeviation => id != null && pattern!=null && parentId!=null;
+  bool get isDeviation => id != null && pattern != null && parentId != null;
 
-  bool get isInstance => id == null && pattern!=null && parentId!=null;
+  bool get isInstance => id == null && pattern != null && parentId != null;
+
+  bool get isLimited => pattern == null || pattern!.limited;
+
+  bool owns(Event event) =>
+      id != null &&
+      (event.id == id || (event.isInstance && event.parentId == id));
 
   Event exemplar() => Event(
     start: start,
@@ -85,19 +83,18 @@ class Event extends Fixture with Diagnosticable {
     location: location,
   );
 
-  Event instance([Map<String, dynamic>? data]) => Event.make(
-    data: {...get(), ...(data ?? {}), "parentId": id},
+  Event instance([Map<String, dynamic>? data]) =>
+      Event.make(data: {...get(), ...(data ?? {}), "parentId": id});
+
+  Event exception([String? id, Map<String, dynamic>? data]) => Event.make(
+    id: id,
+    data: {...get(), ...(data ?? {}), "pattern": null, "parentId": this.id},
   );
 
-  // Event exception([String? id, Map<String, dynamic>? data]) => Event.make(
-  //   id: id, data: {
-  //     ...get(), ...(data ?? {}), "pattern": null, "parentId": this.id
-  // });
-  //
-  // Event deviation([String? id, Map<String, dynamic>? data]) => Event.make(
-  //   id: id, data: {
-  //     ...get(), "pattern": pattern, ...(data ?? {}), "parentId": this.id
-  // });
+  Event deviation([String? id, Map<String, dynamic>? data]) => Event.make(
+    id: id,
+    data: {...get(), "pattern": pattern, ...(data ?? {}), "parentId": this.id},
+  );
 
   EventType get type {
     if (isInstance) return EventType.instance;
@@ -105,64 +102,33 @@ class Event extends Fixture with Diagnosticable {
     if (isException) return EventType.exception;
     if (isRecurrence) return EventType.recurrence;
     if (isOccurrence) return EventType.occurrence;
-    throw(StateError("undefined EventType."));
+    throw (StateError("undefined EventType."));
   }
 
-  @override
-  int get hashCode => Object.hash(
-      super.hashCode,
-      color,
-      subject,
-      location,
-      parentId,
-      pattern.hashCode
-  );
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(other, this)) return true;
-    if (other is Event) {
-      return other.start == start
-          && other.stop == stop
-          && other.color == color
-          && other.subject == subject
-          && other.location == location
-          && other.parentId == parentId
-          && other.pattern == pattern;
-    }
-    return false;
-  }
-
-  List<Event> expand(DateTime from, DateTime to) {
-    if (pattern == null) {
-      return range(from, to) ? [this] : [];
-    }
+  List<Event> expand(DateTime? from, DateTime? to) {
+    if (pattern == null) return spans(from, to) ? [this] : [];
+    if (from == null && to == null && !isLimited) return [];
     final instances = <Event>[];
     final iterator = pattern!.iterator(start);
     while (iterator.moveNext()) {
       final instanceStart = iterator.current;
       final instanceStop = instanceStart.add(duration);
-      if (!instanceStart.isBefore(to)) break;
-      if (instanceStop.isAfter(from)) {
-        instances.add(instance({
-          "start": instanceStart,
-          "stop": instanceStop,
-        }));
+      if (to != null && !instanceStart.isBefore(to)) break;
+      if (from == null || instanceStop.isAfter(from)) {
+        instances.add(instance({"start": instanceStart, "stop": instanceStop}));
       }
     }
     return instances;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Object>('id', id));
-    properties.add(DiagnosticsProperty<DateTime>('start', start));
-    properties.add(DiagnosticsProperty<DateTime>('stop', stop));
-    properties.add(StringProperty('subject', subject));
-    properties.add(ColorProperty('color', color));
-    properties.add(StringProperty('location', location));
-    properties.add(StringProperty('parentId', parentId));
-    properties.add(DiagnosticsProperty<Object>('pattern', pattern));
-  }
+  List<Object?> get props => [
+    id,
+    ...super.props,
+    color,
+    subject,
+    location,
+    parentId,
+    pattern,
+  ];
 }
