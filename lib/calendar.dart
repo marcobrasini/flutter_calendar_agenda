@@ -9,4 +9,5 @@ export 'src/data/pattern.dart' show Pattern, PatternType;
 export 'src/utils/schemes.dart' show DateScheme, TimeScheme, WeekScheme;
 export 'src/config.dart';
 export 'src/utils/datetime.dart';
+export 'src/utils/timezone.dart';
 export 'package:intl/intl.dart';

@@ -32,6 +32,8 @@ class SlotEvent extends StatelessWidget {
     final config = CalendarConfig.of(context);
     final modifier = context.read<CalendarModifier>();
     final alpha = dragging ? eventDraggableSlotAlpha : 255;
+    final style = config.event.styleFor(event);
+    final padding = config.event.padding ?? 0.0;
     return Listener(
       onPointerDown: (pointerEvent) {
         final box = context.findRenderObject() as RenderBox;
@@ -55,24 +57,24 @@ class SlotEvent extends StatelessWidget {
           children: [
             config.eventBuilder?.call(context, event) ?? Container(
               padding: EdgeInsets.only(
-                bottom: (event.parentId != null) ? 3 * eventSlotPadding : 0.0,
+                bottom: (event.parentId != null) ? 3 * padding : 0.0,
               ),
               child: Padding(
-                padding: const EdgeInsets.all(eventSlotPadding),
+                padding: EdgeInsets.all(padding),
                 child: Text(event.subject,
-                  style: config.event.textStyle,
+                  style: style,
                   maxLines: config.event.maxLines,
                   overflow: config.event.overflow,
                 ),
               ),
             ),
             if (event.parentId != null) Positioned(
-              left: eventSlotPadding,
-              bottom: eventSlotPadding,
+              left: padding,
+              bottom: padding,
               child: Icon(
                 (event.pattern == null) ? Icons.sync_disabled : Icons.sync,
-                color: config.event.textStyle?.color,
-                size: 3 * eventSlotPadding,
+                color: style?.color,
+                size: 3 * padding,
               ),
             ),
           ],

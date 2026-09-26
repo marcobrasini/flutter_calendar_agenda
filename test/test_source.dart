@@ -1,3 +1,4 @@
+import 'package:calendar/calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:calendar/src/source.dart';
@@ -97,30 +98,30 @@ void main() {
     ];
     final cached = {
       yesterday: [
-        events[2].instance({
-          "start": yesterday & events[2].start.time,
-          "stop": yesterday & events[2].stop.time,
-        }),
+        events[2].instance(Fixture(
+          start: yesterday & events[2].start.time,
+          stop: yesterday & events[2].stop.time,
+        )),
       ],
       today: [
         events[0],
-        events[2].instance({
-          "start": today & events[2].start.time,
-          "stop": today & events[2].stop.time,
-        }),
+        events[2].instance(Fixture(
+          start: today & events[2].start.time,
+          stop: today & events[2].stop.time,
+        )),
       ],
       tomorrow: [
-        events[2].instance({
-          "start": tomorrow & events[2].start.time,
-          "stop": tomorrow & events[2].stop.time,
-        }),
+        events[2].instance(Fixture(
+          start: tomorrow & events[2].start.time,
+          stop: tomorrow & events[2].stop.time,
+        )),
         events[1],
       ],
       tomorrow + 1: [
-        events[2].instance({
-          "start": tomorrow + 1 & events[2].start.time,
-          "stop": tomorrow + 1 & events[2].stop.time,
-        }),
+        events[2].instance(Fixture(
+          start: tomorrow + 1 & events[2].start.time,
+          stop: tomorrow + 1 & events[2].stop.time,
+        )),
       ],
     };
 

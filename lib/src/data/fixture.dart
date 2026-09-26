@@ -23,6 +23,9 @@ class Fixture extends Equatable {
     stop: data['stop'] ?? stop,
   );
 
+  @useResult
+  Fixture copy() => Fixture(start: start, stop: stop);
+
   Duration get duration => stop.difference(start);
   bool get isAllDay => start == start.date && stop == stop.date;
   bool get isSpanned => duration.inDays >= 1 && stop != start.date + 1;

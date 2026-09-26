@@ -1,5 +1,6 @@
 import 'package:calendar/src/utils/schemes.dart';
 import 'package:intl/intl.dart';
+import 'timezone.dart';
 
 
 class Time extends DateTime {
@@ -352,6 +353,21 @@ extension DateAndTime on DateTime {
 
   String format(String fmt) => DateFormat(fmt).format(this);
   DateTime round() => date & time;
+
+  DateTime toTZ([String? location]) {
+    TimeZones.ensureInitialized();
+    final loc = TimeZones.location(location);
+    final t = TZDateTime.from(this, loc);
+    return DateTime(t.year, t.month, t.day, t.hour, t.minute, t.second);
+  }
+
+  DateTime fromTZ([String? location]) {
+    if (isUtc) return this;
+    TimeZones.ensureInitialized();
+    final loc = TimeZones.location(location);
+    final t = TZDateTime(loc, year, month, day, hour, minute, second);
+    return DateTime.fromMillisecondsSinceEpoch(t.millisecondsSinceEpoch, isUtc: true);
+  }
 
   Date get tomorrow => date + 1;
   Date get yesterday => date - 1;

@@ -1,3 +1,4 @@
+import 'package:calendar/src/data/event.dart';
 import 'package:flutter/material.dart';
 import 'enums.dart';
 import 'const.dart';
@@ -139,6 +140,7 @@ class EventConfig{
     this.rounded,
     this.extent,
     this.textStyle,
+    this.textStyleOf,
     this.overflow,
     this.maxLines,
     this.draggable,
@@ -151,11 +153,15 @@ class EventConfig{
   final double? rounded;
   final double? extent;
   final TextStyle? textStyle;
+  final TextStyle? Function(Event event)? textStyleOf;
   final TextOverflow? overflow;
   final int? maxLines;
   final EditEvent? draggable;
   final EditEvent? resizable;
   final EditEvent? swipeable;
+
+  TextStyle? styleFor(Event event) =>
+      textStyle?.merge(textStyleOf?.call(event)) ?? textStyleOf?.call(event);
 
   Duration get eventDuration => duration ?? Duration(milliseconds: 200);
   double get eventPadding => padding ?? 0.0;
@@ -168,6 +174,7 @@ class EventConfig{
     rounded:            other.rounded ?? rounded,
     extent:             other.extent ?? extent,
     textStyle:          other.textStyle ?? textStyle,
+    textStyleOf:        other.textStyleOf ?? textStyleOf,
     maxLines:           other.maxLines ?? maxLines,
     overflow:           other.overflow ?? overflow,
     draggable:          other.draggable ?? draggable,
