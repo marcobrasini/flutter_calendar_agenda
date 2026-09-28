@@ -27,6 +27,10 @@ class SlotEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final modifier = context.watch<CalendarModifier>();
+    final scheme = Theme.of(context).colorScheme;
+    final dimmer = (scheme.brightness == Brightness.light)
+        ?  eventSlotLineDimmed
+        : -eventSlotLineDimmed;
     final layout = modifier.layout!;
     final container = modifier.container;
     return GestureDetector(
@@ -74,7 +78,7 @@ class SlotEditor extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: layout.event.color.dimmer(eventSlotLineDimmed),
+                    color: layout.event.color.dimmer(dimmer),
                   ),
                 ),
               ),
@@ -106,7 +110,7 @@ class SlotEditor extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: layout.event.color.dimmer(eventSlotLineDimmed),
+                    color: layout.event.color.dimmer(dimmer),
                   ),
                 ),
               ),

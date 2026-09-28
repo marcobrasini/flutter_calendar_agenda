@@ -16,7 +16,8 @@ class TimePointer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context).clock;
-    final color = config.color ?? Theme.of(context).primaryColor;
+    final colors = Theme.of(context).colorScheme;
+    final color = config.clockColor ?? colors.primary;
     return SizedBox(
       width: size.width,
       height: size.height,

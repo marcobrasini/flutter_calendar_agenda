@@ -203,8 +203,6 @@ class PatternIterator implements Iterator<DateTime> {
     if (pattern.until != null && next.isAfter(pattern.until!)) return false;
     current = next;
     _first = false;
-    print(current);
-    print(pattern.exceptions);
     if (pattern.exceptions.isNotEmpty
         && pattern.exceptions.contains(current)) {
       return moveNext();

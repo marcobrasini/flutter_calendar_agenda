@@ -29,6 +29,10 @@ class SlotEvent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dimmer = (scheme.brightness == Brightness.light)
+        ?  eventSlotLineDimmed
+        : -eventSlotLineDimmed;
     final config = CalendarConfig.of(context);
     final modifier = context.read<CalendarModifier>();
     final alpha = dragging ? eventDraggableSlotAlpha : 255;
@@ -48,7 +52,7 @@ class SlotEvent extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(eventSlotRounded),
           border: (selected) ? Border.all(
-            color: event.color.dimmer(eventSlotLineDimmed),
+            color: event.color.dimmer(dimmer),
             width: eventSlotLineWidth,
           ) : null,
           color: event.color.withAlpha(alpha),
@@ -57,7 +61,7 @@ class SlotEvent extends StatelessWidget {
           children: [
             config.eventBuilder?.call(context, event) ?? Container(
               padding: EdgeInsets.only(
-                bottom: (event.parentId != null) ? 3 * padding : 0.0,
+                bottom: (event.parentId != null) ? 6 * padding : 0.0,
               ),
               child: Padding(
                 padding: EdgeInsets.all(padding),
@@ -74,7 +78,7 @@ class SlotEvent extends StatelessWidget {
               child: Icon(
                 (event.pattern == null) ? Icons.sync_disabled : Icons.sync,
                 color: style?.color,
-                size: 3 * padding,
+                size: 6 * padding,
               ),
             ),
           ],
