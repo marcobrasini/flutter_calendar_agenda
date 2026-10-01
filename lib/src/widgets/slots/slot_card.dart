@@ -3,9 +3,9 @@ import 'package:calendar/src/const.dart';
 import 'package:calendar/src/modifier.dart';
 import 'package:calendar/src/widgets/slots/slot_event.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:calendar/src/data/event.dart';
 import 'package:calendar/src/data/fixture.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 class SlotCard extends StatelessWidget {

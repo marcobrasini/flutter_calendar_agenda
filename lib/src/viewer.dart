@@ -1,72 +1,50 @@
+import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
-import 'utils/datetime.dart';
-import 'source.dart';
-import 'config.dart';
+import 'scroller.dart';
+import 'parser.dart';
 import 'enums.dart';
 
 
-class CalendarViewer extends ChangeNotifier {
+class CalendarViewer extends ChangeNotifier with CalendarParser {
+  @override final CalendarView view;
+  final CalendarScroller scroller;
 
-  final CalendarView view;
-  final CalendarEvents source;
-  final CalendarController controller;
-  late DateTime _datetime;
-  CalendarSwipe? _swiping;
-
-  CalendarViewer(this.source, {
+  CalendarViewer({
     required this.view,
     required CalendarScroll scroll,
-  }) : controller = CalendarController(scroll) {
-    switch (view) {
-      case CalendarView.daily:   _datetime = Date.now();
-      case CalendarView.weekly:  _datetime = Week.now();
-      case CalendarView.monthly: _datetime = Month.now();
-    }
-    controller.datetime = _datetime;
+  }) : scroller = CalendarScroller(scroll) {
+    datetime = DateTime.now();
+    scroller.datetime = datetime;
   }
 
-  dynamic get datetime => _datetime;
-  set datetime(DateTime datetime) {
-    if (datetime == _datetime) return;
-    switch (view) {
-      case CalendarView.daily:    _datetime = datetime.date;
-      case CalendarView.weekly:   _datetime = datetime.toWeek;
-      case CalendarView.monthly:  _datetime = datetime.toMonth;
-    }
-  }
+  bool _jumping = false;
+  bool get jumping => _jumping;
 
-  Date  get asDate  => _datetime.date;
-  Week  get asWeek  => _datetime.toWeek;
-  Month get asMonth => _datetime.toMonth;
+  CalendarSwipe? _swiping;
   CalendarSwipe? get swiping => _swiping;
 
-  dynamic type(dynamic datetime) => switch(view) {
-    CalendarView.daily =>   (datetime as Date),
-    CalendarView.weekly =>  (datetime as Week),
-    CalendarView.monthly => (datetime as Month),
-  };
-
-  Date get start => switch(view) {
-    CalendarView.daily =>   type(_datetime).start,
-    CalendarView.weekly =>  type(_datetime).start,
-    CalendarView.monthly => type(_datetime).start,
-  };
-
-  Date get stop => switch(view) {
-    CalendarView.daily =>   type(_datetime).stop,
-    CalendarView.weekly =>  type(_datetime).stop,
-    CalendarView.monthly => type(_datetime).stop,
-  };
-
   void next([bool swiping = false]) {
-    _datetime = (_datetime as dynamic) + 1;
+    datetime = (datetime as dynamic) + 1;
     if (swiping) return swipe(CalendarSwipe.forward);
     notifyListeners();
   }
 
   void last([bool swiping = false]) {
-    _datetime = (_datetime as dynamic) - 1;
+    datetime = (datetime as dynamic) - 1;
     if (swiping) return swipe(CalendarSwipe.backward);
+    notifyListeners();
+  }
+
+  void jump(DateTime target, {bool animate = true}) {
+    final normalized = normalize(target);
+    if (normalized == datetime) return;
+    if (animate) {
+      if (normalized == datetime + 1) return next(true);
+      if (normalized == datetime - 1) return last(true);
+    }
+    datetime = normalized;
+    _swiping = null;
+    _jumping = true;
     notifyListeners();
   }
 
@@ -77,10 +55,11 @@ class CalendarViewer extends ChangeNotifier {
 
   void clear() {
     _swiping = null;
+    _jumping = false;
   }
 
   String title(BuildContext context) {
-    final header = CalendarConfig.of(context).header;
+    final header = CalendarConfig.of(context).headerConfig(view);
     switch (view) {
       case CalendarView.weekly:
         final week = asWeek;
@@ -93,22 +72,7 @@ class CalendarViewer extends ChangeNotifier {
 
   @override
   void dispose() {
-    controller.dispose();
+    scroller.dispose();
     super.dispose();
-  }
-}
-
-class CalendarController extends ScrollController {
-  final GlobalKey key = GlobalKey();
-  final CalendarScroll scroll;
-  late DateTime datetime;
-  double distance = 0.0;
-
-  CalendarController(this.scroll);
-
-  @override
-  void jumpTo(double value) {
-    distance += value - position.pixels;
-    super.jumpTo(value);
   }
 }

@@ -351,7 +351,7 @@ extension DateAndTime on DateTime {
       "${second.toString().padLeft(2, '0')}"
       "${isUtc ? 'Z' : ''}";
 
-  String format(String fmt) => DateFormat(fmt).format(this);
+  String format(String? fmt) => DateFormat(fmt).format(this);
   DateTime round() => date & time;
 
   DateTime toTZ([String? location]) {

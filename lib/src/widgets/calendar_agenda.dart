@@ -1,14 +1,13 @@
-import 'package:calendar/calendar.dart';
-import 'package:calendar/src/modifier.dart';
-import 'package:calendar/src/utils/schemes.dart';
-import 'package:calendar/src/viewer.dart';
-import 'package:calendar/src/widgets/agenda_registry.dart';
-import 'package:calendar/src/widgets/agenda_scroller.dart';
-import 'package:calendar/src/widgets/agenda_tile.dart';
-import 'package:calendar/src/widgets/slots/slot_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:calendar/src/enums.dart';
+import 'slots/slot_editor.dart';
+import '../utils/schemes.dart';
+import '../modifier.dart';
+import '../viewer.dart';
+import '../enums.dart';
+import 'agenda_registry.dart';
+import 'agenda_scroller.dart';
+import 'agenda_tile.dart';
 
 
 class CalendarAgenda extends StatefulWidget {
@@ -39,7 +38,7 @@ class _CalendarAgendaState extends State<CalendarAgenda> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
-      final content = _viewer.controller.key.currentContext?.findRenderObject();
+      final content = _viewer.scroller.key.currentContext?.findRenderObject();
       modifier.attachViewport(_viewportKey);
       modifier.attachContent(content as RenderBox);
     });
@@ -61,7 +60,7 @@ class _CalendarAgendaState extends State<CalendarAgenda> {
           key: _viewportKey,
           children: [
             AgendaScroller(
-              key: _viewer.controller.key,
+              key: _viewer.scroller.key,
               direction: Axis.vertical,
               registry: registry,
               builder: (datetime, until) => AgendaTile(

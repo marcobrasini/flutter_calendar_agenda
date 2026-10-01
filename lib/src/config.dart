@@ -193,8 +193,8 @@ class CalendarConfig extends InheritedWidget {
     required this.clock,
     required this.header,
     required this.date,
-    this.time,
-    this.week,
+    required this.time,
+    required this.week,
     this.centred = true,
     this.showFrame = true,
     this.showHeader = true,
@@ -220,10 +220,10 @@ class CalendarConfig extends InheritedWidget {
   final LineConfig line;
   final EventConfig event;
   final ClockConfig clock;
-  final HeaderConfig header;
-  final TextConfig date;
   final TextConfig? time;
+  final TextConfig? date;
   final TextConfig? week;
+  final HeaderConfig? header;
   final bool centred;
   final bool showFrame;
   final bool showHeader;
@@ -244,6 +244,26 @@ class CalendarConfig extends InheritedWidget {
   final WidgetBuilder? lastAnchorBuilder;
   final WidgetBuilder? nextAnchorBuilder;
   final WidgetBuilder? emptyBuilder;
+
+  TextConfig timeConfig() => TextConfig(format: timeHeaderFormat, padding: timeHeaderPadding).merge(time);
+
+  TextConfig dateConfig(CalendarView view) => switch(view) {
+    CalendarView.daily => TextConfig(format: dailyDateFormat, padding: dailyDatePadding),
+    CalendarView.weekly => TextConfig(format: weeklyDateFormat, padding: weeklyDatePadding),
+    CalendarView.monthly => TextConfig(format: monthlyDateFormat, padding: monthlyDatePadding),
+  }.merge(date);
+
+  TextConfig weekConfig(CalendarView view) => switch(view) {
+    CalendarView.daily => TextConfig(format: monthlyWeekFormat, padding: monthlyWeekPadding),
+    CalendarView.weekly => TextConfig(format: monthlyWeekFormat, padding: monthlyWeekPadding),
+    CalendarView.monthly => TextConfig(format: monthlyWeekFormat, padding: monthlyWeekPadding),
+  }.merge(week);
+
+  HeaderConfig headerConfig(CalendarView view) => switch(view) {
+    CalendarView.daily => HeaderConfig(format: dailyHeaderFormat, padding: dailyHeaderPadding),
+    CalendarView.weekly => HeaderConfig(format: weeklyHeaderFormat, padding: weeklyHeaderPadding),
+    CalendarView.monthly => HeaderConfig(format: monthlyHeaderFormat, padding: monthlyHeaderPadding),
+  };
 
   Axis scrollDirection(CalendarView view) => switch(view) {
     CalendarView.daily    => Axis.horizontal,

@@ -79,6 +79,16 @@ class TabledMetrics extends ChangeNotifier {
     Axis.vertical   => _height,
   };
 
+  void reset() {
+    for (final m in _metrics.values) {
+      m
+        ..offset = 0.0
+        ..extent = null
+        ..snap = false;
+    }
+    refresh();
+  }
+
   void refresh() {
     if (_measuring) return;
     _measuring = true;

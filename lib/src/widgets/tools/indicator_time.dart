@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:timer_builder/timer_builder.dart';
 import '../../utils/datetime.dart';
 import '../tabled_metrics.dart';
+import '../../scroller.dart';
 import '../../viewer.dart';
 import '../../config.dart';
 import 'pointer_date.dart';
@@ -12,36 +13,36 @@ class TimeIndicator extends StatelessWidget {
   const TimeIndicator({
     super.key,
     required this.metrics,
-    required this.controller,
+    required this.scroller,
     required this.direction,
   });
 
   final TabledMetrics metrics;
-  final CalendarController controller;
+  final CalendarScroller scroller;
   final Axis direction;
 
   Offset? getOffset() {
-    if (!controller.hasClients) return null;
+    if (!scroller.hasClients) return null;
     final now = DateTime.now();
-    final date = controller.datetime.date;
+    final date = scroller.datetime.date;
     final days = now.date % date;
     final weeks = (days / metrics.dateStep).floor();
     final tiles = days - weeks * metrics.dateStep;
     final length = metrics.dateSpace;
     final dx = (direction == Axis.horizontal)
-        ? tiles * length + controller.distance - controller.offset
+        ? tiles * length + scroller.distance - scroller.offset
         : tiles * length;
     final double dy;
     if (metrics.timeScheme != null) {
       final time = now.time % Time.fromHour(metrics.timeBeg);
       dy = (direction == Axis.vertical)
-          ? time / metrics.timeScale + controller.distance - controller.offset
+          ? time / metrics.timeScale + scroller.distance - scroller.offset
           : time / metrics.timeScale;
       return Offset(dx, dy);
     }
     if (metrics.weekScheme != null) {
       dy = (direction == Axis.vertical)
-          ? weeks / metrics.weekScale - controller.offset
+          ? weeks / metrics.weekScale - scroller.offset
           : weeks / metrics.weekScale;
       return Offset(dx, dy);
     }
@@ -55,7 +56,7 @@ class TimeIndicator extends StatelessWidget {
       config.clockPeriod,
       builder: (context) {
         return ListenableBuilder(
-          listenable: Listenable.merge([controller, metrics]),
+          listenable: Listenable.merge([scroller, metrics]),
           builder: (context, _) {
             final length = metrics.dateSpace;
             final offset = getOffset();

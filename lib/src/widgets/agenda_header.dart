@@ -22,8 +22,9 @@ class AgendaHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final viewer = context.read<CalendarViewer>();
     final config = CalendarConfig.of(context);
+    final viewer = context.read<CalendarViewer>();
+    final headerConfig = config.headerConfig(viewer.view);
     return Row(
       children: [
         if (config.showHeaderButton) IconButton(
@@ -41,11 +42,11 @@ class AgendaHeader extends StatelessWidget {
                 datetime.first + (dateScheme?.beg ?? 0),
                 datetime.last + (dateScheme?.beg ?? 0),
             ) ?? Container(
-              color: config.header.background,
-              padding: EdgeInsetsGeometry.all(config.header.textPadding),
+              color: headerConfig.background,
+              padding: EdgeInsetsGeometry.all(headerConfig.textPadding),
               child: Text(
-                datetime.format(config.header.format ?? defaultDateFormat),
-                style: config.header.textStyle,
+                datetime.format(headerConfig.format ?? defaultDateFormat),
+                style: headerConfig.textStyle,
               ),
             ),
           ),

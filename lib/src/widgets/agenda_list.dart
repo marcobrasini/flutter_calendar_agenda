@@ -1,3 +1,4 @@
+import 'package:calendar/calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'slots/slot_card.dart';
@@ -24,12 +25,14 @@ class AgendaList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final view = context.read<CalendarViewer>().view;
     final config = CalendarConfig.of(context);
+    final dateConfig = config.dateConfig(view);
     final colors = Theme.of(context).colorScheme;
     final source = context.read<CalendarEvents>();
     final events = source.forDate(date);
-    final cardMargin = config.date.textPadding;
-    final dateWidth = context.dateOffset() + cardMargin;
+    final cardMargin = dateConfig.textPadding;
+    final dateWidth = context.dateOffset(view) + cardMargin;
     final cardWidth = width - dateWidth;
     final lineColor = config.line.color ?? colors.outlineVariant;
     final widgets = Column(
@@ -55,10 +58,10 @@ class AgendaList extends StatelessWidget {
           children: [
             DateSlot(
               date: date,
-              dateFormat: config.date.format ?? defaultDateFormat,
-              datePadding: config.date.textPadding,
-              dateTextStyle: config.date.textStyle,
-              dateBackground: config.date.background,
+              dateFormat: dateConfig.format ?? defaultDateFormat,
+              datePadding: dateConfig.textPadding,
+              dateTextStyle: dateConfig.textStyle,
+              dateBackground: dateConfig.background,
               width: dateWidth,
             ),
             Container(

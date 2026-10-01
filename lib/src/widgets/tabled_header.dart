@@ -1,3 +1,4 @@
+import '../scroller.dart';
 import 'package:flutter/material.dart';
 import 'tools/slot_date.dart';
 import '../utils/datetime.dart';
@@ -13,12 +14,12 @@ class TabledHeader extends StatelessWidget {
     super.key,
     required this.metrics,
     required this.config,
-    this.controller,
+    this.scroller,
   });
 
   final TabledMetrics metrics;
   final TextConfig config;
-  final CalendarController? controller;
+  final CalendarScroller? scroller;
 
   List<Date> dates([Date? date]) {
     final start = (date ?? Week.weekDays.mon) + metrics.dateBeg;
@@ -46,20 +47,20 @@ class TabledHeader extends StatelessWidget {
     return ListenableBuilder(
       listenable: metrics,
       builder: (context, _) {
-        return (controller != null && controller!.hasClients)
+        return (scroller != null && scroller!.hasClients)
             ? ListenableBuilder(
-              listenable: controller!,
+              listenable: scroller!,
               builder: (context, _) {
-                final date = controller!.datetime.date;
+                final date = scroller!.datetime.date;
                 return ClipRect(
                   child: Container(
                     width: metrics.width,
                     height: metrics.height,
                     color: config.background,
                     child: AnimatedBuilder(
-                      animation: controller!,
+                      animation: scroller!,
                       builder: (context, _) {
-                        double fraction = controller!.offset / metrics.width;
+                        double fraction = scroller!.offset / metrics.width;
                         final base = fraction.floor();
                         return Stack(
                           children: [base, base + 1].map((i) => Positioned(

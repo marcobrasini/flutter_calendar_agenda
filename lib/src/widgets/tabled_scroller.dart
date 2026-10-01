@@ -1,3 +1,4 @@
+import 'package:calendar/src/scroller.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewer.dart';
@@ -7,18 +8,18 @@ import 'tabled_slot.dart';
 import 'tabled_metrics.dart';
 
 
-typedef ScrollBuilder = TabledSlot Function(GlobalKey, DateTime);
+typedef ScrollBuilder = Widget Function(GlobalKey, DateTime);
 
 
 class TabledScroller extends StatefulWidget {
   const TabledScroller({
     super.key,
-    required this.direction,
+    required this.viewer,
     required this.metrics,
     required this.builder,
   });
 
-  final Axis direction;
+  final CalendarViewer viewer;
   final TabledMetrics metrics;
   final ScrollBuilder builder;
 
@@ -28,13 +29,17 @@ class TabledScroller extends StatefulWidget {
 
 class _TabledScrollerState extends State<TabledScroller> {
   static final Key _centerKey = UniqueKey();
-  late final CalendarViewer _viewer;
   late final ScrollPhysics _physics;
   bool _snapping = false;
 
-  CalendarController get _controller => _viewer.controller;
+  void _changed() {
+    if (mounted) setState(() {});
+  }
+
+  CalendarViewer get _viewer => widget.viewer;
+  CalendarScroller get _scroller => _viewer.scroller;
   DateTime get recorded => widget.metrics.indexer(_viewer.datetime, 0);
-  DateTime get scrolled => _controller.datetime;
+  DateTime get scrolled => _scroller.datetime;
 
   Widget _build(int index) {
     final metric = widget.metrics.metric(index);
@@ -44,7 +49,7 @@ class _TabledScrollerState extends State<TabledScroller> {
       final box = metric.key.currentContext?.findRenderObject() as RenderBox?;
       if (box != null && box.hasSize) {
         final snap = widget.metrics.snapper?.call(datetime) ?? true;
-        final size = switch (widget.direction) {
+        final size = switch (widget.metrics.direction) {
           Axis.horizontal => box.size.width,
           Axis.vertical => box.size.height,
         };
@@ -72,8 +77,8 @@ class _TabledScrollerState extends State<TabledScroller> {
       viewerUpdate(index, datetime);
       if (notification is ScrollEndNotification) {
         _snapping = true;
-        _controller.datetime = recorded;
-        _controller.jumpTo(notification.metrics.pixels - offset);
+        _scroller.datetime = recorded;
+        _scroller.jumpTo(notification.metrics.pixels - offset);
         widget.metrics.shift(index);
         setState(() {});
         _snapping = false;
@@ -84,10 +89,10 @@ class _TabledScrollerState extends State<TabledScroller> {
   }
 
   void _animate(CalendarSwipe swipe) {
-    if (!_controller.hasClients) return;
+    if (!_scroller.hasClients) return;
     final snap = widget.metrics.swipe(swipe);
     if (snap != 0) {
-      _controller.animateTo(
+      _scroller.animateTo(
         widget.metrics.offset(snap),
         duration: viewSwipeDelay,
         curve: Curves.easeInOut,
@@ -97,17 +102,16 @@ class _TabledScrollerState extends State<TabledScroller> {
 
   @override
   void initState() {
-    _viewer = context.read<CalendarViewer>();
-    _physics = (_controller.scroll == CalendarScroll.snapping)
+    _physics = (_scroller.scroll == CalendarScroll.snapping)
         ? SnapPhysics(metrics: widget.metrics)
         : ScrollPhysics();
-    _controller.datetime = recorded;
+    _scroller.datetime = recorded;
+    _viewer.addListener(_changed);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    context.watch<CalendarViewer>();
     if (_viewer.swiping != null) {
       final swipe = _viewer.swiping!;
       _viewer.clear();
@@ -115,11 +119,22 @@ class _TabledScrollerState extends State<TabledScroller> {
         _animate(swipe);
       });
     }
+    if (_viewer.jumping) {
+      widget.metrics.reset();
+      _scroller.datetime = recorded;
+      _viewer.clear();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scroller.hasClients) return;
+        _snapping = true;
+        _scroller.jumpTo(widget.metrics.offset(0));
+        _snapping = false;
+      });
+    }
     return NotificationListener<ScrollNotification>(
       onNotification: _scrolling,
       child: CustomScrollView(
-        controller: _controller,
-        scrollDirection: widget.direction,
+        controller: _scroller,
+        scrollDirection: widget.metrics.direction,
         cacheExtent: widget.metrics.caching,
         center: _centerKey,
         physics: _physics,

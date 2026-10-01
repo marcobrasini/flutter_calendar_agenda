@@ -1,15 +1,18 @@
-import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
+import '../scroller.dart';
 import '../source.dart';
 import '../viewer.dart';
+import '../config.dart';
 import '../enums.dart';
 import '../const.dart';
 import 'agenda_registry.dart';
 import 'agenda_tile.dart';
 
+
 typedef ScrollBuilder = AgendaTile Function(DateTime, Date?);
+
 
 class AgendaScroller extends StatefulWidget {
   const AgendaScroller({
@@ -33,8 +36,8 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   late final CalendarEvents _source;
   late Date? _until;
   bool _snapping = false;
-  CalendarController get _controller => _viewer.controller;
-  CalendarScroll get _scroll => _controller.scroll;
+  CalendarScroller get _scroller => _viewer.scroller;
+  CalendarScroll get _scroll => _scroller.scroll;
 
   int _lastIndex = 0;
   int _nextIndex = 0;
@@ -46,7 +49,7 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   dynamic get _nextDate => widget.registry.indexer(recorded, _nextIndex);
   dynamic get _lastDate => widget.registry.indexer(recorded, _lastIndex);
   DateTime get recorded => _viewer.datetime;
-  DateTime get scrolled => _controller.datetime;
+  DateTime get scrolled => _scroller.datetime;
 
   int? findNext() {
     final index = _nextIndex;
@@ -96,10 +99,10 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   }
 
   void _animate(CalendarSwipe swipe) {
-    if (!_controller.hasClients) return;
+    if (!_scroller.hasClients) return;
     final snap = widget.registry.swipe(swipe);
     if (snap != null) {
-      _controller.animateTo(
+      _scroller.animateTo(
         snap.offset,
         duration: viewSwipeDelay,
         curve: Curves.easeInOut,
@@ -149,7 +152,7 @@ class _AgendaScrollerState extends State<AgendaScroller> {
     return NotificationListener<ScrollNotification>(
       onNotification: _scrolling,
       child: CustomScrollView(
-        controller: _viewer.controller,
+        controller: _viewer.scroller,
         scrollDirection: widget.direction,
         cacheExtent: widget.registry.caching,
         center: (config.centred) ? _centerKey : null,

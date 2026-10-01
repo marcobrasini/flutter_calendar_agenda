@@ -78,6 +78,8 @@ class MyApp extends StatelessWidget {
           child: Calendar(
             source: source,
             view: CalendarView.daily,
+            dateScheme: DateScheme.weekly(),
+            // weekScheme: WeekScheme.general(),
             timeScheme: TimeScheme(6, 22, round: 5),
             onEventDragged: (event, fixture) {
               source.modifyEvents([event.set({

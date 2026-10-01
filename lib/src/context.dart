@@ -1,3 +1,4 @@
+import 'package:calendar/src/enums.dart';
 import 'package:flutter/material.dart';
 import 'utils/datetime.dart';
 import 'config.dart';
@@ -15,8 +16,7 @@ extension CalendarDimensions on BuildContext {
   }
 
   double timeOffset() {
-    final timeConfig = config.time;
-    if (timeConfig == null) return 0.0;
+    final timeConfig = config.timeConfig();
     final Time time = Time(0, 0);
     final layout = TextPainter(
       text: TextSpan(
@@ -34,8 +34,8 @@ extension CalendarDimensions on BuildContext {
     return 0.0;
   }
 
-  double dateOffset() {
-    final dateConfig = config.date;
+  double dateOffset(CalendarView view) {
+    final dateConfig = config.dateConfig(view);
     final date = Date.now();
     final layout = TextPainter(
       text: TextSpan(

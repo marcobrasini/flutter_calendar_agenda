@@ -1,3 +1,4 @@
+import 'package:calendar/src/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'tools/indicator_time.dart';
@@ -6,6 +7,7 @@ import 'slots/slot_editor.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../modifier.dart';
+import '../scroller.dart';
 import '../context.dart';
 import '../config.dart';
 import '../viewer.dart';
@@ -44,7 +46,8 @@ class _CalendarTabledState extends State<CalendarTabled> {
   late final CalendarViewer _viewer;
   TabledMetrics? _metrics;
 
-  CalendarController get _controller => _viewer.controller;
+  CalendarScroller get _scroller => _viewer.scroller;
+  CalendarView get _view => _viewer.view;
 
   @override
   void initState() {
@@ -54,7 +57,7 @@ class _CalendarTabledState extends State<CalendarTabled> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
-      final content = _controller.key.currentContext?.findRenderObject();
+      final content = _scroller.key.currentContext?.findRenderObject();
       modifier.attachViewport(_viewport);
       modifier.attachContent(content as RenderBox?);
       modifier.attachSlider(_slider);
@@ -72,23 +75,22 @@ class _CalendarTabledState extends State<CalendarTabled> {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
-    final scrollDirection = config.scrollDirection(_viewer.view);
-    final slideDirection = config.slideDirection(_viewer.view);
+    final slideDirection = config.slideDirection(_view);
     final showIndicator = config.showIndicator && (
         widget.timeScheme != null || widget.weekScheme != null
     );
     final metrics = _metrics ??= TabledMetrics(
-      view: _viewer.view,
+      view: _view,
       timeScheme: widget.timeScheme,
       dateScheme: widget.dateScheme,
       weekScheme: widget.weekScheme,
-      direction: scrollDirection,
+      direction: config.scrollDirection(_view),
     );
     return LayoutBuilder(
       builder: (context, constraints) {
         final timeMargin = context.timeMargin();
         final timeOffset = context.timeOffset();
-        final dateOffset = context.dateOffset();
+        final dateOffset = context.dateOffset(_view);
         final pageHeight = (
             widget.timeScheme == null || widget.timeScheme?.ratio == 0
         )   ? constraints.maxHeight - timeMargin - dateOffset
@@ -112,8 +114,10 @@ class _CalendarTabledState extends State<CalendarTabled> {
                   height: dateOffset,
                   child: TabledHeader(
                     metrics: metrics,
-                    controller: (widget.weekScheme == null) ? _controller : null,
-                    config: (widget.weekScheme == null) ? config.date! : config.week!,
+                    scroller: (widget.weekScheme == null) ? _scroller : null,
+                    config: (widget.weekScheme == null)
+                        ? config.dateConfig(_viewer.view)
+                        : config.weekConfig(_viewer.view),
                   ),
                 ),
               ],
@@ -139,8 +143,8 @@ class _CalendarTabledState extends State<CalendarTabled> {
                       child: Stack(
                         children: [
                           TabledScroller(
-                            key: _controller.key,
-                            direction: scrollDirection,
+                            key: _scroller.key,
+                            viewer: _viewer,
                             metrics: metrics,
                             builder: (key, datetime) => TabledSlot(
                               key: key,
@@ -154,8 +158,8 @@ class _CalendarTabledState extends State<CalendarTabled> {
                           ),
                           if (showIndicator) TimeIndicator(
                             metrics: metrics,
-                            controller: _controller,
-                            direction: scrollDirection,
+                            scroller: _scroller,
+                            direction: metrics.direction,
                           ),
                           Builder(
                             builder: (context) {

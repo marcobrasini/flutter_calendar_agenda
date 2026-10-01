@@ -1,3 +1,4 @@
+import 'package:calendar/src/picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,19 +18,11 @@ class CalendarDefaults {
     required this.dateScheme,
     required this.timeScheme,
     required this.weekScheme,
-    required this.headerConfig,
-    required this.dateConfig,
-    this.timeConfig,
-    this.weekConfig,
   });
 
   final DateScheme dateScheme;
   final TimeScheme? timeScheme;
   final WeekScheme? weekScheme;
-  final HeaderConfig headerConfig;
-  final TextConfig dateConfig;
-  final TextConfig? timeConfig;
-  final TextConfig? weekConfig;
 
   static const LineConfig lineConfig = LineConfig(
     style: lineFrameStyle,
@@ -54,28 +47,19 @@ class CalendarDefaults {
     dateScheme: DateScheme.daily(),
     timeScheme: TimeScheme.allDay(),
     weekScheme: null,
-    headerConfig: HeaderConfig(format: dailyHeaderFormat, padding: dailyHeaderPadding),
-    dateConfig:   TextConfig(format: dailyDateFormat, padding: dailyDatePadding),
-    timeConfig:   TextConfig(format: timeHeaderFormat, padding: timeHeaderPadding),
   );
 
   static const _weekly = CalendarDefaults(
     dateScheme: DateScheme.weekly(),
     timeScheme: TimeScheme.allDay(),
     weekScheme: null,
-    headerConfig: HeaderConfig(format: weeklyHeaderFormat, padding: weeklyHeaderPadding),
-    dateConfig:   TextConfig(format: weeklyDateFormat, padding: weeklyDatePadding),
-    timeConfig:   TextConfig(format: timeHeaderFormat, padding: timeHeaderPadding),
   );
 
   static const _monthly = CalendarDefaults(
     dateScheme: DateScheme.weekly(),
     timeScheme: null,
     weekScheme: WeekScheme.general(),
-    headerConfig: HeaderConfig(format: monthlyHeaderFormat, padding: monthlyHeaderPadding),
-    dateConfig:   TextConfig(format: monthlyDateFormat, padding: monthlyDatePadding),
-    weekConfig:   TextConfig(format: monthlyWeekFormat, padding: monthlyWeekPadding),
-  );
+    );
 
   static CalendarDefaults of(BuildContext context, CalendarView view) => switch (view) {
     CalendarView.daily   => _daily,
@@ -254,10 +238,10 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
   Widget build(BuildContext context) {
     final defaults = CalendarDefaults.of(context, view);
     final calendar = CalendarConfig(
-      header: defaults.headerConfig.merge(headerConfig),
-      date: defaults.dateConfig.merge(dateConfig),
-      time: defaults.timeConfig?.merge(timeConfig),
-      week: defaults.weekConfig?.merge(weekConfig),
+      header: headerConfig,
+      date: dateConfig,
+      week: weekConfig,
+      time: timeConfig,
       line: CalendarDefaults.lineConfig.merge(lineConfig),
       clock: CalendarDefaults.clockConfig.merge(clockConfig),
       event: CalendarDefaults.eventConfig.merge(eventConfig),
@@ -292,8 +276,14 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CalendarEvents>.value(value: source),
-        ChangeNotifierProvider(create: (_) => CalendarViewer(source,
+        ChangeNotifierProvider(create: (_) => CalendarViewer(
           view: view,
+          scroll: scroll,
+        )),
+        ChangeNotifierProvider(create: (_) => CalendarPicker(
+          view: (weekScheme != null)
+              ? CalendarView.monthly
+              : CalendarView.weekly,
           scroll: scroll,
         )),
         ChangeNotifierProvider(create: (_) => CalendarModifier(
@@ -305,6 +295,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
       ],
       builder: (context, _) {
         context.read<CalendarModifier>().attachSwiper(context.read<CalendarViewer>());
+        context.read<CalendarPicker>().attachViewer(context.read<CalendarViewer>());
         return calendar;
       },
     );

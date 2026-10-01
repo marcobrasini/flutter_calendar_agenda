@@ -90,7 +90,10 @@ class Calendar<T extends Event> extends CalendarBase<T> {
     // );
     return Column(
       children: [
-        CalendarTabledHeader(),
+        CalendarTabledHeader(
+          dateScheme: this.dateScheme ?? dateScheme,
+          weekScheme: this.weekScheme ?? weekScheme,
+        ),
         Expanded(
           child: CalendarTabled(
             dateScheme: (view == CalendarView.daily)

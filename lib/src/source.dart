@@ -252,8 +252,9 @@ class CalendarSources<T extends Event> extends CalendarSource<T> {
   CalendarSource<T> source(String label) =>
       _sources.singleWhere((s) => s.label == label);
 
-  void toggle(CalendarSource<T> source, [bool? value]) =>
-      source.visible = value ?? !source.visible;
+  void attach(CalendarSource<T> source) {
+    if (_sources.add(source)) source.addListener(notifyListeners);
+  }
 
   @override
   void dispose() {
