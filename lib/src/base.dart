@@ -1,12 +1,13 @@
-import 'package:calendar/src/picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'utils/callbacks.dart';
 import 'utils/schemes.dart';
 import 'data/fixture.dart';
 import 'data/event.dart';
 import 'modifier.dart';
 import 'viewer.dart';
+import 'picker.dart';
 import 'source.dart';
 import 'config.dart';
 import 'enums.dart';
@@ -41,6 +42,7 @@ class CalendarDefaults {
     duration: eventSlotDuration,
     padding: eventSlotPadding,
     rounded: eventSlotRounded,
+    margin: eventSlotMargin,
   );
 
   static const _daily = CalendarDefaults(
@@ -102,6 +104,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
     this.showHeader = true,
     this.showHeaderWidget = true,
     this.showHeaderButton = true,
+    this.showHeaderPicker = true,
     this.showIndicator = true,
     //
     this.onEventTap,
@@ -149,6 +152,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
   final bool showHeader;
   final bool showHeaderWidget;
   final bool showHeaderButton;
+  final bool showHeaderPicker;
   final bool showIndicator;
   //
   final HeaderBuilder? headerBuilder;
@@ -190,7 +194,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
   final List<Widget> appbar;
 
 
-  CallbackScheme get callbacks => CallbackScheme(
+  Callbacks get callbacks => Callbacks(
     onFrameTap: onFrameTap,
     onFrameDoubleTap: onFrameDoubleTap,
     onFrameLongPress: onFrameLongPress,
@@ -238,6 +242,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
   Widget build(BuildContext context) {
     final defaults = CalendarDefaults.of(context, view);
     final calendar = CalendarConfig(
+      callbacks: callbacks,
       header: headerConfig,
       date: dateConfig,
       week: weekConfig,
@@ -250,6 +255,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
       showHeader: showHeader,
       showHeaderWidget: showHeaderWidget,
       showHeaderButton: showHeaderButton,
+      showHeaderPicker: showHeaderPicker,
       showIndicator: showIndicator,
       eventDraggable: draggableEvent,
       eventResizable: resizableEvent,
@@ -294,8 +300,8 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
         ))
       ],
       builder: (context, _) {
-        context.read<CalendarModifier>().attachSwiper(context.read<CalendarViewer>());
         context.read<CalendarPicker>().attachViewer(context.read<CalendarViewer>());
+        context.read<CalendarModifier>().attachSwiper(context.read<CalendarPicker>());
         return calendar;
       },
     );

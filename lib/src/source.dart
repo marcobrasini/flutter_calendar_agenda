@@ -31,8 +31,7 @@ class CalendarEvents extends ChangeNotifier {
   final Map<String, Event> _events;
   final Map<Date, List<Event>> _cache;
   final int cacheRange;
-  Date? cacheFrom;
-  Date? cacheTo;
+  Date? cacheFrom, cacheTo;
 
   void load(Date from, Date to) {
     if (cacheFrom == null || cacheTo == null) {
@@ -252,8 +251,21 @@ class CalendarSources<T extends Event> extends CalendarSource<T> {
   CalendarSource<T> source(String label) =>
       _sources.singleWhere((s) => s.label == label);
 
-  void attach(CalendarSource<T> source) {
-    if (_sources.add(source)) source.addListener(notifyListeners);
+  bool attach(CalendarSource<T> source) {
+    if (_sources.add(source)) {
+      source.addListener(notifyListeners);
+      return true;
+    }
+    return false;
+  }
+
+  CalendarSource<T>? detach(CalendarSource<T> source) {
+    if (_sources.remove(source)) {
+      source.removeListener(notifyListeners);
+      notifyListeners();
+      return source;
+    }
+    return null;
   }
 
   @override
@@ -280,9 +292,10 @@ class CalendarSources<T extends Event> extends CalendarSource<T> {
   bool get built => _active.every((s) => s.built);
 
   @override
-  List<Event> forDate(Date date) => CalendarEvents.sort([
-    for (final s in _active) ...s.forDate(date)
-  ]);
+  List<Event> forDate(Date date) {
+    load((date - cacheRange).toMonth.start, (date + cacheRange).toMonth.stop);
+    return CalendarEvents.sort([for (final s in _active) ...s.forDate(date)]);
+  }
 
   @override
   void load(Date from, Date to) {

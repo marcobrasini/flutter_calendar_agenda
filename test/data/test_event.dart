@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:calendar/src/data/event.dart';
 import 'package:calendar/src/data/pattern.dart';

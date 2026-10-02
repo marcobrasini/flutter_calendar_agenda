@@ -16,6 +16,24 @@ class MyApp extends StatelessWidget {
     final now = Date.now() & Time(9, 0);
     final source = CalendarSource(events: [
       Event(
+        id: "allday1",
+        start: now.date,
+        color:  Colors.blue,
+        subject: "AllDay",
+      ),
+      Event(
+        id: "allday2",
+        start: now.date - 3,
+        color:  Colors.blue,
+        subject: "AllDay",
+      ),
+      Event(
+        id: "allday3",
+        start: now.date - 3,
+        color:  Colors.blue,
+        subject: "AllDay",
+      ),
+      Event(
         id: "event1",
         start: now,
         stop: now.add(Duration(hours: 1)),
@@ -80,6 +98,8 @@ class MyApp extends StatelessWidget {
             source: source,
             view: CalendarView.weekly,
             timeScheme: TimeScheme(6, 22, round: 15),
+            dateScheme: DateScheme.weekly(),
+            weekScheme: WeekScheme.general(),
             eventConfig: EventConfig(maxLines: 1),
             onEventDragged: (event, fixture) {
               source.modifyEvents([event.set({

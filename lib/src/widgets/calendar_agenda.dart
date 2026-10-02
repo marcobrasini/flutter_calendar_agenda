@@ -13,13 +13,11 @@ import 'agenda_tile.dart';
 class CalendarAgenda extends StatefulWidget {
   const CalendarAgenda({
     super.key,
-    required this.callbacks,
     required this.scrolling,
     this.dateScheme,
   });
 
   final CalendarScroll scrolling;
-  final CallbackScheme callbacks;
   final DateScheme? dateScheme;
 
   @override
@@ -66,7 +64,6 @@ class _CalendarAgendaState extends State<CalendarAgenda> {
               builder: (datetime, until) => AgendaTile(
                 datetime: datetime,
                 dateScheme: widget.dateScheme,
-                callbacks: widget.callbacks,
                 width: pageWidth,
                 until: until,
               ),

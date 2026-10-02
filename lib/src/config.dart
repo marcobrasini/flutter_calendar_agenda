@@ -1,5 +1,6 @@
-import 'package:calendar/src/data/event.dart';
 import 'package:flutter/material.dart';
+import 'utils/callbacks.dart';
+import 'data/event.dart';
 import 'enums.dart';
 import 'const.dart';
 
@@ -69,7 +70,9 @@ class TextConfig{
   final TextStyle? textStyle;
   final Color? background;
 
+  String get textFormat => format ?? defaultDateFormat;
   double get textPadding => padding ?? 0.0;
+  Color? get textBackground => background;
 
   TextConfig merge(TextConfig? other) => other == null ? this : TextConfig(
     format:     other.format     ?? format,
@@ -139,6 +142,7 @@ class EventConfig{
     this.padding,
     this.rounded,
     this.extent,
+    this.margin,
     this.textStyle,
     this.textStyleOf,
     this.overflow,
@@ -152,6 +156,7 @@ class EventConfig{
   final double? padding;
   final double? rounded;
   final double? extent;
+  final double? margin;
   final TextStyle? textStyle;
   final TextStyle? Function(Event event)? textStyleOf;
   final TextOverflow? overflow;
@@ -167,12 +172,14 @@ class EventConfig{
   double get eventPadding => padding ?? 0.0;
   double get eventRounded => rounded ?? 0.0;
   double get eventExtent => extent ?? 0.0;
+  double get eventMargin => margin ?? 0.0;
 
   EventConfig merge(EventConfig? other) => other == null ? this : EventConfig(
     duration:           other.duration ?? duration,
     padding:            other.padding ?? padding,
     rounded:            other.rounded ?? rounded,
     extent:             other.extent ?? extent,
+    margin:             other.margin ?? margin,
     textStyle:          other.textStyle ?? textStyle,
     textStyleOf:        other.textStyleOf ?? textStyleOf,
     maxLines:           other.maxLines ?? maxLines,
@@ -188,6 +195,7 @@ class CalendarConfig extends InheritedWidget {
   const CalendarConfig({
     super.key,
     required super.child,
+    required this.callbacks,
     required this.line,
     required this.event,
     required this.clock,
@@ -200,6 +208,7 @@ class CalendarConfig extends InheritedWidget {
     this.showHeader = true,
     this.showHeaderWidget = true,
     this.showHeaderButton = true,
+    this.showHeaderPicker = true,
     this.fixLastAnchor = true,
     this.fixNextAnchor = true,
     this.showIndicator = true,
@@ -217,6 +226,7 @@ class CalendarConfig extends InheritedWidget {
     this.emptyBuilder,
   });
 
+  final Callbacks callbacks;
   final LineConfig line;
   final EventConfig event;
   final ClockConfig clock;
@@ -229,6 +239,7 @@ class CalendarConfig extends InheritedWidget {
   final bool showHeader;
   final bool showHeaderWidget;
   final bool showHeaderButton;
+  final bool showHeaderPicker;
   final bool fixLastAnchor;
   final bool fixNextAnchor;
   final bool showIndicator;
@@ -245,25 +256,57 @@ class CalendarConfig extends InheritedWidget {
   final WidgetBuilder? nextAnchorBuilder;
   final WidgetBuilder? emptyBuilder;
 
-  TextConfig timeConfig() => TextConfig(format: timeHeaderFormat, padding: timeHeaderPadding).merge(time);
+  TextConfig timeConfig() => TextConfig(
+      format: timeHeaderFormat,
+      padding: timeHeaderPadding
+  ).merge(time);
 
   TextConfig dateConfig(CalendarView view) => switch(view) {
-    CalendarView.daily => TextConfig(format: dailyDateFormat, padding: dailyDatePadding),
-    CalendarView.weekly => TextConfig(format: weeklyDateFormat, padding: weeklyDatePadding),
-    CalendarView.monthly => TextConfig(format: monthlyDateFormat, padding: monthlyDatePadding),
+    CalendarView.daily => TextConfig(
+      format: dailyDateFormat,
+      padding: dailyDatePadding,
+    ),
+    CalendarView.weekly => TextConfig(
+      format: weeklyDateFormat,
+      padding: weeklyDatePadding,
+    ),
+    CalendarView.monthly => TextConfig(
+      format: monthlyDateFormat,
+      padding: monthlyDatePadding,
+    ),
   }.merge(date);
 
   TextConfig weekConfig(CalendarView view) => switch(view) {
-    CalendarView.daily => TextConfig(format: monthlyWeekFormat, padding: monthlyWeekPadding),
-    CalendarView.weekly => TextConfig(format: monthlyWeekFormat, padding: monthlyWeekPadding),
-    CalendarView.monthly => TextConfig(format: monthlyWeekFormat, padding: monthlyWeekPadding),
+    CalendarView.daily => TextConfig(
+        format: monthlyWeekFormat,
+      padding: monthlyWeekPadding,
+    ),
+    CalendarView.weekly => TextConfig(
+        format: monthlyWeekFormat,
+      padding: monthlyWeekPadding,
+    ),
+    CalendarView.monthly => TextConfig(
+        format: monthlyWeekFormat,
+      padding: monthlyWeekPadding,
+    ),
   }.merge(week);
 
   HeaderConfig headerConfig(CalendarView view) => switch(view) {
-    CalendarView.daily => HeaderConfig(format: dailyHeaderFormat, padding: dailyHeaderPadding),
-    CalendarView.weekly => HeaderConfig(format: weeklyHeaderFormat, padding: weeklyHeaderPadding),
-    CalendarView.monthly => HeaderConfig(format: monthlyHeaderFormat, padding: monthlyHeaderPadding),
+    CalendarView.daily => HeaderConfig(
+      format: dailyHeaderFormat,
+      padding: dailyHeaderPadding,
+    ),
+    CalendarView.weekly => HeaderConfig(
+      format: weeklyHeaderFormat,
+      padding: weeklyHeaderPadding,
+    ),
+    CalendarView.monthly => HeaderConfig(
+      format: monthlyHeaderFormat,
+      padding: monthlyHeaderPadding,
+    ),
   };
+
+  EventConfig eventConfig() => event;
 
   Axis scrollDirection(CalendarView view) => switch(view) {
     CalendarView.daily    => Axis.horizontal,
@@ -289,7 +332,8 @@ class CalendarConfig extends InheritedWidget {
 
   @override
   bool updateShouldNotify(CalendarConfig oldWidget) {
-    return line != oldWidget.line
+    return callbacks != oldWidget.callbacks
+        || line != oldWidget.line
         || event != oldWidget.event
         || clock != oldWidget.clock
         || header != oldWidget.header

@@ -137,8 +137,6 @@ class Date extends DateTime with DateRange {
 
   factory Date.fromISOFormat(String dateString) => DateTime.parse(dateString).date;
 
-  String format(String fmt) => DateFormat(fmt).format(this);
-
   @override
   int get hashCode => Object.hash(year, month, day);
 
@@ -199,8 +197,6 @@ class Week extends DateTime with DateRange {
   @override
   String toString() => "$mon,$sun";
 
-  String format(String fmt) => DateFormat(fmt).format(this);
-
   @override
   int get hashCode => Object.hash(year, month, day, week, weekYear);
 
@@ -249,8 +245,6 @@ class Month extends DateTime with DateRange {
   @override
   String toString([String fmt = "yyyy-MM"]) => format(fmt);
 
-  String format(String fmt) => DateFormat(fmt).format(this);
-
   factory Month.fromString(String dateString) {
     List<String> list = dateString.split("-");
     final int year = int.parse(list[0]);
@@ -298,8 +292,6 @@ class Year extends DateTime with DateRange {
 
   @override
   String toString([String fmt = "yyyy"]) => format(fmt);
-
-  String format(String fmt) => DateFormat(fmt).format(this);
 
   @override
   int get hashCode => year;
@@ -351,7 +343,7 @@ extension DateAndTime on DateTime {
       "${second.toString().padLeft(2, '0')}"
       "${isUtc ? 'Z' : ''}";
 
-  String format(String? fmt) => DateFormat(fmt).format(this);
+  String format(String? fmt) => DateFormat(fmt).format(this).capitalized;
   DateTime round() => date & time;
 
   DateTime toTZ([String? location]) {
@@ -384,5 +376,12 @@ extension DateAndTime on DateTime {
   DateTime operator &(DateTime datetime) => DateTime(
       year, month, day,
       datetime.hour, datetime.minute, datetime.second
+  );
+}
+
+extension on String {
+  String get capitalized => replaceAllMapped(
+    RegExp(r'(^|[\s.,])(\p{Ll})', unicode: true),
+        (m) => '${m[1]}${m[2]!.toUpperCase()}',
   );
 }

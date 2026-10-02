@@ -1,9 +1,8 @@
-import 'package:calendar/src/enums.dart';
-import 'utils/schemes.dart';
-import 'widgets/calendar_agenda.dart';
 import 'package:flutter/material.dart';
-import 'package:calendar/calendar.dart';
 import 'package:calendar/src/base.dart';
+import 'widgets/calendar_agenda.dart';
+import 'utils/schemes.dart';
+import 'data/event.dart';
 
 
 class Agenda<T extends Event> extends CalendarBase<T> {
@@ -79,7 +78,6 @@ class Agenda<T extends Event> extends CalendarBase<T> {
     // );
     return CalendarAgenda(
       dateScheme: dateScheme,
-      callbacks: callbacks,
       scrolling: scroll,
     );
   }

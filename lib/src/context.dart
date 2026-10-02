@@ -1,34 +1,48 @@
-import 'package:calendar/src/enums.dart';
 import 'package:flutter/material.dart';
 import 'utils/datetime.dart';
 import 'config.dart';
+import 'enums.dart';
 
 
 extension CalendarDimensions on BuildContext {
-
+  ColorScheme get colors => Theme.of(this).colorScheme;
   CalendarConfig get config => CalendarConfig.of(this);
 
-  double timeMargin() {
-    final timeConfig = config.time;
-    if (timeConfig == null) return 0.0;
-    final s = timeConfig.textStyle ?? DefaultTextStyle.of(this).style;
-    return s.fontSize! * (s.height ?? 1.5);
+  TextStyle _style(TextStyle? style) =>
+      DefaultTextStyle.of(this).style.merge(style);
+
+  Size _measure(String text, TextStyle? style) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: _style(style)),
+      textScaler: MediaQuery.textScalerOf(this),
+      textDirection: Directionality.of(this),
+    )..layout();
+    final size = painter.size;
+    painter.dispose();
+    return size;
   }
+
+  double tileHeight() {
+    final eventConfig = config.event;
+    final height = _measure("", eventConfig.textStyle).height;
+    return height * 1.25 + (eventConfig.eventMargin + eventConfig.eventPadding) * 2;
+  }
+
+
+  double timeMargin() {
+    final timeConfig = config.timeConfig();
+    final style = _style(timeConfig.textStyle);
+    final fontSize = MediaQuery.textScalerOf(this).scale(style.fontSize ?? 14.0);
+    return fontSize * (style.height ?? 1.5);
+  }
+
 
   double timeOffset() {
     final timeConfig = config.timeConfig();
-    final Time time = Time(0, 0);
-    final layout = TextPainter(
-      text: TextSpan(
-          text: (timeConfig.format != null)
-              ? time.format(timeConfig.format!)
-              : time.toString(),
-          style: timeConfig.textStyle ?? DefaultTextStyle.of(this).style
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return layout.width + (timeConfig.padding ?? 0.0) * 2;
+    final width = _measure("All day", timeConfig.textStyle).width;
+    return width + timeConfig.textPadding * 2;
   }
+
 
   double dateMargin() {
     return 0.0;
@@ -36,16 +50,8 @@ extension CalendarDimensions on BuildContext {
 
   double dateOffset(CalendarView view) {
     final dateConfig = config.dateConfig(view);
-    final date = Date.now();
-    final layout = TextPainter(
-      text: TextSpan(
-          text: (dateConfig.format != null)
-              ? date.format(dateConfig.format!)
-              : date.toString(),
-          style: dateConfig.textStyle ?? DefaultTextStyle.of(this).style
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return layout.height + (dateConfig.padding ?? 0.0) * 2;
+    final text = Date.now().format(dateConfig.textFormat);
+    final height = _measure(text, dateConfig.textStyle).height;
+    return height + dateConfig.textPadding * 2;
   }
 }

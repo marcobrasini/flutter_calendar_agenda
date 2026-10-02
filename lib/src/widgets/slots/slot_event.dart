@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../utils/color.dart';
 import '../../data/event.dart';
 import '../../modifier.dart';
-import '../../config.dart';
+import '../../context.dart';
 import '../../const.dart';
 
 
@@ -29,15 +29,14 @@ class SlotEvent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final dimmer = (scheme.brightness == Brightness.light)
+    final modifier = context.read<CalendarModifier>();
+    final dimmer = (context.colors.brightness == Brightness.light)
         ?  eventSlotLineDimmed
         : -eventSlotLineDimmed;
-    final config = CalendarConfig.of(context);
-    final modifier = context.read<CalendarModifier>();
+    final eventConfig = context.config.eventConfig();
+    final eventStyle = eventConfig.styleFor(event);
+    final padding = eventConfig.eventPadding;
     final alpha = dragging ? eventDraggableSlotAlpha : 255;
-    final style = config.event.styleFor(event);
-    final padding = config.event.padding ?? 0.0;
     return Listener(
       onPointerDown: (pointerEvent) {
         final box = context.findRenderObject() as RenderBox;
@@ -49,8 +48,9 @@ class SlotEvent extends StatelessWidget {
         );
       },
       child: Container(
+        margin: EdgeInsetsGeometry.all(eventConfig.eventMargin),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(eventSlotRounded),
+          borderRadius: BorderRadius.circular(eventConfig.eventRounded),
           border: (selected) ? Border.all(
             color: event.color.dimmer(dimmer),
             width: eventSlotLineWidth,
@@ -59,16 +59,16 @@ class SlotEvent extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            config.eventBuilder?.call(context, event) ?? Container(
+            context.config.eventBuilder?.call(context, event) ?? Container(
               padding: EdgeInsets.only(
-                bottom: (event.parentId != null) ? 6 * padding : 0.0,
+                bottom: (event.parentId != null) ? 4 * padding : 0.0,
               ),
               child: Padding(
                 padding: EdgeInsets.all(padding),
                 child: Text(event.subject,
-                  style: style,
-                  maxLines: config.event.maxLines,
-                  overflow: config.event.overflow,
+                  style: eventStyle,
+                  maxLines: eventConfig.maxLines,
+                  overflow: eventConfig.overflow,
                 ),
               ),
             ),
@@ -77,8 +77,8 @@ class SlotEvent extends StatelessWidget {
               bottom: padding,
               child: Icon(
                 (event.pattern == null) ? Icons.sync_disabled : Icons.sync,
-                color: style?.color,
-                size: 6 * padding,
+                color: eventStyle?.color,
+                size: 4 * padding,
               ),
             ),
           ],

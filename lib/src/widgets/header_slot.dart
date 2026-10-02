@@ -1,17 +1,11 @@
-import 'package:calendar/src/config.dart';
-import 'package:calendar/src/const.dart';
-import 'package:calendar/src/enums.dart';
-import 'package:calendar/src/picker.dart';
-import 'package:calendar/src/widgets/tools/slot_date.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'tools/slot_date.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
-import '../source.dart';
-import '../modifier.dart';
-import 'calendar_target.dart';
-import 'tabled_listed.dart';
-import 'tabled_paged.dart';
+import '../picker.dart';
+import '../config.dart';
+import '../enums.dart';
 import 'tabled_frame.dart';
 
 
@@ -33,6 +27,7 @@ class HeaderSlot extends StatelessWidget {
   final Offset offset;
   double get frameWidth => width - offset.dx;
   double get frameHeight => height - offset.dy;
+  double get space => frameWidth / dateScheme.count;
   Size get size => Size(width, height);
 
   static int _daysBetween(DateTime from, DateTime to) =>
@@ -50,8 +45,8 @@ class HeaderSlot extends StatelessWidget {
     final visible = column != null
         && column >= dateScheme.beg
         && column < dateScheme.end;
+    final eventConfig = config.eventConfig();
     final dateConfig = config.dateConfig(picker.view);
-    final space = frameWidth / dateScheme.count;
     return Stack(
       children: [
         TabledFrame(
@@ -59,6 +54,7 @@ class HeaderSlot extends StatelessWidget {
           width: width,
           height: height,
           offset: offset,
+          // visible: false,
           dateScheme: dateScheme,
         ),
         for (int i = dateScheme.beg; i < dateScheme.end; i++)
@@ -67,37 +63,44 @@ class HeaderSlot extends StatelessWidget {
             left: offset.dx + (i - dateScheme.beg) * space,
             child: SizedBox(
               width: space,
-              height: height,
+              height: frameHeight,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => picker.pick(date + i),
-                child: DateSlot(
-                  date: date + i,
-                  dateFormat: dateConfig.format ?? defaultDateFormat,
-                  datePadding: dateConfig.textPadding,
-                  dateTextStyle: dateConfig.textStyle,
-                  dateBackground: dateConfig.background,
+                child: IgnorePointer(
+                  child: DateSlot(
+                    width: space,
+                    height: frameHeight,
+                    date: date + i,
+                    config: dateConfig,
+                  ),
                 ),
               ),
             ),
           ),
         if (visible)
           AnimatedPositioned(
-            key: const ValueKey('selection'),
-            duration: config.event.eventDuration,
-            top: (picker.viewer?.view == CalendarView.daily) ? offset.dy : 0,
-            left: (picker.viewer?.view == CalendarView.daily) ? offset.dx + (column - dateScheme.beg) * space : 0,
-            width: (picker.viewer?.view == CalendarView.daily) ? space : width,
+            key: const ValueKey('Picked'),
+            duration: eventConfig.eventDuration,
+            top: (picker.viewer?.view == CalendarView.daily)
+                ? offset.dy
+                : 0,
+            left: (picker.viewer?.view == CalendarView.daily)
+                ? offset.dx + (column - dateScheme.beg) * space
+                : 0,
+            width: (picker.viewer?.view == CalendarView.daily)
+                ? space
+                : width,
             height: height,
             child: IgnorePointer(
               child: TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
-                duration: config.event.eventDuration,
+                duration: eventConfig.eventDuration,
                 builder: (context, t, child) => Opacity(opacity: t, child: child),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border.all(color: scheme.primary, width: 2.0),
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(config.event.eventRounded),
                   ),
                 ),
               ),

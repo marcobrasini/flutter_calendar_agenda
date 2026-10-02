@@ -13,6 +13,7 @@ class TabledFrame extends StatelessWidget {
     required this.width,
     required this.height,
     this.offset = Offset.zero,
+    this.visible = true,
     this.dateScheme,
     this.timeScheme,
     this.onTap,
@@ -23,6 +24,7 @@ class TabledFrame extends StatelessWidget {
   final double? width;
   final double? height;
   final Offset offset;
+  final bool visible;
   final DateScheme? dateScheme;
   final TimeScheme? timeScheme;
   final FrameCallback? onTap;
@@ -40,7 +42,7 @@ class TabledFrame extends StatelessWidget {
     return SizedBox(
       height: height,
       width: width,
-      child: GestureDetector(
+      child: (visible) ? GestureDetector(
         onTapUp: (details) => onTap?.call(details.localPosition),
         onLongPressDown: (details) => onLongPress?.call(details.localPosition),
         onDoubleTapDown: (details) => onDoubleTap?.call(details.localPosition),
@@ -74,7 +76,7 @@ class TabledFrame extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      ) : null,
     );
   }
 }

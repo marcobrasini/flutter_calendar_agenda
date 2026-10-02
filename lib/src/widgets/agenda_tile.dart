@@ -1,8 +1,8 @@
-import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
+import '../context.dart';
 import '../source.dart';
 import '../const.dart';
 import 'agenda_header.dart';
@@ -14,7 +14,6 @@ class AgendaTile extends StatefulWidget {
     required this.width,
     required this.datetime,
     required this.dateScheme,
-    required this.callbacks,
     this.onCollapse,
     this.onNeglect,
     this.until,
@@ -23,7 +22,6 @@ class AgendaTile extends StatefulWidget {
   final double width;
   final dynamic datetime;
   final DateScheme? dateScheme;
-  final CallbackScheme callbacks;
   final VoidCallback? onCollapse;
   final VoidCallback? onNeglect;
   final Date? until;
@@ -46,11 +44,10 @@ class _AgendaTileState extends State<AgendaTile> {
   @override
   Widget build(BuildContext context) {
     context.watch<CalendarEvents>();
-    final config = CalendarConfig.of(context);
     final forced = widget.datetime
         .iterate(widget.dateScheme)
         .contains(Date.now());
-    if (!forced && config.negligibleAgenda && isEmpty) {
+    if (!forced && context.config.negligibleAgenda && isEmpty) {
       widget.onNeglect?.call();
       return SizedBox.shrink();
     }
@@ -59,7 +56,7 @@ class _AgendaTileState extends State<AgendaTile> {
         AgendaHeader(
           datetime: widget.datetime,
           dateScheme: widget.dateScheme,
-          onTap: config.shrinkableAgenda
+          onTap: context.config.shrinkableAgenda
               ? () => setState(() {
                   if (_expanded) widget.onCollapse?.call();
                   _expanded = !_expanded;
@@ -72,10 +69,9 @@ class _AgendaTileState extends State<AgendaTile> {
               AgendaList(
                 date: date,
                 width: widget.width,
-                callbacks: widget.callbacks,
               ),
           if (isEmpty)
-            config.emptyBuilder?.call(context) ??
+            context.config.emptyBuilder?.call(context) ??
                 const Padding(
                   padding: EdgeInsets.all(textSlotPadding),
                   child: Center(child: Text("No events")),

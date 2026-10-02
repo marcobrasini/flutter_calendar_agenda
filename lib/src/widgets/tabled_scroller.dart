@@ -1,10 +1,8 @@
-import 'package:calendar/src/scroller.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import '../scroller.dart';
 import '../viewer.dart';
 import '../enums.dart';
 import '../const.dart';
-import 'tabled_slot.dart';
 import 'tabled_metrics.dart';
 
 
@@ -31,6 +29,7 @@ class _TabledScrollerState extends State<TabledScroller> {
   static final Key _centerKey = UniqueKey();
   late final ScrollPhysics _physics;
   bool _snapping = false;
+  bool _animating = false;
 
   void _changed() {
     if (mounted) setState(() {});
@@ -59,31 +58,27 @@ class _TabledScrollerState extends State<TabledScroller> {
     return widget.builder(metric.key, datetime);
   }
 
-  void viewerUpdate(int index, DateTime datetime) {
-    if (recorded == datetime || index == 0) return;
-    if (index > 0) {
-      while (recorded.isBefore(datetime)) {_viewer.next();}
-    } else {
-      while (recorded.isAfter(datetime)) {_viewer.last();}
+  void _update(DateTime datetime) {
+    while (recorded.isBefore(datetime)) {
+      _viewer.next();
+    }
+    while (recorded.isAfter(datetime)) {
+      _viewer.last();
     }
   }
 
   bool _scrolling(ScrollNotification notification) {
     if (_snapping) return false;
     final index = widget.metrics.snap(notification.metrics.pixels);
-    final datetime = widget.metrics.indexer(scrolled, index);
-    final offset = widget.metrics.offset(index);
-    if (datetime != widget.metrics.indexer(scrolled, 0)) {
-      viewerUpdate(index, datetime);
-      if (notification is ScrollEndNotification) {
-        _snapping = true;
-        _scroller.datetime = recorded;
-        _scroller.jumpTo(notification.metrics.pixels - offset);
-        widget.metrics.shift(index);
-        setState(() {});
-        _snapping = false;
-        return false;
-      }
+    if (!_animating) _update(widget.metrics.indexer(scrolled, index));
+    if (notification is ScrollEndNotification && index != 0) {
+      final offset = widget.metrics.offset(index);
+      _snapping = true;
+      _scroller.datetime = recorded;
+      _scroller.jumpTo(notification.metrics.pixels - offset);
+      widget.metrics.shift(index);
+      _changed();
+      _snapping = false;
     }
     return false;
   }
@@ -91,13 +86,15 @@ class _TabledScrollerState extends State<TabledScroller> {
   void _animate(CalendarSwipe swipe) {
     if (!_scroller.hasClients) return;
     final snap = widget.metrics.swipe(swipe);
-    if (snap != 0) {
-      _scroller.animateTo(
-        widget.metrics.offset(snap),
-        duration: viewSwipeDelay,
-        curve: Curves.easeInOut,
-      );
-    }
+    if (snap == 0) return;
+    _animating = true;
+    _scroller
+        .animateTo(
+          widget.metrics.offset(snap),
+          duration: viewSwipeDelay,
+          curve: Curves.easeInOut,
+        )
+        .whenComplete(() => _animating = false);
   }
 
   @override
@@ -108,6 +105,12 @@ class _TabledScrollerState extends State<TabledScroller> {
     _scroller.datetime = recorded;
     _viewer.addListener(_changed);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _viewer.removeListener(_changed);
+    super.dispose();
   }
 
   @override

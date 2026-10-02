@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
-import '../source.dart';
 import '../modifier.dart';
+import '../context.dart';
+import '../source.dart';
 import 'calendar_target.dart';
 import 'tabled_listed.dart';
 import 'tabled_paged.dart';
@@ -17,7 +18,6 @@ class TabledSlot extends StatelessWidget {
     required this.date,
     required this.width,
     required this.height,
-    required this.callbacks,
     required this.timeScheme,
     required this.dateScheme,
     this.offset = Offset.zero,
@@ -26,7 +26,6 @@ class TabledSlot extends StatelessWidget {
   final Date date;
   final double width;
   final double height;
-  final CallbackScheme callbacks;
   final DateScheme dateScheme;
   final TimeScheme? timeScheme;
   final Offset offset;
@@ -37,6 +36,7 @@ class TabledSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.watch<CalendarEvents>();
+    final callbacks = context.config.callbacks;
     final modifier = context.read<CalendarModifier>();
     final delegate = (timeScheme != null)
         ? SlotDropDelegate(date, timeScheme!, dateScheme)
@@ -71,7 +71,6 @@ class TabledSlot extends StatelessWidget {
                         width: space,
                         height: height,
                         timeScheme: timeScheme!,
-                        callbacks: callbacks,
                       ),
                     ) : DropWidget(
                       registry: modifier.registry,
@@ -81,7 +80,6 @@ class TabledSlot extends StatelessWidget {
                         date: date + i,
                         width: space,
                         height: height,
-                        callbacks: callbacks,
                       ),
                     )
               ],

@@ -21,7 +21,6 @@ class TabledPaged extends StatelessWidget {
     required this.width,
     required this.height,
     required this.timeScheme,
-    required this.callbacks,
   });
 
   final Date date;
@@ -29,7 +28,6 @@ class TabledPaged extends StatelessWidget {
   final double height;
   final TimeScheme timeScheme;
   double get timeScale => timeScheme.scale(height);
-  final CallbackScheme callbacks;
 
   int _yOf(Event event) {
     final from = Time.fromHour(timeScheme.beg);
@@ -57,7 +55,7 @@ class TabledPaged extends StatelessWidget {
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context).event;
     final source = context.read<CalendarEvents>();
-    final events = source.forDate(date);
+    final events = source.forDate(date).where((e) => !e.isAllDay).toList();
     return SizedBox(
       width: width,
       height: height,
@@ -75,7 +73,6 @@ class TabledPaged extends StatelessWidget {
                 children: [
                   PagedSlotEvent(
                     layout: layout,
-                    callbacks: callbacks,
                   ),
                 ],
               ),
@@ -89,13 +86,11 @@ class TabledPaged extends StatelessWidget {
 
 class PagedSlotEvent extends StatelessWidget {
   const PagedSlotEvent({
-    super.key,
     required this.layout,
-    required this.callbacks,
+    super.key,
   });
 
   final SlotLayout layout;
-  final CallbackScheme callbacks;
 
   bool resizable(CalendarConfig config) =>
       config.event.resizable?.call(layout.event) ?? config.eventResizable;
@@ -106,6 +101,7 @@ class PagedSlotEvent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
+    final callbacks = config.callbacks;
     final modifier = context.read<CalendarModifier>();
     final slot = context.select<CalendarModifier, SlotModifier>((modifier) {
       final selected = modifier.layout?.event == layout.event;

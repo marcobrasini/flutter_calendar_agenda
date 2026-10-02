@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:timer_builder/timer_builder.dart';
 import '../../utils/datetime.dart';
-import '../tabled_metrics.dart';
 import '../../scroller.dart';
-import '../../viewer.dart';
-import '../../config.dart';
+import '../../context.dart';
+import '../tabled_metrics.dart';
 import 'pointer_date.dart';
 import 'pointer_time.dart';
 
@@ -40,24 +39,23 @@ class TimeIndicator extends StatelessWidget {
           : time / metrics.timeScale;
       return Offset(dx, dy);
     }
-    if (metrics.weekScheme != null) {
-      dy = (direction == Axis.vertical)
-          ? weeks / metrics.weekScale - scroller.offset
-          : weeks / metrics.weekScale;
-      return Offset(dx, dy);
-    }
-    return null;
+    if (metrics.weekScheme == null) return Offset(dx, 0.0);
+    dy = (direction == Axis.vertical)
+        ? weeks / metrics.weekScale - scroller.offset
+        : weeks / metrics.weekScale;
+    return Offset(dx, dy);
   }
 
   @override
   Widget build(BuildContext context) {
-    final config = CalendarConfig.of(context).clock;
+    final clockConfig = context.config.clock;
     return TimerBuilder.periodic(
-      config.clockPeriod,
+      clockConfig.clockPeriod,
       builder: (context) {
         return ListenableBuilder(
           listenable: Listenable.merge([scroller, metrics]),
           builder: (context, _) {
+            final space = context.dateOffset(metrics.view);
             final length = metrics.dateSpace;
             final offset = getOffset();
             return (offset != null) ? SizedBox(
@@ -71,12 +69,14 @@ class TimeIndicator extends StatelessWidget {
                     width: length,
                     child: (metrics.timeScheme != null)
                         ? TimePointer(
-                      size: Size(length, 0.0),
-                    )
+                          size: Size(length, 0.0),
+                        )
                         : DatePointer(
-                      date: Date.now(),
-                      focus: true,
-                    ),
+                          view: metrics.view,
+                          date: Date.now(),
+                          width: length,
+                          height: space,
+                        ),
                   ),
                 ],
               ),

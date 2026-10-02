@@ -101,7 +101,6 @@ class Calendar<T extends Event> extends CalendarBase<T> {
                 : dateScheme,
             timeScheme: (view == CalendarView.monthly) ? null : timeScheme,
             weekScheme: (view == CalendarView.monthly) ? weekScheme : null,
-            callbacks: callbacks,
             cornerWidget: cornerBuilder,
           ),
         ),

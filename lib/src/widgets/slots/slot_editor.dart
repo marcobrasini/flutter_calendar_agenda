@@ -12,6 +12,8 @@ typedef EventBuilder = Widget Function(BuildContext);
 
 
 class SlotEditor extends StatelessWidget {
+  static const shift = 0.3;
+
   const SlotEditor({
     super.key,
     required this.layout,
@@ -22,7 +24,7 @@ class SlotEditor extends StatelessWidget {
   final SlotLayout layout;
   final Offset offset;
   final EventBuilder? builder;
-  final double radius = 10.0;
+  final double radius = 12.0;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class SlotEditor extends StatelessWidget {
             ),
           ),
           if (modifier.isResizing) Positioned(
-            left: container.left + container.width / 2 - radius + offset.dx,
+            left: container.left + container.width * (0.5 + shift) - radius + offset.dx,
             top: container.top - radius + offset.dy,
             width: 2 * radius,
             height: 2 * radius,
@@ -85,7 +87,7 @@ class SlotEditor extends StatelessWidget {
             ),
           ),
           if (modifier.isResizing) Positioned(
-            left: container.left + container.width / 2 - radius + offset.dx,
+            left: container.left + container.width * (0.5 - shift) - radius + offset.dx,
             top: container.top + container.height - radius + offset.dy,
             width: 2 * radius,
             height: 2 * radius,

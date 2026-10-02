@@ -1,4 +1,5 @@
 import 'viewer.dart';
+import 'enums.dart';
 
 
 class CalendarPicker extends CalendarViewer {
@@ -8,18 +9,55 @@ class CalendarPicker extends CalendarViewer {
   });
 
   CalendarViewer? viewer;
-  void attachViewer(CalendarViewer viewer) =>
-      this.viewer = viewer..addListener(sync);
+  bool _stepping = false;
+
+  void attachViewer(CalendarViewer viewer) {
+    this.viewer?.removeListener(sync);
+    this.viewer = viewer..addListener(sync);
+  }
 
   void sync() {
-    if (viewer != null) datetime = viewer!.datetime;
-    notifyListeners();
+    final target = viewer?.datetime;
+    if (target == null) return;
+    if (normalize(target) == datetime) {
+      notifyListeners();
+    } else {
+      jump(target);
+    }
   }
 
   void pick(DateTime datetime) {
-    this.datetime = datetime;
-    viewer?.jump(datetime);
-    notifyListeners();
+    (viewer != null) ? viewer!.jump(datetime) : jump(datetime);
+  }
+
+  @override
+  void next([bool swiping = false]) {
+    _stepping = true;
+    try {
+      super.next(swiping);
+    } finally {
+      _stepping = false;
+    }
+  }
+
+  @override
+  void last([bool swiping = false]) {
+    _stepping = true;
+    try {
+      super.last(swiping);
+    } finally {
+      _stepping = false;
+    }
+  }
+
+  @override
+  void swipe(CalendarSwipe swipe) {
+    if (_stepping) return super.swipe(swipe);
+    final target = viewer ?? this;
+    switch(swipe) {
+      case CalendarSwipe.forward:   target.next(true);
+      case CalendarSwipe.backward:  target.last(true);
+    }
   }
 
   @override

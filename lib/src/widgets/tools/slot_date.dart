@@ -1,5 +1,8 @@
-import 'package:calendar/src/utils/datetime.dart';
+import 'dart:math';
+import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
+import '../../utils/datetime.dart';
+import '../../context.dart';
 
 
 class DateSlot extends StatelessWidget {
@@ -9,44 +12,44 @@ class DateSlot extends StatelessWidget {
     this.width,
     this.height,
     required this.date,
-    required this.dateFormat,
-    required this.datePadding,
-    this.dateTextStyle,
-    this.dateBackground,
+    required this.config,
     this.dateWidget,
   });
 
   final Date date;
   final double? width;
   final double? height;
-  final String dateFormat;
-  final double datePadding;
-  final TextStyle? dateTextStyle;
-  final Color? dateBackground;
+  final TextConfig config;
   final Widget? dateWidget;
+
+  double get size => min(width ?? double.infinity, height ?? double.infinity);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      color: dateBackground,
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsetsGeometry.symmetric(
-              vertical: datePadding,
-            ),
-            child: Center (
+    final callbacks = context.config.callbacks;
+    return GestureDetector(
+      onTap: () => callbacks.onFrameTap?.call(date),
+      child: Container(
+        width: width,
+        height: height,
+        color: config.textBackground,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsetsGeometry.symmetric(
+                vertical: config.textPadding,
+              ),
               child: Text(
-                date.format(dateFormat),
+                date.format(config.textFormat),
                 textAlign: TextAlign.center,
-                style: dateTextStyle,
+                style: config.textStyle
               ),
             ),
-          ),
-          ?dateWidget,
-        ],
+            ?dateWidget,
+          ],
+        ),
       ),
     );
   }

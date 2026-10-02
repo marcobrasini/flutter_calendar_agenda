@@ -70,8 +70,8 @@ const dashFrameWidth = 4.0;
 const dashFrameSpace = 4.0;
 //
 const viewSwipeDelay = Duration(milliseconds: 500);
-const viewSwipeMargin = 20.0;
-const viewSlideMargin = 40.0;
+const viewSwipeMargin = 60.0;
+const viewSlideMargin = 60.0;
 
 const timeIndicatorPeriod = Duration(minutes: 1);
 const timeIndicatorLineWidth = 1.5;
@@ -84,6 +84,7 @@ const eventSlotLineWidth = 2.5;
 const eventSlotTabledExtent = 24.0;
 const eventSlotAgendaExtent = 60.0;
 const eventDraggableSlotAlpha = 127;
+const eventSlotMargin = 2.0;
 const eventSlotPadding = 4.0;
-const eventSlotRounded = 4.0;
+const eventSlotRounded = 8.0;
 const eventSlotDuration = Duration(milliseconds: 200);

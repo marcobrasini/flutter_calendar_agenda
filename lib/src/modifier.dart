@@ -30,18 +30,18 @@ class CalendarModifier extends ChangeNotifier {
     SlotAction.dragging: onDragStart,
     SlotAction.resizing: onResizeStart,
   },
-  _moveCallbacks = {
-    SlotAction.dragging: onDragMove,
-    SlotAction.resizing: onResizeMove,
-  },
-  _endCallbacks = {
-    SlotAction.dragging: onDragEnd,
-    SlotAction.resizing: onResizeEnd,
-  },
-  _cancelCallbacks = {
-    SlotAction.dragging: onDragCancel,
-    SlotAction.resizing: onResizeCancel,
-  };
+        _moveCallbacks = {
+          SlotAction.dragging: onDragMove,
+          SlotAction.resizing: onResizeMove,
+        },
+        _endCallbacks = {
+          SlotAction.dragging: onDragEnd,
+          SlotAction.resizing: onResizeEnd,
+        },
+        _cancelCallbacks = {
+          SlotAction.dragging: onDragCancel,
+          SlotAction.resizing: onResizeCancel,
+        };
 
   final DropRegistry registry = DropRegistry();
   final ModifyCallback? onEventDragged;
@@ -61,6 +61,7 @@ class CalendarModifier extends ChangeNotifier {
   Offset? _boxOffset;       // local position of the box offset before expansion
   SlotLayout? _layout;
   Rect _container = Rect.zero;
+  Rect _origin = Rect.zero; // [MOD] rettangolo di partenza, coordinate del contenuto
   bool _editing = false;
 
   SlotAction get action => _action;
@@ -120,6 +121,14 @@ class CalendarModifier extends ChangeNotifier {
   void attachSlider(ScrollController slider) => _slider = slider;
   bool get hasSlider => (_slider != null) ? _slider!.hasClients : false;
   double get slided => (hasSlider) ? _slider!.offset - _slideStart : 0.0;
+
+  // [MOD] spostamento del contenuto dovuto allo slide, sull'asse giusto.
+  // Letto dal controller: jumpTo lo aggiorna subito, senza aspettare il layout.
+  Offset get _slideDelta => switch (slidingDirection) {
+    Axis.horizontal => Offset(slided, 0.0),
+    Axis.vertical   => Offset(0.0, slided),
+    null            => Offset.zero,
+  };
 
   Fixture? get dropped {
     if (_layout == null || _actualOffset == null) return null;
@@ -209,10 +218,10 @@ class CalendarModifier extends ChangeNotifier {
     if (_slideTimer != null) return;
     _slideTimer = Timer.periodic(Duration(milliseconds: 50), (_) {
       final position = _slider!.position;
-      final offset = (position.pixels + _slideSpace);
+      final offset = position.pixels + _slideSpace;
       _slider!.jumpTo(offset.clamp(0.0, position.maxScrollExtent));
-      _boxOffset = null;
-      set(boxOffset & _layout!.container.size);
+      // [MOD] niente più `_boxOffset = null` + ricalcolo dalle trasformazioni
+      _update();
       notifyListeners();
     });
   }
@@ -268,15 +277,23 @@ class CalendarModifier extends ChangeNotifier {
     if (recording) {
       _startCallbacks[_action]?.call(_layout!.event);
       _initialOffset = _actualOffset;
-      _container = boxOffset & _layout!.container.size;
-      if (hasSlider) _slideStart = hasSlider ? _slider!.offset : 0;
+      // [MOD] maniglia di resize su un editor già aperto: si parte dal
+      // rettangolo mostrato. Il localOffset della maniglia è relativo al
+      // contenuto, non all'evento, quindi boxOffset qui sarebbe sbagliato.
+      final resizingOpen = _editing && _action == SlotAction.resizing;
+      if (!resizingOpen) {
+        _boxOffset = null;   // ricalcolato col localOffset di questo tocco
+        _container = boxOffset & _layout!.container.size;
+      }
+      _origin = _container;
+      _slideStart = hasSlider ? _slider!.offset : 0.0;
       _attachPointerRoutes();
       notifyListeners();
     }
   }
 
   void move() {
-    set(boxOffset & _layout!.container.size);
+    _update();   // [MOD] era set(boxOffset & _layout!.container.size)
     if (hasViewer && hasViewport) _swiping();
     if (hasSlider && hasViewport) _sliding();
     notifyListeners();
@@ -295,29 +312,32 @@ class CalendarModifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void set(Rect container) {
+  // [MOD] sostituisce set(Rect): parte sempre da _origin e somma
+  // il movimento del dito più lo slide del contenuto.
+  void _update() {
+    final delta = dragged + _slideDelta;
     switch (_action) {
       case SlotAction.dragging:
-        _container = container.translate(dragged.dx, dragged.dy);
+        _container = _origin.shift(delta);
       case SlotAction.resizing:
-        final delta = switch (_resize) {
-          ResizeSide.before || ResizeSide.after => dragged.dy,
-          _ => 0.0,
-        };
         switch (_resize) {
           case ResizeSide.before:
-            _container = Rect.fromLTWH(
-              container.left, container.top + delta,
-              container.width, container.height - delta,
+            final top = (_origin.top + delta.dy)
+                .clamp(double.negativeInfinity, _origin.bottom);
+            _container = Rect.fromLTRB(
+              _origin.left, top, _origin.right, _origin.bottom,
             );
           case ResizeSide.after:
-            _container = Rect.fromLTWH(
-              container.left, container.top,
-              container.width, container.height + delta,
+            final bottom = (_origin.bottom + delta.dy)
+                .clamp(_origin.top, double.infinity);
+            _container = Rect.fromLTRB(
+              _origin.left, _origin.top, _origin.right, bottom,
             );
-          default: return;
+          default:
+            return;
         }
-      default: return;
+      case SlotAction.none:
+        return;
     }
   }
 
