@@ -4,7 +4,6 @@ import '../utils/schemes.dart';
 import '../modifier.dart';
 import '../context.dart';
 import '../picker.dart';
-import '../enums.dart';
 import 'header_picker.dart';
 import 'tabled_metrics.dart';
 
@@ -81,7 +80,7 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
                 children: [
                   if (context.config.showHeaderButton) IconButton(
                     onPressed: (modifier.isResizing) ? null : () {
-                      _picker.swipe(CalendarSwipe.backward);
+                      _picker.last(true);
                     },
                     icon: Icon(Icons.arrow_left,
                       color: headerStyle?.color,
@@ -106,7 +105,7 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
                   ),
                   if (context.config.showHeaderButton) IconButton(
                     onPressed: (modifier.isResizing) ? null : () {
-                      _picker.swipe(CalendarSwipe.forward);
+                      _picker.next(true);
                     },
                     icon: Icon(Icons.arrow_right,
                       color: headerStyle?.color,

@@ -1,3 +1,4 @@
+import 'package:calendar/src/source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../utils/datetime.dart';
@@ -114,9 +115,14 @@ class SlotDropDelegate extends DropDelegate {
 
 
 class TileDropDelegate extends DropDelegate {
-  TileDropDelegate(this.date, [this.dateScheme]);
+  TileDropDelegate(this.date, {
+    this.dateScheme,
+    this.forceAllDay = false,
+  });
+
   final Date date;
   final DateScheme? dateScheme;
+  final bool forceAllDay;
 
   @override
   DateTime at(Offset offset, Size size) {
@@ -128,6 +134,14 @@ class TileDropDelegate extends DropDelegate {
   @override
   Fixture resolve(Rect local, Size size, Fixture fixture) {
     final days = date % fixture.start.date;
+    if (forceAllDay) {
+      final start = fixture.start.date.start;
+      final stop = fixture.stop.date.end;
+      return Fixture(
+          start: start.add(Duration(days: days)),
+          stop: stop.add(Duration(days: days)),
+      );
+    }
     return Fixture(
       start: fixture.start.add(Duration(days: days)),
       stop:  fixture.stop.add(Duration(days: days)),

@@ -101,6 +101,7 @@ class TimeBeg extends Time {
   int get hashCode => Object.hash(super.hashCode, 'TimeBeg');
 }
 
+
 mixin DateRange {
   Date get first;
   Date get last;
@@ -110,6 +111,7 @@ mixin DateRange {
       dateScheme?.count ?? days, (i) => first.date + (dateScheme?.beg ?? 0) + i
   );
 }
+
 
 class Date extends DateTime with DateRange {
   Date(super.year, super.month, super.day);

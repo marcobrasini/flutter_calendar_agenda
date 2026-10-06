@@ -33,7 +33,7 @@ class TabledAllDay extends StatelessWidget {
               onTap: () => context.config.callbacks.onFrameTap?.call(date),
               child:  DropWidget(
                 registry: modifier.registry,
-                delegate: TileDropDelegate(date),
+                delegate: TileDropDelegate(date, forceAllDay: true),
                 child: TabledListed(
                   key: ValueKey(date),
                   date: date,

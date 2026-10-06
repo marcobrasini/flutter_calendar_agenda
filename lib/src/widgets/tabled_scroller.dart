@@ -15,11 +15,13 @@ class TabledScroller extends StatefulWidget {
     required this.viewer,
     required this.metrics,
     required this.builder,
+    this.active = true,
   });
 
   final CalendarViewer viewer;
   final TabledMetrics metrics;
   final ScrollBuilder builder;
+  final bool active;
 
   @override
   State<TabledScroller> createState() => _TabledScrollerState();
@@ -27,9 +29,14 @@ class TabledScroller extends StatefulWidget {
 
 class _TabledScrollerState extends State<TabledScroller> {
   static final Key _centerKey = UniqueKey();
-  late final ScrollPhysics _physics;
   bool _snapping = false;
   bool _animating = false;
+
+  ScrollPhysics get _physics => !widget.active
+      ? const NeverScrollableScrollPhysics()
+      : (_scroller.scroll == CalendarScroll.snapping)
+      ? SnapPhysics(metrics: widget.metrics)
+      : const ScrollPhysics();
 
   void _changed() {
     if (mounted) setState(() {});
@@ -99,9 +106,6 @@ class _TabledScrollerState extends State<TabledScroller> {
 
   @override
   void initState() {
-    _physics = (_scroller.scroll == CalendarScroll.snapping)
-        ? SnapPhysics(metrics: widget.metrics)
-        : ScrollPhysics();
     _scroller.datetime = recorded;
     _viewer.addListener(_changed);
     super.initState();

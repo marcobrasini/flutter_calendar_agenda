@@ -100,8 +100,13 @@ class TabledMetrics extends ChangeNotifier {
 
   void resize(double width, double height) {
     if (_width == width && _height == height) return;
-    this.._width = width.._height = height;
-    _metrics.clear();
+    final axisChanged = switch (direction) {
+      Axis.horizontal => _width != width,
+      Axis.vertical   => _height != height,
+    };
+    _width = width;
+    _height = height;
+    if (axisChanged) _metrics.clear();
     refresh();
   }
 

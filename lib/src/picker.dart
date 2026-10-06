@@ -51,7 +51,7 @@ class CalendarPicker extends CalendarViewer {
   }
 
   @override
-  void swipe(CalendarSwipe swipe) {
+  void swipe(CalendarSwipe swipe, [bool header = false]) {
     if (_stepping) return super.swipe(swipe);
     final target = viewer ?? this;
     switch(swipe) {

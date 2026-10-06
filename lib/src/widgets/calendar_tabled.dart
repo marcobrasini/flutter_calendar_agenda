@@ -11,6 +11,7 @@ import '../scroller.dart';
 import '../context.dart';
 import '../config.dart';
 import '../viewer.dart';
+import '../scaler.dart';
 import '../source.dart';
 import '../enums.dart';
 import 'tabled_scroller.dart';
@@ -18,6 +19,7 @@ import 'tabled_metrics.dart';
 import 'tabled_header.dart';
 import 'tabled_allday.dart';
 import 'tabled_slider.dart';
+import 'tabled_scaler.dart';
 import 'tabled_slot.dart';
 
 
@@ -46,6 +48,7 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
   final GlobalKey _viewport = GlobalKey();
   final ValueNotifier<Date?> _paged = ValueNotifier(null);
   late final ScrollController _slider;
+  late final CalendarScaler _scaler;
   late final CalendarViewer _viewer;
   TabledMetrics? _metrics;
 
@@ -64,12 +67,22 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
   }
 
   @override
+  void didUpdateWidget(CalendarTabled old) {
+    super.didUpdateWidget(old);
+    if (old.timeScheme?.ratio != widget.timeScheme?.ratio) {
+      _scaler.reset(widget.timeScheme?.ratio ?? 0.0);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     _viewer = context.read<CalendarViewer>();
     _slider = widget.slider ?? ScrollController();
+    _scaler = CalendarScaler(ratio: widget.timeScheme?.ratio ?? 0.0);
     _scroller.addListener(_syncPage);
     _viewer.addListener(_viewerChanged);
+    _scaler.attach(_slider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
@@ -86,6 +99,7 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
   void dispose() {
     _scroller.removeListener(_syncPage);
     _viewer.removeListener(_viewerChanged);
+    _scaler.dispose();
     _paged.dispose();
     _metrics?.dispose();
     if (widget.slider == null) _slider.dispose();
@@ -193,6 +207,7 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
               children: [
                 TabledScroller(
                   key: _scroller.key,
+                  active: !_scaler.pinching,
                   viewer: _viewer,
                   metrics: metrics,
                   builder: (key, datetime) => TabledSlot(
@@ -230,101 +245,120 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
       direction: config.scrollDirection(_view),
     );
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final tileHeight = context.tileHeight();
-        final timeMargin = context.timeMargin() * 2;
-        final timeOffset = context.timeOffset();
-        final dateOffset = context.dateOffset(_view);
-        final pageHeight = (widget.timeScheme == null ||
-            widget.timeScheme?.ratio == 0)
-            ? constraints.maxHeight - timeMargin - dateOffset
-            : widget.timeScheme!.minutes * widget.timeScheme!.ratio;
-        final pageWidth = constraints.maxWidth -
-            (widget.timeScheme != null ? timeOffset : 0.0);
-        metrics.resize(pageWidth, pageHeight);
+    return ListenableBuilder(
+      listenable: _scaler,
+      builder: (context, _) => LayoutBuilder(
+        builder: (context, constraints) {
+          final tileHeight = context.tileHeight();
+          final timeMargin = context.timeMargin() * 2;
+          final timeOffset = context.timeOffset();
+          final dateOffset = context.dateOffset(_view);
+          final pageHeight = (widget.timeScheme == null || !_scaler.zoomable)
+              ? constraints.maxHeight - timeMargin - dateOffset
+              : widget.timeScheme!.minutes * _scaler.ratio;
+          final pageWidth = constraints.maxWidth -
+              (widget.timeScheme != null ? timeOffset : 0.0);
+          metrics.resize(pageWidth, pageHeight);
 
-        return Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            CustomScrollView(
-              key: _viewport,
-              controller: _slider,
-              scrollDirection: config.slideDirection(_view),
-              slivers: [
-                if (config.showHeaderWidget) Builder(
-                  builder: (context) {
-                    final source = context.watch<CalendarEvents>();
-                    return ValueListenableBuilder<Date?>(
-                      valueListenable: _paged,
-                      builder: (context, page, _) {
-                        final target = _allDayExtent(source, metrics, page, tileHeight);
-                        return TweenAnimationBuilder<double>(
-                          tween: Tween(end: target),
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                          builder: (context, extent, _) => SliverKeepOffset(
-                            sliver: SliverPersistentHeader(
-                              pinned: true,
-                              floating: true,
-                              delegate: _TabledHeaderDelegate(
-                                vsync: this,
-                                headerExtent: dateOffset,
-                                snapExtent: extent,
-                                color: Theme.of(context).colorScheme.surface,
-                                header: _buildHeader(metrics, timeOffset, dateOffset, pageWidth),
-                                snap: _buildAllDay(metrics, timeOffset, pageWidth),
-                              ),
-                            ),
-                          ),
+          return Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              TabledScaler(
+                scaler: _scaler,
+                bodyTop: dateOffset,
+                child: CustomScrollView(
+                  key: _viewport,
+                  controller: _slider,
+                  physics: _scaler.pinching
+                      ? const NeverScrollableScrollPhysics()
+                      : null,
+                  scrollDirection: config.slideDirection(_view),
+                  slivers: [
+                    if (config.showHeaderWidget) Builder(
+                      builder: (context) {
+                        final source = context.watch<CalendarEvents>();
+                        return ValueListenableBuilder<Date?>(
+                          valueListenable: _paged,
+                          builder: (context, page, _) {
+                            final target = _allDayExtent(
+                                source, metrics, page, tileHeight);
+                            return TweenAnimationBuilder<double>(
+                              tween: Tween(end: target),
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOut,
+                              builder: (context, extent, _) =>
+                                  SliverKeepOffset(
+                                    sliver: SliverPersistentHeader(
+                                      pinned: true,
+                                      floating: true,
+                                      delegate: _TabledHeaderDelegate(
+                                        vsync: this,
+                                        headerExtent: dateOffset,
+                                        snapExtent: extent,
+                                        color: Theme
+                                            .of(context)
+                                            .colorScheme
+                                            .surface,
+                                        header: _buildHeader(
+                                            metrics, timeOffset, dateOffset,
+                                            pageWidth),
+                                        snap: _buildAllDay(
+                                            metrics, timeOffset, pageWidth),
+                                      ),
+                                    ),
+                                  ),
+                            );
+                          },
                         );
                       },
-                    );
-                  },
+                    ),
+                    SliverToBoxAdapter(
+                      child: _buildBody(
+                          metrics, timeOffset, pageWidth, pageHeight),
+                    ),
+                  ],
                 ),
-                SliverToBoxAdapter(
-                  child: _buildBody(metrics, timeOffset, pageWidth, pageHeight),
-                ),
-              ],
-            ),
-            Builder(
-              builder: (context) {
-                final modifier = context.watch<CalendarModifier>();
-                if (!modifier.editing) return const SizedBox.shrink();
-                return Positioned.fill(
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: modifier.end,
-                        ),
-                      ),
-                      Positioned.fill(
-                        child: ClipRect(
-                          child: Stack(
-                            children: [
-                              CompositedTransformFollower(
-                                link: _link,
-                                showWhenUnlinked: false,
-                                child: SizedBox(
-                                  width: pageWidth,
-                                  height: pageHeight,
-                                  child: SlotEditor(layout: modifier.layout!),
-                                ),
-                              ),
-                            ],
+              ),
+              Builder(
+                builder: (context) {
+                  final modifier = context.watch<CalendarModifier>();
+                  if (!modifier.editing) return const SizedBox.shrink();
+                  return Positioned.fill(
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: modifier.end,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
+                        Positioned.fill(
+                          child: ClipRect(
+                            child: Stack(
+                              children: [
+                                CompositedTransformFollower(
+                                  link: _link,
+                                  showWhenUnlinked: false,
+                                  child: SizedBox(
+                                    width: pageWidth,
+                                    height: pageHeight,
+                                    child: SlotEditor(
+                                        layout: modifier.layout!),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

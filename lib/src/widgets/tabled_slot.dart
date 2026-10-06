@@ -40,7 +40,7 @@ class TabledSlot extends StatelessWidget {
     final modifier = context.read<CalendarModifier>();
     final delegate = (timeScheme != null)
         ? SlotDropDelegate(date, timeScheme!, dateScheme)
-        : TileDropDelegate(date, dateScheme);
+        : TileDropDelegate(date, dateScheme: dateScheme);
     final space = frameWidth / dateScheme.count;
     return Stack(
       children: [

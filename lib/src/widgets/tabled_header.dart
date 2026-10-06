@@ -40,7 +40,7 @@ class TabledHeader extends StatelessWidget {
           Expanded(
             child: DropWidget(
               registry: modifier.registry,
-              delegate: TileDropDelegate(date),
+              delegate: TileDropDelegate(date, forceAllDay: true),
               child: DateSlot(
                 date: date,
                 config: (metrics.weekScheme == null)
