@@ -605,4 +605,4 @@ All types support `+`, `-`, `%` (distance), `<`, `>`, `<=`, `>=` and value equal
 
 ## License
 
-<!-- TODO -->
+Released under the [MIT License](LICENSE).
