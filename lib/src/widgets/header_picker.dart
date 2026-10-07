@@ -9,12 +9,8 @@ import 'tabled_metrics.dart';
 import 'tabled_header.dart';
 import 'header_slot.dart';
 
-
 class HeaderPicker extends StatefulWidget {
-  const HeaderPicker({
-    required this.metrics,
-    super.key
-  });
+  const HeaderPicker({required this.metrics, super.key});
 
   final TabledMetrics metrics;
 
@@ -36,11 +32,12 @@ class _HeaderPickerState extends State<HeaderPicker> {
     final slotCount = widget.metrics.weekScheme?.count ?? 1;
     return Column(
       children: [
-        if (widget.metrics.weekScheme != null) TabledHeader(
-          width: widget.metrics.width,
-          height: widget.metrics.height,
-          metrics: widget.metrics
-        ),
+        if (widget.metrics.weekScheme != null)
+          TabledHeader(
+            width: widget.metrics.width,
+            height: widget.metrics.height,
+            metrics: widget.metrics,
+          ),
         SizedBox(
           width: widget.metrics.width,
           height: widget.metrics.height,
@@ -53,17 +50,18 @@ class _HeaderPickerState extends State<HeaderPicker> {
                   key: key,
                   date: datetime.date,
                   width: widget.metrics.width,
-                  height: widget.metrics.height/slotCount,
+                  height: widget.metrics.height / slotCount,
                   dateScheme: widget.metrics.dateScheme!,
                 ),
               ),
-              if (context.config.showIndicator) TimeIndicator(
-                metrics: widget.metrics,
-                scroller: _picker.scroller,
-                direction: widget.metrics.direction,
-              )
+              if (context.config.showIndicator)
+                TimeIndicator(
+                  metrics: widget.metrics,
+                  scroller: _picker.scroller,
+                  direction: widget.metrics.direction,
+                ),
             ],
-          )
+          ),
         ),
       ],
     );

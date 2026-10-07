@@ -6,13 +6,11 @@ import '../utils/schemes.dart';
 import '../viewer.dart';
 import '../enums.dart';
 
-
 class SnapPoint {
   const SnapPoint(this.offset, this.datetime);
   final double offset;
   final dynamic datetime;
 }
-
 
 class AgendaRegistry {
   AgendaRegistry({
@@ -39,9 +37,9 @@ class AgendaRegistry {
   int get dateStep => dateScheme?.step ?? 0;
   int? get dateCount => dateScheme?.count;
 
-  double get caching => switch(direction) {
+  double get caching => switch (direction) {
     Axis.horizontal => _width,
-    Axis.vertical   => _height,
+    Axis.vertical => _height,
   };
 
   bool get isBlank => _sorted.length <= 1;
@@ -60,11 +58,14 @@ class AgendaRegistry {
 
   void invalidate() {
     _rendering = true;
-    if (_scheduled) return; _scheduled = true;
-    SchedulerBinding.instance..addPostFrameCallback((_) {
-      _scheduled = false;
-      if (_rendering) _rebuild();
-    })..scheduleFrame();
+    if (_scheduled) return;
+    _scheduled = true;
+    SchedulerBinding.instance
+      ..addPostFrameCallback((_) {
+        _scheduled = false;
+        if (_rendering) _rebuild();
+      })
+      ..scheduleFrame();
   }
 
   void _rebuild() {
@@ -86,7 +87,8 @@ class AgendaRegistry {
     points.sort((a, b) => a.offset.compareTo(b.offset));
     final unique = <SnapPoint>[];
     for (final point in points) {
-      if (unique.isEmpty || point.offset - unique.last.offset > precisionErrorTolerance) {
+      if (unique.isEmpty ||
+          point.offset - unique.last.offset > precisionErrorTolerance) {
         unique.add(point);
       }
     }
@@ -96,7 +98,9 @@ class AgendaRegistry {
 
   void resize(double width, double height) {
     if (_width == width && _height == height) return;
-    this.._width = width.._height = height;
+    this
+      .._width = width
+      .._height = height;
     invalidate();
   }
 
@@ -105,7 +109,11 @@ class AgendaRegistry {
     int lo = 0, hi = _sorted.length;
     while (lo < hi) {
       final mid = (lo + hi) >> 1;
-      if (_sorted[mid].offset <= limit) { lo = mid + 1; } else { hi = mid; }
+      if (_sorted[mid].offset <= limit) {
+        lo = mid + 1;
+      } else {
+        hi = mid;
+      }
     }
     return (lo - 1).clamp(0, _sorted.length - 1);
   }
@@ -114,9 +122,8 @@ class AgendaRegistry {
 
   DateTime datetime(int index) => _sorted[index].datetime;
 
-  SnapPoint? find(DateTime datetime) => _sorted.where(
-          (snap) => snap.datetime == datetime
-  ).singleOrNull;
+  SnapPoint? find(DateTime datetime) =>
+      _sorted.where((snap) => snap.datetime == datetime).singleOrNull;
 
   SnapPoint? snap(double pixels) {
     final i = index(pixels);
@@ -137,12 +144,11 @@ class AgendaRegistry {
     return (i == 0) ? null : _sorted[i - 1];
   }
 
-  SnapPoint? swipe(CalendarSwipe swipe) => switch(swipe) {
+  SnapPoint? swipe(CalendarSwipe swipe) => switch (swipe) {
     CalendarSwipe.backward => last(viewer.datetime),
-    CalendarSwipe.forward =>  next(viewer.datetime),
+    CalendarSwipe.forward => next(viewer.datetime),
   };
 }
-
 
 class WidgetRegistry extends SingleChildRenderObjectWidget {
   const WidgetRegistry({
@@ -163,10 +169,12 @@ class WidgetRegistry extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderRegistry renderObject) {
-    renderObject..registry = registry..datetime = datetime..snap = snap;
+    renderObject
+      ..registry = registry
+      ..datetime = datetime
+      ..snap = snap;
   }
 }
-
 
 class RenderRegistry extends RenderProxyBox {
   RenderRegistry(this._registry, this._dateTime, this._snap);
@@ -192,7 +200,10 @@ class RenderRegistry extends RenderProxyBox {
   AgendaRegistry get registry => _registry;
   set registry(AgendaRegistry value) {
     if (identical(value, _registry)) return;
-    if (attached) { _registry.remove(this); value.add(this); }
+    if (attached) {
+      _registry.remove(this);
+      value.add(this);
+    }
     _registry = value;
   }
 

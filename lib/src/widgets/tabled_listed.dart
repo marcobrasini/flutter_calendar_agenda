@@ -13,7 +13,6 @@ import '../config.dart';
 import '../const.dart';
 import '../enums.dart';
 
-
 class TabledListed extends StatelessWidget {
   const TabledListed({
     super.key,
@@ -34,7 +33,7 @@ class TabledListed extends StatelessWidget {
         event: event,
         container: Rect.fromLTWH(0.0, 0.0, width, tileHeight),
         tile: true,
-      )
+      ),
   ];
 
   @override
@@ -58,7 +57,7 @@ class TabledListed extends StatelessWidget {
                 width: layout.width,
                 height: layout.height,
                 child: ListedSlotEvent(layout: layout),
-              )
+              ),
           ],
         ),
       ),
@@ -66,12 +65,8 @@ class TabledListed extends StatelessWidget {
   }
 }
 
-
 class ListedSlotEvent extends StatelessWidget {
-  const ListedSlotEvent({
-    super.key,
-    required this.layout,
-  });
+  const ListedSlotEvent({super.key, required this.layout});
 
   final SlotLayout layout;
 
@@ -136,10 +131,10 @@ class ListedSlotEvent extends StatelessWidget {
       child: (slot.editing && slot.action == SlotAction.resizing)
           ? const SizedBox.shrink()
           : SlotEvent(
-            event: layout.event,
-            offset: Offset(layout.left, 0.0),
-            dragging: slot.editing && slot.action == SlotAction.dragging,
-          ),
+              event: layout.event,
+              offset: Offset(layout.left, 0.0),
+              dragging: slot.editing && slot.action == SlotAction.dragging,
+            ),
     );
   }
 }

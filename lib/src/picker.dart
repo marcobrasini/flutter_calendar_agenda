@@ -1,18 +1,14 @@
 import 'viewer.dart';
 import 'enums.dart';
 
-
 class CalendarPicker extends CalendarViewer {
-  CalendarPicker({
-    required super.view,
-    required super.scroll,
-  });
+  CalendarPicker({required super.view, required super.scroll});
 
   CalendarViewer? _viewer;
   CalendarViewer? get viewer => _viewer;
   bool get negligible => view == _viewer?.view;
-  bool _stepping = false;   // picker-activated flag: calling for super-methods
-  bool _leading = false;    // activating-viewer flag: no sync callback
+  bool _stepping = false; // picker-activated flag: calling for super-methods
+  bool _leading = false; // activating-viewer flag: no sync callback
 
   void attachViewer(CalendarViewer? viewer) {
     if (identical(viewer, _viewer)) return;
@@ -71,8 +67,10 @@ class CalendarPicker extends CalendarViewer {
     if (_stepping) return super.swipe(swipe);
     final target = _viewer ?? this;
     switch (swipe) {
-      case CalendarSwipe.forward:  target.next(true);
-      case CalendarSwipe.backward: target.last(true);
+      case CalendarSwipe.forward:
+        target.next(true);
+      case CalendarSwipe.backward:
+        target.last(true);
     }
   }
 

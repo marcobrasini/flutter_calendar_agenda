@@ -1,10 +1,9 @@
-import 'package:calendar/src/source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../data/fixture.dart';
-
+import '../source.dart';
 
 class DropRegistry {
   final Set<RenderDrop> _zones = {};
@@ -29,7 +28,6 @@ class DropRegistry {
   void dispose() => hovered.dispose();
 }
 
-
 class DropWidget extends SingleChildRenderObjectWidget {
   const DropWidget({
     super.key,
@@ -47,10 +45,11 @@ class DropWidget extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderDrop renderObject) {
-    renderObject..registry = registry..delegate = delegate;
+    renderObject
+      ..registry = registry
+      ..delegate = delegate;
   }
 }
-
 
 class RenderDrop extends RenderProxyBox {
   RenderDrop(this._registry, this.delegate);
@@ -61,7 +60,10 @@ class RenderDrop extends RenderProxyBox {
   DropRegistry get registry => _registry;
   set registry(DropRegistry value) {
     if (identical(value, _registry)) return;
-    if (attached) { _registry.remove(this); value.add(this); }
+    if (attached) {
+      _registry.remove(this);
+      value.add(this);
+    }
     _registry = value;
   }
 
@@ -78,13 +80,11 @@ class RenderDrop extends RenderProxyBox {
   }
 }
 
-
 abstract class DropDelegate {
   bool accepts(Fixture event) => true;
   Fixture resolve(Rect rect, Size size, Fixture fixture);
   DateTime at(Offset offset, Size size);
 }
-
 
 class SlotDropDelegate extends DropDelegate {
   SlotDropDelegate(this.date, this.timeScheme, [this.dateScheme]);
@@ -92,8 +92,8 @@ class SlotDropDelegate extends DropDelegate {
   final TimeScheme timeScheme;
   final DateScheme? dateScheme;
   int get step => timeScheme.round;
-  int get origin => timeScheme.from.hour * Duration.minutesPerHour
-      + timeScheme.from.minute;
+  int get origin =>
+      timeScheme.from.hour * Duration.minutesPerHour + timeScheme.from.minute;
 
   @override
   DateTime at(Offset offset, Size size) {
@@ -109,16 +109,12 @@ class SlotDropDelegate extends DropDelegate {
   @override
   Fixture resolve(Rect rect, Size size, Fixture fixture) => Fixture(
     start: at(rect.topCenter, size),
-    stop:  at(rect.bottomCenter, size),
+    stop: at(rect.bottomCenter, size),
   );
 }
 
-
 class TileDropDelegate extends DropDelegate {
-  TileDropDelegate(this.date, {
-    this.dateScheme,
-    this.forceAllDay = false,
-  });
+  TileDropDelegate(this.date, {this.dateScheme, this.forceAllDay = false});
 
   final Date date;
   final DateScheme? dateScheme;
@@ -138,13 +134,13 @@ class TileDropDelegate extends DropDelegate {
       final start = fixture.start.date.start;
       final stop = fixture.stop.date.end;
       return Fixture(
-          start: start.add(Duration(days: days)),
-          stop: stop.add(Duration(days: days)),
+        start: start.add(Duration(days: days)),
+        stop: stop.add(Duration(days: days)),
       );
     }
     return Fixture(
       start: fixture.start.add(Duration(days: days)),
-      stop:  fixture.stop.add(Duration(days: days)),
+      stop: fixture.stop.add(Duration(days: days)),
     );
   }
 }

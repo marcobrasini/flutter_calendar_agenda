@@ -2,18 +2,16 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-
 /// Mantiene fermo il contenuto che segue quando lo scrollExtent
 /// dello sliver figlio cambia mentre la vista è scrollata.
 class SliverKeepOffset extends SingleChildRenderObjectWidget {
   const SliverKeepOffset({super.key, required Widget sliver})
-      : super(child: sliver);
+    : super(child: sliver);
 
   @override
   RenderSliverKeepOffset createRenderObject(BuildContext context) =>
       RenderSliverKeepOffset();
 }
-
 
 class RenderSliverKeepOffset extends RenderProxySliver {
   double? _lastExtent;

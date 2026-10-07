@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:calendar/src/base.dart';
 import 'widgets/calendar_agenda.dart';
 import 'utils/schemes.dart';
 import 'data/event.dart';
-
+import 'base.dart';
 
 class Agenda<T extends Event> extends CalendarBase<T> {
   const Agenda({
@@ -53,10 +52,11 @@ class Agenda<T extends Event> extends CalendarBase<T> {
   });
 
   @override
-  Widget buildViewer(BuildContext context,
-      DateScheme dateScheme,
-      TimeScheme? timeScheme,
-      WeekScheme? weekScheme,
+  Widget buildViewer(
+    BuildContext context,
+    DateScheme dateScheme,
+    TimeScheme? timeScheme,
+    WeekScheme? weekScheme,
   ) {
     // return CustomScrollView(
     //   primary: false,
@@ -76,9 +76,6 @@ class Agenda<T extends Event> extends CalendarBase<T> {
     //     ),
     //   ],
     // );
-    return CalendarAgenda(
-      dateScheme: dateScheme,
-      scrolling: scroll,
-    );
+    return CalendarAgenda(dateScheme: dateScheme, scrolling: scroll);
   }
 }

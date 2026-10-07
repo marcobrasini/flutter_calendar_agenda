@@ -1,18 +1,10 @@
 import 'dart:ui';
-import 'package:calendar/src/utils/datetime.dart';
 import 'package:meta/meta.dart';
+import '../utils/datetime.dart';
 import 'fixture.dart';
 import 'pattern.dart';
 
-
-enum EventType {
-  occurrence,
-  recurrence,
-  exception,
-  deviation,
-  instance,
-}
-
+enum EventType { occurrence, recurrence, exception, deviation, instance }
 
 class Event extends Fixture {
   final String? id;
@@ -66,13 +58,17 @@ class Event extends Fixture {
 
   Event setPattern(Pattern pattern) => set({'pattern': pattern});
 
-  Event addException(DateTime datetime) => set({'pattern': pattern?.addException(datetime)});
+  Event addException(DateTime datetime) =>
+      set({'pattern': pattern?.addException(datetime)});
 
-  Event delException(DateTime datetime) => set({'pattern': pattern?.delException(datetime)});
+  Event delException(DateTime datetime) =>
+      set({'pattern': pattern?.delException(datetime)});
 
-  Event addRecurrence(Date date) => set({'pattern': pattern?.addRecurrence(date)});
+  Event addRecurrence(Date date) =>
+      set({'pattern': pattern?.addRecurrence(date)});
 
-  Event delRecurrence(Date date) => set({'pattern': pattern?.delRecurrence(date)});
+  Event delRecurrence(Date date) =>
+      set({'pattern': pattern?.delRecurrence(date)});
 
   Event setParent(String? parentId) => set({'parentId': parentId});
 
@@ -106,23 +102,27 @@ class Event extends Fixture {
     location: location,
   );
 
-  Event instance(Fixture fixture) =>
-    Event.make(data: {...get(), ...fixture.get(),
-      "parentId": id,
-      "pattern": pattern,
-    });
+  Event instance(Fixture fixture) => Event.make(
+    data: {...get(), ...fixture.get(), "parentId": id, "pattern": pattern},
+  );
 
-  Event exception(Fixture fixture) =>
-    Event.make(data: {...get(), ...fixture.get(),
+  Event exception(Fixture fixture) => Event.make(
+    data: {
+      ...get(),
+      ...fixture.get(),
       "pattern": null,
       "parentId": id ?? parentId,
-    });
+    },
+  );
 
-  Event deviation(Fixture fixture) =>
-    Event.make(data: {...get(), ...fixture.get(),
+  Event deviation(Fixture fixture) => Event.make(
+    data: {
+      ...get(),
+      ...fixture.get(),
       "pattern": pattern,
       "parentId": id ?? parentId,
-    });
+    },
+  );
 
   EventType get type {
     if (isInstance) return EventType.instance;
@@ -143,7 +143,9 @@ class Event extends Fixture {
       final instanceStop = instanceStart.add(duration);
       if (to != null && !instanceStart.isBefore(to)) break;
       if (from == null || instanceStop.isAfter(from)) {
-        instances.add(instance(Fixture(start: instanceStart, stop: instanceStop)));
+        instances.add(
+          instance(Fixture(start: instanceStart, stop: instanceStop)),
+        );
       }
     }
     return instances;

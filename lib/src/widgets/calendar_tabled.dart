@@ -23,9 +23,7 @@ import 'tabled_slider.dart';
 import 'tabled_scaler.dart';
 import 'tabled_slot.dart';
 
-
 class CalendarTabled extends StatefulWidget {
-
   const CalendarTabled({
     super.key,
     required this.timeScheme,
@@ -45,7 +43,8 @@ class CalendarTabled extends StatefulWidget {
   State<CalendarTabled> createState() => _CalendarTabledState();
 }
 
-class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStateMixin {
+class _CalendarTabledState extends State<CalendarTabled>
+    with TickerProviderStateMixin {
   final GlobalKey _overlay = GlobalKey();
   final GlobalKey _viewport = GlobalKey();
   final ValueNotifier<Date?> _paged = ValueNotifier(null);
@@ -109,18 +108,19 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
   }
 
   Widget _buildHeader(
-      TabledMetrics metrics, 
-      double timeOffset,
-      double dateOffset, 
-      double pageWidth
+    TabledMetrics metrics,
+    double timeOffset,
+    double dateOffset,
+    double pageWidth,
   ) {
     return Row(
       children: [
-        if (widget.timeScheme != null) SizedBox(
-          width: timeOffset,
-          height: dateOffset,
-          child: widget.cornerWidget?.call(context),
-        ),
+        if (widget.timeScheme != null)
+          SizedBox(
+            width: timeOffset,
+            height: dateOffset,
+            child: widget.cornerWidget?.call(context),
+          ),
         SizedBox(
           width: pageWidth,
           height: dateOffset,
@@ -146,35 +146,37 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
   }
 
   double _allDayExtent(
-      CalendarEvents source,
-      TabledMetrics metrics,
-      Date? page,
-      double tileHeight
-    ) {
+    CalendarEvents source,
+    TabledMetrics metrics,
+    Date? page,
+    double tileHeight,
+  ) {
     if (widget.timeScheme == null) return 0.0;
     final date = (widget.weekScheme != null)
         ? null
         : page ?? metrics.indexer(_viewer.datetime, 0).date;
     return _rows(source, metrics, date) * tileHeight;
   }
-  
+
   Widget _buildAllDay(
-      TabledMetrics metrics,
-      double timeOffset,
-      double pageWidth,
+    TabledMetrics metrics,
+    double timeOffset,
+    double pageWidth,
   ) {
     return Row(
       children: [
-        if (widget.timeScheme != null) SizedBox(
-          width: timeOffset,
-          child: Center(
-            child: FittedBox(
-              child: Text("All day",
-                style: context.config.timeConfig().textStyle,
+        if (widget.timeScheme != null)
+          SizedBox(
+            width: timeOffset,
+            child: Center(
+              child: FittedBox(
+                child: Text(
+                  "All day",
+                  style: context.config.timeConfig().textStyle,
+                ),
               ),
             ),
           ),
-        ),
         SizedBox(
           width: pageWidth,
           child: TabledAllDay(
@@ -195,11 +197,12 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (widget.timeScheme != null) TimeHeader(
-          width: timeOffset,
-          height: pageHeight,
-          scheme: widget.timeScheme!,
-        ),
+        if (widget.timeScheme != null)
+          TimeHeader(
+            width: timeOffset,
+            height: pageHeight,
+            scheme: widget.timeScheme!,
+          ),
         SizedBox(
           width: pageWidth,
           height: pageHeight,
@@ -221,11 +224,12 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
                     dateScheme: widget.dateScheme,
                   ),
                 ),
-                if (context.config.showIndicator) TimeIndicator(
-                  metrics: metrics,
-                  scroller: _scroller,
-                  direction: metrics.direction,
-                ),
+                if (context.config.showIndicator)
+                  TimeIndicator(
+                    metrics: metrics,
+                    scroller: _scroller,
+                    direction: metrics.direction,
+                  ),
               ],
             ),
           ),
@@ -258,7 +262,8 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
           final pageHeight = (widget.timeScheme == null || !_scaler.zoomable)
               ? constraints.maxHeight - timeMargin * 2 - dateOffset
               : widget.timeScheme!.minutes * _scaler.ratio;
-          final pageWidth = constraints.maxWidth -
+          final pageWidth =
+              constraints.maxWidth -
               (widget.timeScheme != null ? timeOffset : 0.0);
           metrics.resize(pageWidth, pageHeight);
 
@@ -277,47 +282,61 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
                       : null,
                   scrollDirection: config.slideDirection(_view),
                   slivers: [
-                    if (config.showHeaderWidget) Builder(
-                      builder: (context) {
-                        final source = context.watch<CalendarEvents>();
-                        return ValueListenableBuilder<Date?>(
-                          valueListenable: _paged,
-                          builder: (context, page, _) {
-                            final target = _allDayExtent(
-                                source, metrics, page, tileHeight);
-                            return TweenAnimationBuilder<double>(
-                              tween: Tween(end: target),
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                              builder: (context, extent, _) =>
-                                  SliverKeepOffset(
-                                    sliver: SliverPersistentHeader(
-                                      pinned: true,
-                                      floating: true,
-                                      delegate: _TabledHeaderDelegate(
-                                        vsync: this,
-                                        headerExtent: dateOffset,
-                                        snapExtent: extent,
-                                        color: Theme
-                                            .of(context)
-                                            .colorScheme
-                                            .surface,
-                                        header: _buildHeader(
-                                            metrics, timeOffset, dateOffset,
-                                            pageWidth),
-                                        snap: _buildAllDay(
-                                            metrics, timeOffset, pageWidth),
+                    if (config.showHeaderWidget)
+                      Builder(
+                        builder: (context) {
+                          final source = context.watch<CalendarEvents>();
+                          return ValueListenableBuilder<Date?>(
+                            valueListenable: _paged,
+                            builder: (context, page, _) {
+                              final target = _allDayExtent(
+                                source,
+                                metrics,
+                                page,
+                                tileHeight,
+                              );
+                              return TweenAnimationBuilder<double>(
+                                tween: Tween(end: target),
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeInOut,
+                                builder: (context, extent, _) =>
+                                    SliverKeepOffset(
+                                      sliver: SliverPersistentHeader(
+                                        pinned: true,
+                                        floating: true,
+                                        delegate: _TabledHeaderDelegate(
+                                          vsync: this,
+                                          headerExtent: dateOffset,
+                                          snapExtent: extent,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.surface,
+                                          header: _buildHeader(
+                                            metrics,
+                                            timeOffset,
+                                            dateOffset,
+                                            pageWidth,
+                                          ),
+                                          snap: _buildAllDay(
+                                            metrics,
+                                            timeOffset,
+                                            pageWidth,
+                                          ),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                            );
-                          },
-                        );
-                      },
-                    ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     SliverToBoxAdapter(
                       child: _buildBody(
-                          metrics, timeOffset, pageWidth, pageHeight),
+                        metrics,
+                        timeOffset,
+                        pageWidth,
+                        pageHeight,
+                      ),
                     ),
                   ],
                 ),
@@ -328,8 +347,12 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
                   if (!modifier.editing) return const SizedBox.shrink();
 
                   if (modifier.isDragging) {
-                    final box = _overlay.currentContext?.findRenderObject() as RenderBox?;
-                    if (box == null || !box.hasSize) return const SizedBox.shrink();
+                    final box =
+                        _overlay.currentContext?.findRenderObject()
+                            as RenderBox?;
+                    if (box == null || !box.hasSize) {
+                      return const SizedBox.shrink();
+                    }
                     final topLeft = box.globalToLocal(modifier.screen.topLeft);
                     return Positioned.fill(
                       child: IgnorePointer(
@@ -391,7 +414,6 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
   }
 }
 
-
 class _TabledHeaderDelegate extends SliverPersistentHeaderDelegate {
   _TabledHeaderDelegate({
     required this.vsync,
@@ -424,7 +446,11 @@ class _TabledHeaderDelegate extends SliverPersistentHeaderDelegate {
       );
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     final visible = (snapExtent - shrinkOffset).clamp(0.0, snapExtent);
     return ColoredBox(
       color: color,
@@ -450,8 +476,8 @@ class _TabledHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(_TabledHeaderDelegate old) =>
       old.headerExtent != headerExtent ||
-          old.snapExtent != snapExtent ||
-          old.header != header ||
-          old.snap != snap ||
-          old.color != color;
+      old.snapExtent != snapExtent ||
+      old.header != header ||
+      old.snap != snap ||
+      old.color != color;
 }

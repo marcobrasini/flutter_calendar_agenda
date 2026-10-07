@@ -7,13 +7,8 @@ import '../context.dart';
 import '../viewer.dart';
 import '../source.dart';
 
-
 class AgendaList extends StatelessWidget {
-  const AgendaList({
-    super.key,
-    required this.date,
-    required this.width,
-  });
+  const AgendaList({super.key, required this.date, required this.width});
 
   final Date date;
   final double width;
@@ -43,33 +38,36 @@ class AgendaList extends StatelessWidget {
           ),
       ],
     );
-    return (events.isNotEmpty) ? Column(
-      children: [
-        Divider(
-          height: 0.0,
-          color: lineColor,
-        ),
-        (context.config.showFrame) ? Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DateSlot(
-              date: date,
-              config: dateConfig,
-              width: dateWidth,
-            ),
-            Container(
-              width: cardWidth,
-              padding: EdgeInsets.only(
-                left: cardMargin, top: cardMargin, bottom: cardMargin,
-              ),
-              decoration: BoxDecoration(
-                border: Border(left: BorderSide(color: lineColor,)),
-              ),
-              child: widgets,
-            ),
-          ],
-        ) : widgets,
-      ],
-    ) : SizedBox.shrink();
+    return (events.isNotEmpty)
+        ? Column(
+            children: [
+              Divider(height: 0.0, color: lineColor),
+              (context.config.showFrame)
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DateSlot(
+                          date: date,
+                          config: dateConfig,
+                          width: dateWidth,
+                        ),
+                        Container(
+                          width: cardWidth,
+                          padding: EdgeInsets.only(
+                            left: cardMargin,
+                            top: cardMargin,
+                            bottom: cardMargin,
+                          ),
+                          decoration: BoxDecoration(
+                            border: Border(left: BorderSide(color: lineColor)),
+                          ),
+                          child: widgets,
+                        ),
+                      ],
+                    )
+                  : widgets,
+            ],
+          )
+        : SizedBox.shrink();
   }
 }

@@ -1,12 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-
 class CalendarScaler extends ChangeNotifier {
-  CalendarScaler({
-    double ratio = 0.0,
-    this.minRatio = 0.5,
-    this.maxRatio = 2.0,
-  }) : _ratio = ratio;
+  CalendarScaler({double ratio = 0.0, this.minRatio = 0.5, this.maxRatio = 2.0})
+    : _ratio = ratio;
 
   final double minRatio;
   final double maxRatio;

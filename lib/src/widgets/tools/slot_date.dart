@@ -1,12 +1,10 @@
 import 'dart:math';
-import 'package:calendar/src/config.dart';
 import 'package:flutter/material.dart';
 import '../../utils/datetime.dart';
 import '../../context.dart';
-
+import '../../config.dart';
 
 class DateSlot extends StatelessWidget {
-
   const DateSlot({
     super.key,
     this.width,
@@ -44,7 +42,7 @@ class DateSlot extends StatelessWidget {
               child: Text(
                 date.format(config.textFormat),
                 textAlign: TextAlign.center,
-                style: config.textStyle
+                style: config.textStyle,
               ),
             ),
             ?dateWidget,
@@ -53,5 +51,4 @@ class DateSlot extends StatelessWidget {
       ),
     );
   }
-
 }

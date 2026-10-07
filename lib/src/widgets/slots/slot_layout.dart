@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../data/event.dart';
 import '../../const.dart';
 
-
 class SlotLayout {
   final Event event;
   Rect container;
@@ -32,13 +31,12 @@ class SlotLayout {
   double get height => container.height;
   double get column => (container.right - (parent ?? container.left)) / split;
   double get offset => (parent == null || order > 0) ? 0.0 : side;
-  double get side => min(container.width/eventSlotOffsetRatio, eventSlotOffset);
+  double get side =>
+      min(container.width / eventSlotOffsetRatio, eventSlotOffset);
 
   Rect get rendered => Rect.fromLTWH(left, top, width, height);
 
-  Rect get safe => Rect.fromLTWH(
-    left, top, width, content + 2 * padding,
-  );
+  Rect get safe => Rect.fromLTWH(left, top, width, content + 2 * padding);
 
   static List<SlotLayout> layouts(List<SlotLayout> input) {
     final results = <SlotLayout>[];
@@ -55,7 +53,7 @@ class SlotLayout {
         }
       }
       results.add(layout);
-      }
+    }
     return results;
   }
 }

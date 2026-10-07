@@ -66,10 +66,7 @@ class _AgendaTileState extends State<AgendaTile> {
         if (_expanded) ...[
           for (Date date in widget.datetime.iterate(widget.dateScheme))
             if (widget.until == null || date <= widget.until!)
-              AgendaList(
-                date: date,
-                width: widget.width,
-              ),
+              AgendaList(date: date, width: widget.width),
           if (isEmpty)
             context.config.emptyBuilder?.call(context) ??
                 const Padding(

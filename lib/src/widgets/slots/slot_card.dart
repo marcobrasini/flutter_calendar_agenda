@@ -1,12 +1,11 @@
-import 'package:calendar/src/config.dart';
-import 'package:calendar/src/const.dart';
-import 'package:calendar/src/modifier.dart';
-import 'package:calendar/src/widgets/slots/slot_event.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:calendar/src/data/event.dart';
-import 'package:calendar/src/data/fixture.dart';
-
+import '../../data/event.dart';
+import '../../data/fixture.dart';
+import '../../modifier.dart';
+import '../../config.dart';
+import '../../const.dart';
+import 'slot_event.dart';
 
 class SlotCard extends StatelessWidget {
   const SlotCard({
@@ -28,9 +27,9 @@ class SlotCard extends StatelessWidget {
   bool get right => onEventSwipedRight != null;
 
   DismissDirection get swipe {
-    if (left && right)  return DismissDirection.horizontal;
-    if (left)   return DismissDirection.startToEnd;
-    if (right)  return DismissDirection.endToStart;
+    if (left && right) return DismissDirection.horizontal;
+    if (left) return DismissDirection.startToEnd;
+    if (right) return DismissDirection.endToStart;
     return DismissDirection.none;
   }
 
@@ -80,9 +79,7 @@ class SlotCard extends StatelessWidget {
             child: AnimatedContainer(
               duration: config.eventDuration,
               curve: Curves.easeOutCubic,
-              child: SlotEvent(
-                event: event,
-              ),
+              child: SlotEvent(event: event),
             ),
           ),
         ),
@@ -91,25 +88,22 @@ class SlotCard extends StatelessWidget {
   }
 }
 
-
-enum SwipeRole {
-  left,
-  right,
-}
+enum SwipeRole { left, right }
 
 class SwipeCard extends StatelessWidget {
   final SwipeRole _role;
   const SwipeCard._(this._role);
 
-  const SwipeCard.left()  : this._(SwipeRole.left);
+  const SwipeCard.left() : this._(SwipeRole.left);
   const SwipeCard.right() : this._(SwipeRole.right);
 
   @override
   Widget build(BuildContext context) {
     final config = CalendarConfig.of(context);
     return switch (_role) {
-      SwipeRole.left => config.leftSwipeBuilder?.call(context),
-      SwipeRole.right => config.rightSwipeBuilder?.call(context),
-    } ?? SizedBox.expand();
+          SwipeRole.left => config.leftSwipeBuilder?.call(context),
+          SwipeRole.right => config.rightSwipeBuilder?.call(context),
+        } ??
+        SizedBox.expand();
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../tools/painter_string.dart';
 
-
 class SlotString extends StatelessWidget {
   final String string;
   final double width;
@@ -28,12 +27,10 @@ class SlotString extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox (
+    return SizedBox(
       width: width,
       height: height,
-      child: CustomPaint(
-        painter: painter,
-      ),
+      child: CustomPaint(painter: painter),
     );
   }
 }

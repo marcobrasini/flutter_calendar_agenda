@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'enums.dart';
 
-
 class CalendarScroller extends ScrollController {
   final GlobalKey key = GlobalKey();
   final CalendarScroll scroll;

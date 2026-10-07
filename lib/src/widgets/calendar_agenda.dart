@@ -9,13 +9,8 @@ import 'agenda_registry.dart';
 import 'agenda_scroller.dart';
 import 'agenda_tile.dart';
 
-
 class CalendarAgenda extends StatefulWidget {
-  const CalendarAgenda({
-    super.key,
-    required this.scrolling,
-    this.dateScheme,
-  });
+  const CalendarAgenda({super.key, required this.scrolling, this.dateScheme});
 
   final CalendarScroll scrolling;
   final DateScheme? dateScheme;
@@ -32,7 +27,7 @@ class _CalendarAgendaState extends State<CalendarAgenda> {
   @override
   void initState() {
     super.initState();
-    _viewer =  context.read<CalendarViewer>();
+    _viewer = context.read<CalendarViewer>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final modifier = context.read<CalendarModifier>();
@@ -68,18 +63,18 @@ class _CalendarAgendaState extends State<CalendarAgenda> {
                 until: until,
               ),
             ),
-            Builder(builder: (context) {
-              final modifier = context.watch<CalendarModifier>();
-              return SizedBox(
-                width: pageWidth,
-                height: pageHeight,
-                child: (modifier.editing)
-                    ? SlotEditor(
-                      layout: modifier.layout!,
-                    )
-                    : SizedBox.shrink(),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final modifier = context.watch<CalendarModifier>();
+                return SizedBox(
+                  width: pageWidth,
+                  height: pageHeight,
+                  child: (modifier.editing)
+                      ? SlotEditor(layout: modifier.layout!)
+                      : SizedBox.shrink(),
+                );
+              },
+            ),
           ],
         );
       },

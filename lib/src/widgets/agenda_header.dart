@@ -6,9 +6,7 @@ import '../config.dart';
 import '../const.dart';
 import '../enums.dart';
 
-
 class AgendaHeader extends StatelessWidget {
-
   final dynamic datetime;
   final DateScheme? dateScheme;
   final VoidCallback? onTap;
@@ -27,37 +25,41 @@ class AgendaHeader extends StatelessWidget {
     final headerConfig = config.headerConfig(viewer.view);
     return Row(
       children: [
-        if (config.showHeaderButton) IconButton(
-          icon: const Icon(Icons.arrow_left),
-          onPressed: () {
-            viewer.datetime = datetime;
-            viewer.swipe(CalendarSwipe.backward);
-          },
-        ),
+        if (config.showHeaderButton)
+          IconButton(
+            icon: const Icon(Icons.arrow_left),
+            onPressed: () {
+              viewer.datetime = datetime;
+              viewer.swipe(CalendarSwipe.backward);
+            },
+          ),
         Expanded(
           child: GestureDetector(
-          onTap: config.showHeaderButton ? onTap : null,
-            child: config.headerBuilder?.call(
-                context,
-                datetime.first + (dateScheme?.beg ?? 0),
-                datetime.last + (dateScheme?.beg ?? 0),
-            ) ?? Container(
-              color: headerConfig.background,
-              padding: EdgeInsetsGeometry.all(headerConfig.textPadding),
-              child: Text(
-                datetime.format(headerConfig.format ?? defaultDateFormat),
-                style: headerConfig.textStyle,
-              ),
-            ),
+            onTap: config.showHeaderButton ? onTap : null,
+            child:
+                config.headerBuilder?.call(
+                  context,
+                  datetime.first + (dateScheme?.beg ?? 0),
+                  datetime.last + (dateScheme?.beg ?? 0),
+                ) ??
+                Container(
+                  color: headerConfig.background,
+                  padding: EdgeInsetsGeometry.all(headerConfig.textPadding),
+                  child: Text(
+                    datetime.format(headerConfig.format ?? defaultDateFormat),
+                    style: headerConfig.textStyle,
+                  ),
+                ),
           ),
         ),
-        if (config.showHeaderButton) IconButton(
-          icon: const Icon(Icons.arrow_right),
-          onPressed: () {
-            viewer.datetime = datetime;
-            viewer.swipe(CalendarSwipe.forward);
-          },
-        ),
+        if (config.showHeaderButton)
+          IconButton(
+            icon: const Icon(Icons.arrow_right),
+            onPressed: () {
+              viewer.datetime = datetime;
+              viewer.swipe(CalendarSwipe.forward);
+            },
+          ),
       ],
     );
   }

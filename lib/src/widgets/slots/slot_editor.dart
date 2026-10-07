@@ -1,17 +1,15 @@
-import 'package:calendar/src/context.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../utils/color.dart';
 import '../../modifier.dart';
+import '../../context.dart';
 import '../../const.dart';
 import '../../enums.dart';
 import 'slot_layout.dart';
 import 'slot_event.dart';
 
-
 typedef EventBuilder = Widget Function(BuildContext);
-
 
 class SlotEditor extends StatelessWidget {
   static const double shift = 0.3;
@@ -29,7 +27,6 @@ class SlotEditor extends StatelessWidget {
   final Offset offset;
   final EventBuilder? builder;
 
-
   Widget _handle({
     required BuildContext context,
     required CalendarModifier modifier,
@@ -46,17 +43,20 @@ class SlotEditor extends StatelessWidget {
         behavior: HitTestBehavior.opaque,
         gestures: {
           EagerGestureRecognizer:
-          GestureRecognizerFactoryWithHandlers<EagerGestureRecognizer>(
+              GestureRecognizerFactoryWithHandlers<EagerGestureRecognizer>(
                 () => EagerGestureRecognizer(),
                 (_) {},
-          ),
+              ),
         },
         child: Listener(
           behavior: HitTestBehavior.opaque,
           onPointerDown: (e) {
-            print(e);
             final box = context.findRenderObject() as RenderBox;
-            modifier.enter(e.pointer, e.position, box.globalToLocal(e.position));
+            modifier.enter(
+              e.pointer,
+              e.position,
+              box.globalToLocal(e.position),
+            );
             modifier.take(modifier.layout!, SlotAction.resizing, side);
             modifier.start();
           },
@@ -78,7 +78,7 @@ class SlotEditor extends StatelessWidget {
     final eventConfig = context.config.eventConfig();
     final colors = context.colors;
     final dimmer = (colors.brightness == Brightness.light)
-        ?  eventSlotLineDimmed
+        ? eventSlotLineDimmed
         : -eventSlotLineDimmed;
     final layout = modifier.layout!;
     final container = modifier.container;

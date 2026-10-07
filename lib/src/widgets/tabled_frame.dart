@@ -5,9 +5,7 @@ import '../config.dart';
 import '../enums.dart';
 import '../const.dart';
 
-
 class TabledFrame extends StatelessWidget {
-
   const TabledFrame({
     super.key,
     required this.width,
@@ -42,41 +40,49 @@ class TabledFrame extends StatelessWidget {
     return SizedBox(
       height: height,
       width: width,
-      child: (visible) ? GestureDetector(
-        onTapUp: (details) => onTap?.call(details.localPosition),
-        onLongPressDown: (details) => onLongPress?.call(details.localPosition),
-        onDoubleTapDown: (details) => onDoubleTap?.call(details.localPosition),
-        child: Stack(
-          children: [
-            if (timeScheme != null || height != null) CustomPaint(
-              size: Size.infinite,
-              painter: LinesPainter(
-                divisions: timeScheme?.count ?? 1,
-                lineStyle: config.line.lineStyle,
-                lineWidth: config.line.lineWidth,
-                lineColor: config.line.lineColor ?? colors.outlineVariant,
-                offset: offset + Offset(config.line.lineOffsetX, 0.0),
-                dashedSpace: config.line.dashedSpace,
-                dashedWidth: config.line.dashedWidth,
-                direction: LineDirection.horizontal,
+      child: (visible)
+          ? GestureDetector(
+              onTapUp: (details) => onTap?.call(details.localPosition),
+              onLongPressDown: (details) =>
+                  onLongPress?.call(details.localPosition),
+              onDoubleTapDown: (details) =>
+                  onDoubleTap?.call(details.localPosition),
+              child: Stack(
+                children: [
+                  if (timeScheme != null || height != null)
+                    CustomPaint(
+                      size: Size.infinite,
+                      painter: LinesPainter(
+                        divisions: timeScheme?.count ?? 1,
+                        lineStyle: config.line.lineStyle,
+                        lineWidth: config.line.lineWidth,
+                        lineColor:
+                            config.line.lineColor ?? colors.outlineVariant,
+                        offset: offset + Offset(config.line.lineOffsetX, 0.0),
+                        dashedSpace: config.line.dashedSpace,
+                        dashedWidth: config.line.dashedWidth,
+                        direction: LineDirection.horizontal,
+                      ),
+                    ),
+                  if (dateScheme != null || width != null)
+                    CustomPaint(
+                      size: Size.infinite,
+                      painter: LinesPainter(
+                        divisions: dateScheme?.count ?? 1,
+                        lineStyle: config.line.lineStyle,
+                        lineWidth: config.line.lineWidth,
+                        lineColor:
+                            config.line.lineColor ?? colors.outlineVariant,
+                        offset: offset + Offset(0.0, config.line.lineOffsetY),
+                        dashedSpace: config.line.dashedSpace,
+                        dashedWidth: config.line.dashedWidth,
+                        direction: LineDirection.vertical,
+                      ),
+                    ),
+                ],
               ),
-            ),
-            if (dateScheme != null || width != null) CustomPaint(
-              size: Size.infinite,
-              painter: LinesPainter(
-                divisions: dateScheme?.count ?? 1,
-                lineStyle: config.line.lineStyle,
-                lineWidth: config.line.lineWidth,
-                lineColor: config.line.lineColor ?? colors.outlineVariant,
-                offset: offset + Offset(0.0, config.line.lineOffsetY),
-                dashedSpace: config.line.dashedSpace,
-                dashedWidth: config.line.dashedWidth,
-                direction: LineDirection.vertical,
-              ),
-            ),
-          ],
-        ),
-      ) : null,
+            )
+          : null,
     );
   }
 }

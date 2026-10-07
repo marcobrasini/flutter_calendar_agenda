@@ -1,24 +1,15 @@
-import 'package:calendar/calendar.dart';
 import 'package:equatable/equatable.dart';
-import 'package:calendar/src/utils/datetime.dart';
 import 'package:meta/meta.dart';
+import '../utils/datetime.dart';
 
-
-enum PatternType {
-  daily,
-  weekly,
-  monthly,
-  yearly,
-}
+enum PatternType { daily, weekly, monthly, yearly }
 
 String? patternRRULE(String source, String property) {
   final index = source.indexOf(property);
   if (index == -1) return null;
   final start = index + ("$property=").length;
   final stop = source.indexOf(";", start);
-  return stop == -1
-      ? source.substring(start)
-      : source.substring(start, stop);
+  return stop == -1 ? source.substring(start) : source.substring(start, stop);
 }
 
 String? patternEXDATE(String source) {
@@ -26,11 +17,8 @@ String? patternEXDATE(String source) {
   if (index == -1) return null;
   final start = index + ("EXDATE:").length;
   final stop = source.indexOf(";", start);
-  return stop == -1
-      ? source.substring(start)
-      : source.substring(start, stop);
+  return stop == -1 ? source.substring(start) : source.substring(start, stop);
 }
-
 
 class Pattern extends Equatable {
   static const _icsToType = {
@@ -61,7 +49,7 @@ class Pattern extends Equatable {
     Set<DateTime>? exceptions,
     List<Date>? recurrences,
   }) : exceptions = Set.unmodifiable(exceptions ?? const <DateTime>{}),
-        recurrences = List.unmodifiable(recurrences ?? const <Date>[]);
+       recurrences = List.unmodifiable(recurrences ?? const <Date>[]);
 
   factory Pattern.make({required Map<String, dynamic> data}) => Pattern(
     type: data["type"] as PatternType,
@@ -84,12 +72,16 @@ class Pattern extends Equatable {
     return Pattern(
       type: _icsToType[properties["type"]!]!,
       step: (properties["step"] != null) ? int.parse(properties["step"]!) : 1,
-      count: (properties["count"] != null) ? int.parse(properties["count"]!) : null,
-      until: (properties["until"] != null) ? DateTime.parse(properties["until"]!).toTZ() : null,
+      count: (properties["count"] != null)
+          ? int.parse(properties["count"]!)
+          : null,
+      until: (properties["until"] != null)
+          ? DateTime.parse(properties["until"]!).toTZ()
+          : null,
       exceptions: {
         for (String date in (properties["exceptions"]?.split(',') ?? []))
-          DateTime.parse(date).toTZ()
-      }
+          DateTime.parse(date).toTZ(),
+      },
     );
   }
 
@@ -100,7 +92,9 @@ class Pattern extends Equatable {
     if (until != null) rrule.add("UNTIL=${until!.fromTZ().toISOString()}");
     String string = "RRULE:${rrule.join(";")}";
     if (exceptions.isNotEmpty) {
-      final exdate = exceptions.map((date) => date.fromTZ().toISOString()).toList();
+      final exdate = exceptions
+          .map((date) => date.fromTZ().toISOString())
+          .toList();
       string = "$string\nEXDATE:${exdate.join(",")}";
     }
     return string;
@@ -120,19 +114,13 @@ class Pattern extends Equatable {
       Pattern.make(data: {...get(), ...data..remove('type')});
 
   @useResult
-  Pattern setStep(int step) => set({
-    'step': step,
-  });
+  Pattern setStep(int step) => set({'step': step});
 
   @useResult
-  Pattern setCount(int count) => set({
-    'count': count,
-  });
+  Pattern setCount(int count) => set({'count': count});
 
   @useResult
-  Pattern setUntil(DateTime until) => set({
-    'until': until,
-  });
+  Pattern setUntil(DateTime until) => set({'until': until});
 
   @useResult
   Pattern addException(DateTime datetime) => set({
@@ -140,9 +128,8 @@ class Pattern extends Equatable {
   });
 
   @useResult
-  Pattern delException(DateTime datetime) => set({
-    'exceptions': exceptions.where((d) => d != datetime).toSet(),
-  });
+  Pattern delException(DateTime datetime) =>
+      set({'exceptions': exceptions.where((d) => d != datetime).toSet()});
 
   @useResult
   Pattern addRecurrence(Date date) => set({
@@ -150,18 +137,17 @@ class Pattern extends Equatable {
   });
 
   @useResult
-  Pattern delRecurrence(Date date) => set({
-    'recurrences': recurrences.where((d) => d != date).toList(),
-  });
+  Pattern delRecurrence(Date date) =>
+      set({'recurrences': recurrences.where((d) => d != date).toList()});
 
   @useResult
   Pattern shift(Duration duration) => set({
-    'until':      until?.add(duration),
+    'until': until?.add(duration),
     'exceptions': exceptions.map((e) => e.add(duration)).toSet(),
   });
 
   PatternIterator iterator(DateTime datetime) {
-    switch(type) {
+    switch (type) {
       case PatternType.daily:
         return PatternDaily(this, datetime);
       case PatternType.weekly:
@@ -176,20 +162,26 @@ class Pattern extends Equatable {
   bool get limited => count != null || until != null;
 
   @override
-  List<Object?> get props =>
-      [type, step, count, until, exceptions, recurrences];
+  List<Object?> get props => [
+    type,
+    step,
+    count,
+    until,
+    exceptions,
+    recurrences,
+  ];
 
   @override
   bool get stringify => true;
 }
-
 
 class PatternIterator implements Iterator<DateTime> {
   PatternIterator(this.pattern, this.since) : current = since, index = 0;
 
   final Pattern pattern;
   final DateTime since;
-  @override DateTime current;
+  @override
+  DateTime current;
   int index;
   bool _first = true;
   int _i = 0;
@@ -203,8 +195,7 @@ class PatternIterator implements Iterator<DateTime> {
     if (pattern.until != null && next.isAfter(pattern.until!)) return false;
     current = next;
     _first = false;
-    if (pattern.exceptions.isNotEmpty
-        && pattern.exceptions.contains(current)) {
+    if (pattern.exceptions.isNotEmpty && pattern.exceptions.contains(current)) {
       return moveNext();
     }
     index = index + 1;
@@ -215,7 +206,6 @@ class PatternIterator implements Iterator<DateTime> {
     throw UnimplementedError();
   }
 }
-
 
 class PatternDaily extends PatternIterator {
   PatternDaily(super.pattern, super.since);
@@ -229,13 +219,11 @@ class PatternDaily extends PatternIterator {
   }
 }
 
-
 class PatternWeekly extends PatternIterator {
   PatternWeekly(super.pattern, super.since);
 
-  bool isRecurrence(DateTime date) => pattern.recurrences.any(
-          (value) => (date.weekday == value.weekday)
-  );
+  bool isRecurrence(DateTime date) =>
+      pattern.recurrences.any((value) => (date.weekday == value.weekday));
 
   @override
   DateTime nextDateTime() {
@@ -264,13 +252,11 @@ class PatternWeekly extends PatternIterator {
   }
 }
 
-
 class PatternMonthly extends PatternIterator {
   PatternMonthly(super.pattern, super.since);
 
-  bool isRecurrence(DateTime date) => pattern.recurrences.any(
-          (value) => (date.day == value.day)
-  );
+  bool isRecurrence(DateTime date) =>
+      pattern.recurrences.any((value) => (date.day == value.day));
 
   @override
   DateTime nextDateTime() {
@@ -302,12 +288,11 @@ class PatternMonthly extends PatternIterator {
   }
 }
 
-
 class PatternYearly extends PatternIterator {
   PatternYearly(super.pattern, super.since);
-  
+
   bool isRecurrence(DateTime date) => pattern.recurrences.any(
-          (value) => (date.month == value.month) && (date.day == value.day)
+    (value) => (date.month == value.month) && (date.day == value.day),
   );
 
   @override
@@ -339,4 +324,3 @@ class PatternYearly extends PatternIterator {
     }
   }
 }
-

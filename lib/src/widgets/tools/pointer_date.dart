@@ -6,7 +6,6 @@ import '../../context.dart';
 import '../../picker.dart';
 import '../../enums.dart';
 
-
 class DatePointer extends StatelessWidget {
   const DatePointer({
     super.key,
@@ -35,14 +34,12 @@ class DatePointer extends StatelessWidget {
       child: Stack(
         alignment: AlignmentGeometry.center,
         children: [
-          if (date == Date.now()) Container(
-            height: size,
-            width: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
+          if (date == Date.now())
+            Container(
+              height: size,
+              width: size,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
             ),
-          ),
           Padding(
             padding: EdgeInsetsGeometry.symmetric(
               vertical: dateConfig.textPadding,
@@ -62,4 +59,3 @@ class DatePointer extends StatelessWidget {
     );
   }
 }
-

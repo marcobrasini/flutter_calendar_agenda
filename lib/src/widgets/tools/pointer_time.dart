@@ -4,12 +4,8 @@ import '../../enums.dart';
 import 'painter_lines.dart';
 import 'painter_point.dart';
 
-
 class TimePointer extends StatelessWidget {
-  const TimePointer({
-    super.key,
-    required this.size,
-  });
+  const TimePointer({super.key, required this.size});
 
   final Size size;
 
@@ -34,7 +30,7 @@ class TimePointer extends StatelessWidget {
               offset: Offset.zero,
               radius: config.clockRadius,
               color: color,
-            )
+            ),
           ],
         ),
       ),

@@ -1,0 +1,18 @@
+name: calendar_agenda_example
+description: Examples for the calendar package.
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_calendar_agenda:
+    path: ../
+
+dev_dependencies:
+  flutter_lints: any
+
+flutter:
+  uses-material-design: true

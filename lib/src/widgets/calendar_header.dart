@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../modifier.dart';
 import '../context.dart';
@@ -8,13 +7,8 @@ import '../picker.dart';
 import 'header_picker.dart';
 import 'tabled_metrics.dart';
 
-
 class CalendarTabledHeader extends StatefulWidget {
-  const CalendarTabledHeader({
-    this.dateScheme,
-    this.weekScheme,
-    super.key,
-  });
+  const CalendarTabledHeader({this.dateScheme, this.weekScheme, super.key});
 
   final DateScheme? dateScheme;
   final WeekScheme? weekScheme;
@@ -80,40 +74,47 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
             children: [
               Row(
                 children: [
-                  if (config.showHeaderButton) IconButton(
-                    onPressed: (modifier.isResizing) ? null : () {
-                      _picker.last(true);
-                    },
-                    icon: Icon(Icons.arrow_left,
-                      color: headerStyle?.color,
-                      size: headerStyle?.fontSize,
+                  if (config.showHeaderButton)
+                    IconButton(
+                      onPressed: (modifier.isResizing)
+                          ? null
+                          : () {
+                              _picker.last(true);
+                            },
+                      icon: Icon(
+                        Icons.arrow_left,
+                        color: headerStyle?.color,
+                        size: headerStyle?.fontSize,
+                      ),
                     ),
-                  ),
                   Expanded(
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: config.showHeaderPicker ? _toggle : null,
                       child: Center(
-                        child: config.headerBuilder?.call(
-                          context,
-                          _picker.datetime.first,
-                          _picker.datetime.last,
-                        ) ?? Text(
-                          _picker.title(context),
-                          style: headerStyle,
-                        ),
+                        child:
+                            config.headerBuilder?.call(
+                              context,
+                              _picker.datetime.first,
+                              _picker.datetime.last,
+                            ) ??
+                            Text(_picker.title(context), style: headerStyle),
                       ),
                     ),
                   ),
-                  if (config.showHeaderButton) IconButton(
-                    onPressed: (modifier.isResizing) ? null : () {
-                      _picker.next(true);
-                    },
-                    icon: Icon(Icons.arrow_right,
-                      color: headerStyle?.color,
-                      size: headerStyle?.fontSize,
+                  if (config.showHeaderButton)
+                    IconButton(
+                      onPressed: (modifier.isResizing)
+                          ? null
+                          : () {
+                              _picker.next(true);
+                            },
+                      icon: Icon(
+                        Icons.arrow_right,
+                        color: headerStyle?.color,
+                        size: headerStyle?.fontSize,
+                      ),
                     ),
-                  ),
                 ],
               ),
               if (!_picker.negligible && context.config.showHeaderPicker)
@@ -128,7 +129,7 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
             ],
           ),
         );
-      }
+      },
     );
   }
 }

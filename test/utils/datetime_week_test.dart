@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar/src/utils/datetime.dart';
-
+import 'package:flutter_calendar_agenda/flutter_calendar_agenda.dart';
 
 void main() {
   final now = DateTime.now();
@@ -71,7 +70,6 @@ void main() {
   }
 
   group('Week', () {
-
     test('first Week exact', () {
       // leap year
       int year = 2024;
@@ -124,8 +122,8 @@ void main() {
       expectIsWeek(week);
       if (week <= Date(year, 1, 7)) {
         (DateTime(year, 1, 1).weekday == DateTime.monday)
-          ? expectExact(week, year)
-          : expectFirst(week, year);
+            ? expectExact(week, year)
+            : expectFirst(week, year);
         expectWeek(week, DateTime(year));
         expect(week.week, 0);
       }
@@ -138,8 +136,8 @@ void main() {
       expectIsWeek(week);
       if (week >= Date(year, 12, 25)) {
         (DateTime(year, 12, 31).weekday == DateTime.sunday)
-          ? expectExact(week, year)
-          : expectLast(week, year);
+            ? expectExact(week, year)
+            : expectLast(week, year);
         expectWeek(week, DateTime(year, 12, 31));
         expect(week.week, 52);
       }
@@ -197,10 +195,10 @@ void main() {
       final week = Week(current.year, 53);
       final year = current.year + ((week.month == 12) ? 0 : 1);
       expectIsWeek(week);
-      expect(week.weekYear, current.year+1);
+      expect(week.weekYear, current.year + 1);
       expect(week.week, 0);
       expect(week.year, year);
-      expect(week.date, Date(current.year+1, 1, 1).weekStart);
+      expect(week.date, Date(current.year + 1, 1, 1).weekStart);
     });
 
     test('Week constructor', () {
@@ -229,12 +227,12 @@ void main() {
     test('Week operator ==', () {
       expect(current == now, isTrue);
       expect(current == current, isTrue);
-      final previousWeek = DateTime(now.year, now.month, now.day-7);
-      final followingWeek = DateTime(now.year, now.month, now.day+7);
+      final previousWeek = DateTime(now.year, now.month, now.day - 7);
+      final followingWeek = DateTime(now.year, now.month, now.day + 7);
       expect(current == previousWeek, isFalse);
       expect(current == followingWeek, isFalse);
-      final previousDay = DateTime(now.year, now.month, now.day-1);
-      final followingDay = DateTime(now.year, now.month, now.day+1);
+      final previousDay = DateTime(now.year, now.month, now.day - 1);
+      final followingDay = DateTime(now.year, now.month, now.day + 1);
       expect(current == now.weekStart.yesterday, isFalse);
       expect(current == now.weekStart, isTrue);
       expect(current == current.last, isTrue);
@@ -244,12 +242,12 @@ void main() {
     });
 
     test('Week operator <', () {
-      final previousWeek = DateTime(now.year, now.month, now.day-7);
-      final followingWeek = DateTime(now.year, now.month, now.day+7);
+      final previousWeek = DateTime(now.year, now.month, now.day - 7);
+      final followingWeek = DateTime(now.year, now.month, now.day + 7);
       expect(current < previousWeek, isFalse);
       expect(current < followingWeek, isTrue);
-      final previousDay = DateTime(now.year, now.month, now.day-1);
-      final followingDay = DateTime(now.year, now.month, now.day+1);
+      final previousDay = DateTime(now.year, now.month, now.day - 1);
+      final followingDay = DateTime(now.year, now.month, now.day + 1);
       expect(current < now.weekStart.yesterday, isFalse);
       expect(current < now.weekStart, isFalse);
       expect(current < current.last, isFalse);
@@ -259,12 +257,12 @@ void main() {
     });
 
     test('Week operator <=', () {
-      final previousWeek = DateTime(now.year, now.month, now.day-7);
-      final followingWeek = DateTime(now.year, now.month, now.day+7);
+      final previousWeek = DateTime(now.year, now.month, now.day - 7);
+      final followingWeek = DateTime(now.year, now.month, now.day + 7);
       expect(current <= previousWeek, isFalse);
       expect(current <= followingWeek, isTrue);
-      final previousDay = DateTime(now.year, now.month, now.day-1);
-      final followingDay = DateTime(now.year, now.month, now.day+1);
+      final previousDay = DateTime(now.year, now.month, now.day - 1);
+      final followingDay = DateTime(now.year, now.month, now.day + 1);
       expect(current <= now.weekStart.yesterday, isFalse);
       expect(current <= now.weekStart, isTrue);
       expect(current <= current.last, isTrue);
@@ -274,12 +272,12 @@ void main() {
     });
 
     test('Week operator >', () {
-      final previousWeek = DateTime(now.year, now.month, now.day-7);
-      final followingWeek = DateTime(now.year, now.month, now.day+7);
+      final previousWeek = DateTime(now.year, now.month, now.day - 7);
+      final followingWeek = DateTime(now.year, now.month, now.day + 7);
       expect(current > previousWeek, isTrue);
       expect(current > followingWeek, isFalse);
-      final previousDay = DateTime(now.year, now.month, now.day-1);
-      final followingDay = DateTime(now.year, now.month, now.day+1);
+      final previousDay = DateTime(now.year, now.month, now.day - 1);
+      final followingDay = DateTime(now.year, now.month, now.day + 1);
       expect(current > now.weekStart.yesterday, isTrue);
       expect(current > now.weekStart, isFalse);
       expect(current > current.last, isFalse);
@@ -289,12 +287,12 @@ void main() {
     });
 
     test('Week operator >=', () {
-      final previousWeek = DateTime(now.year, now.month, now.day-7);
-      final followingWeek = DateTime(now.year, now.month, now.day+7);
+      final previousWeek = DateTime(now.year, now.month, now.day - 7);
+      final followingWeek = DateTime(now.year, now.month, now.day + 7);
       expect(current >= previousWeek, isTrue);
       expect(current >= followingWeek, isFalse);
-      final previousDay = DateTime(now.year, now.month, now.day-1);
-      final followingDay = DateTime(now.year, now.month, now.day+1);
+      final previousDay = DateTime(now.year, now.month, now.day - 1);
+      final followingDay = DateTime(now.year, now.month, now.day + 1);
       expect(current >= now.weekStart.yesterday, isTrue);
       expect(current >= now.weekStart, isTrue);
       expect(current >= current.last, isTrue);
@@ -304,23 +302,23 @@ void main() {
     });
 
     test('Week operator +', () {
-      final previousWeek = DateTime(now.year, now.month, now.day-7);
-      final followingWeek = DateTime(now.year, now.month, now.day+7);
+      final previousWeek = DateTime(now.year, now.month, now.day - 7);
+      final followingWeek = DateTime(now.year, now.month, now.day + 7);
       expect(current + -1, previousWeek.toWeek);
       expect(current + 1, followingWeek.toWeek);
-      final previousYear = DateTime(now.year-1, now.month, now.day);
-      final followingYear = DateTime(now.year+1, now.month, now.day);
+      final previousYear = DateTime(now.year - 1, now.month, now.day);
+      final followingYear = DateTime(now.year + 1, now.month, now.day);
       expect(current + -52, previousYear.toWeek);
       expect(current + 52, followingYear.toWeek);
     });
 
     test('Week operator -', () {
-      final previousWeek = DateTime(now.year, now.month, now.day-7);
-      final followingWeek = DateTime(now.year, now.month, now.day+7);
+      final previousWeek = DateTime(now.year, now.month, now.day - 7);
+      final followingWeek = DateTime(now.year, now.month, now.day + 7);
       expect(current - 1, previousWeek.toWeek);
       expect(current - -1, followingWeek.toWeek);
-      final previousYear = DateTime(now.year-1, now.month, now.day);
-      final followingYear = DateTime(now.year+1, now.month, now.day);
+      final previousYear = DateTime(now.year - 1, now.month, now.day);
+      final followingYear = DateTime(now.year + 1, now.month, now.day);
       expect(current - 52, previousYear.toWeek);
       expect(current - -52, followingYear.toWeek);
     });

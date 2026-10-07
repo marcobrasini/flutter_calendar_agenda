@@ -10,9 +10,7 @@ import '../const.dart';
 import 'agenda_registry.dart';
 import 'agenda_tile.dart';
 
-
 typedef ScrollBuilder = AgendaTile Function(DateTime, Date?);
-
 
 class AgendaScroller extends StatefulWidget {
   const AgendaScroller({
@@ -42,8 +40,8 @@ class _AgendaScrollerState extends State<AgendaScroller> {
   int _lastIndex = 0;
   int _nextIndex = 0;
   bool get _individual => _scroll == CalendarScroll.individual;
-  bool get _sequential => _scroll == CalendarScroll.sequential;
   bool get _continuous => _scroll == CalendarScroll.continuous;
+  // bool get _sequential => _scroll == CalendarScroll.sequential;
   bool get _lastExpanded => _individual && _lastIndex < 0;
   bool get _nextExpanded => _individual && _nextIndex > 0;
   dynamic get _nextDate => widget.registry.indexer(recorded, _nextIndex);

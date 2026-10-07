@@ -1,10 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar/src/data/pattern.dart';
-import 'package:calendar/src/utils/datetime.dart';
-
+import 'package:flutter_calendar_agenda/flutter_calendar_agenda.dart';
+import 'package:flutter_calendar_agenda/src/data/pattern.dart';
 
 void main() {
-
   final since = DateTime.now();
 
   group('Pattern daily', () {
@@ -15,22 +13,21 @@ void main() {
     final length = after ~/ step + (after % step == 0 ? 0 : 1);
     final exceptions = {
       since.add(Duration(days: step)).round(),
-      since.add(Duration(days: 6*step)).round(),
+      since.add(Duration(days: 6 * step)).round(),
     };
     final allExceptions = {
-      for (int i = 0 ; i < length; i++)
+      for (int i = 0; i < length; i++)
         ((since.date + (i * step)) & since.time).round(),
     };
     final exceptionLength = exceptions.where((d) => d.isBefore(until)).length;
-    final rrule = ""
+    final rrule =
+        ""
         "RRULE:FREQ=DAILY;INTERVAL=$step;"
         "COUNT=$count;UNTIL=${until.toISOString()}"
         "\nEXDATE:${exceptions.map((e) => e.toISOString()).join(",")}";
 
     test('Pattern constructor default', () {
-      final pattern = Pattern(
-        type: PatternType.daily,
-      );
+      final pattern = Pattern(type: PatternType.daily);
       expect(pattern.type, PatternType.daily);
       expect(pattern.step, 1);
       expect(pattern.count, isNull);
@@ -91,8 +88,8 @@ void main() {
       expect(dates.length, count);
       for (var i = 0; i < dates.length; i++) {
         expect((dates[i].date % since) % step, 0);
-        expect((dates[i].date % since), i*step);
-        expect(dates[i], since.add(Duration(days: i*step)).round());
+        expect((dates[i].date % since), i * step);
+        expect(dates[i], since.add(Duration(days: i * step)).round());
       }
     });
 
@@ -131,7 +128,7 @@ void main() {
       expect(dates.length, length);
       for (var i = 0; i < dates.length; i++) {
         expect((dates[i].date % since) % step, 0);
-        expect((dates[i].date % since), i*step);
+        expect((dates[i].date % since), i * step);
         expect(dates[i].isBefore(until), isTrue);
       }
     });
@@ -171,7 +168,6 @@ void main() {
       }
       expect(dates.isEmpty, true);
     });
-
   });
 
   group('Pattern weekly', () {
@@ -185,12 +181,12 @@ void main() {
       since.add(Duration(days: 28)).round(),
     };
     final allExceptions = {
-      for (int i = 0 ; i <= length; i++)
+      for (int i = 0; i <= length; i++)
         ((since.date + (i * step * 7)) & since.time).round(),
     };
-    final exceptionLength = exceptions.where(
-            (d) => d.isBefore(until) && ((d.toWeek % since) % step == 0)
-    ).length;
+    final exceptionLength = exceptions
+        .where((d) => d.isBefore(until) && ((d.toWeek % since) % step == 0))
+        .length;
 
     final weekdays = [3, 5];
     final recurrences = [
@@ -203,9 +199,7 @@ void main() {
     };
 
     test('Pattern constructor default', () {
-      final pattern = Pattern(
-        type: PatternType.weekly,
-      );
+      final pattern = Pattern(type: PatternType.weekly);
       expect(pattern.type, PatternType.weekly);
       expect(pattern.step, 1);
       expect(pattern.count, isNull);
@@ -335,7 +329,7 @@ void main() {
       expect(dates.length, length);
       for (var i = 0; i < dates.length; i++) {
         expect((dates[i].date % since) % step, 0);
-        expect((dates[i].date % since), i*step*7);
+        expect((dates[i].date % since), i * step * 7);
         expect(dates[i], (since.date + (i * step * 7)) & since.time);
       }
     });
@@ -352,7 +346,7 @@ void main() {
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
-      expect(dates.length, length-exceptionLength);
+      expect(dates.length, length - exceptionLength);
       for (var date in dates) {
         expect(date.isBefore(until), isTrue);
         expect((date.date % since) % (step * 7), 0);
@@ -422,22 +416,22 @@ void main() {
     final length = after ~/ step + ((after % step) == 0 ? 0 : 1);
 
     final exceptions = {
-      DateTime(since.year, since.month+step, since.day) & since.time,
-      DateTime(since.year, since.month+18, since.day) & since.time,
+      DateTime(since.year, since.month + step, since.day) & since.time,
+      DateTime(since.year, since.month + 18, since.day) & since.time,
     };
-    final exceptionLength = exceptions.where(
-            (d) => d.isBefore(until) && (d.toMonth % since) % step == 0
-    ).length;
+    final exceptionLength = exceptions
+        .where((d) => d.isBefore(until) && (d.toMonth % since) % step == 0)
+        .length;
 
     final monthdays = [1, 14, 28];
     final recurrences = [
-      DateTime(since.year).date + (monthdays[0]-1),
-      DateTime(since.year).date + (monthdays[1]-1),
-      DateTime(since.year).date + (monthdays[2]-1),
+      DateTime(since.year).date + (monthdays[0] - 1),
+      DateTime(since.year).date + (monthdays[1] - 1),
+      DateTime(since.year).date + (monthdays[2] - 1),
     ];
     final recurrenceExceptions = {
       DateTime(since.year, since.month, monthdays[2]) & since.time,
-      DateTime(since.year, since.month+step, monthdays[1]) & since.time,
+      DateTime(since.year, since.month + step, monthdays[1]) & since.time,
     };
 
     final critic = Date(since.year, 1, 31);
@@ -447,9 +441,7 @@ void main() {
     }).where((b) => b).length;
 
     test('Pattern constructor default', () {
-      final pattern = Pattern(
-        type: PatternType.monthly,
-      );
+      final pattern = Pattern(type: PatternType.monthly);
       expect(pattern.type, PatternType.monthly);
       expect(pattern.step, 1);
       expect(pattern.count, isNull);
@@ -504,7 +496,10 @@ void main() {
       for (var i = 0; i < dates.length; i++) {
         expect((dates[i].toMonth % since) % step, 0);
         expect((dates[i].toMonth % since), i * step);
-        expect(dates[i], DateTime(since.year, since.month + i * step, since.day) & since.time);
+        expect(
+          dates[i],
+          DateTime(since.year, since.month + i * step, since.day) & since.time,
+        );
       }
     });
 
@@ -646,17 +641,17 @@ void main() {
 
     test('Pattern iterator count with recurrences 31st', () {
       final pattern = Pattern(
-          type: PatternType.monthly,
-          step: 1,
-          count: count,
-          recurrences: [Date(since.year, 1, 31)]
+        type: PatternType.monthly,
+        step: 1,
+        count: count,
+        recurrences: [Date(since.year, 1, 31)],
       );
       final List<DateTime> dates = [];
       final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
-      expect(dates.length, count-skips);
+      expect(dates.length, count - skips);
       for (var date in dates) {
         expect(date.day, 31);
       }
@@ -664,36 +659,37 @@ void main() {
 
     test('Pattern iterator count with recurrences 28th and 31st', () {
       final pattern = Pattern(
-          type: PatternType.monthly,
-          step: 1,
-          count: 2*count,
-          recurrences: [Date(since.year, 1, 28), Date(since.year, 1, 31)]
+        type: PatternType.monthly,
+        step: 1,
+        count: 2 * count,
+        recurrences: [Date(since.year, 1, 28), Date(since.year, 1, 31)],
       );
       final List<DateTime> dates = [];
       final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
-      expect(dates.length, 2*count-skips);
+      expect(dates.length, 2 * count - skips);
       for (var date in dates) {
         expect(date.day == 28 || date.day == 31, isTrue);
       }
     });
-
   });
 
   group('Pattern yearly', () {
     final step = 2;
     final count = 14;
     final after = 15;
-    final until = DateTime(since.year+after, since.month, since.day);
-    final length = (until.toYear % since) ~/ step + (
-        ((until.toYear % since) % step == 0 && (until.time < since.time)) ? 0 : 1
-    );
+    final until = DateTime(since.year + after, since.month, since.day);
+    final length =
+        (until.toYear % since) ~/ step +
+        (((until.toYear % since) % step == 0 && (until.time < since.time))
+            ? 0
+            : 1);
 
     final exceptions = {
-      DateTime(since.year+2, since.month, since.day) & since.time,
-      DateTime(since.year+9, since.month, since.day) & since.time,
+      DateTime(since.year + 2, since.month, since.day) & since.time,
+      DateTime(since.year + 9, since.month, since.day) & since.time,
     };
     final exceptionLength = exceptions.where((d) {
       return d.isBefore(until) && d.year % step == 0;
@@ -705,8 +701,10 @@ void main() {
       Date(since.year, 12, 31),
     ];
     final recurrenceExceptions = {
-      DateTime(since.year, recurrences[2].month, recurrences[2].day) & since.time,
-      DateTime(since.year+step, recurrences[1].month, recurrences[1].day) & since.time,
+      DateTime(since.year, recurrences[2].month, recurrences[2].day) &
+          since.time,
+      DateTime(since.year + step, recurrences[1].month, recurrences[1].day) &
+          since.time,
     };
     final critic = Date(since.year, 2, 29);
     final skips = List.generate(count, (i) {
@@ -715,9 +713,7 @@ void main() {
     }).where((b) => b).length;
 
     test('Pattern constructor default', () {
-      final pattern = Pattern(
-        type: PatternType.yearly,
-      );
+      final pattern = Pattern(type: PatternType.yearly);
       expect(pattern.type, PatternType.yearly);
       expect(pattern.step, 1);
       expect(pattern.count, isNull);
@@ -810,9 +806,12 @@ void main() {
       expect(dates.length, count);
       for (var date in dates) {
         expect((date.toYear % since) % step, 0);
-        expect(recurrences.any((value) =>
-            date.month == value.month && date.day == value.day
-        ), isTrue);
+        expect(
+          recurrences.any(
+            (value) => date.month == value.month && date.day == value.day,
+          ),
+          isTrue,
+        );
       }
     });
 
@@ -833,9 +832,12 @@ void main() {
       for (var date in dates) {
         expect((date.toYear % since) % step, 0);
         expect(recurrenceExceptions.contains(date), isFalse);
-        expect(recurrences.any((value) =>
-            date.month == value.month && date.day == value.day
-        ), isTrue);
+        expect(
+          recurrences.any(
+            (value) => date.month == value.month && date.day == value.day,
+          ),
+          isTrue,
+        );
       }
     });
 
@@ -892,9 +894,12 @@ void main() {
       }
       for (var date in dates) {
         expect((date.toYear % since) % step, 0);
-        expect(recurrences.any((value) =>
-            date.month == value.month && date.day == value.day
-        ), isTrue);
+        expect(
+          recurrences.any(
+            (value) => date.month == value.month && date.day == value.day,
+          ),
+          isTrue,
+        );
       }
     });
 
@@ -914,25 +919,28 @@ void main() {
       for (var date in dates) {
         expect((date.toYear % since) % step, 0);
         expect(recurrenceExceptions.contains(date), isFalse);
-        expect(recurrences.any((value) =>
-          date.month == value.month && date.day == value.day
-        ), isTrue);
+        expect(
+          recurrences.any(
+            (value) => date.month == value.month && date.day == value.day,
+          ),
+          isTrue,
+        );
       }
     });
 
     test('Pattern iterator count with recurrences 2/29th', () {
       final pattern = Pattern(
-          type: PatternType.yearly,
-          step: 1,
-          count: count,
-          recurrences: [Date(2028, 2, 29)]
+        type: PatternType.yearly,
+        step: 1,
+        count: count,
+        recurrences: [Date(2028, 2, 29)],
       );
       final List<DateTime> dates = [];
       final iterator = pattern.iterator(since);
       while (iterator.moveNext()) {
         dates.add(iterator.current);
       }
-      expect(dates.length, count-skips);
+      expect(dates.length, count - skips);
       for (var date in dates) {
         expect(date.isLeapYear, isTrue);
         expect(date.month, 2);

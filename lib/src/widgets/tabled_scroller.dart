@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 import '../scroller.dart';
 import '../viewer.dart';
 import '../enums.dart';
 import '../const.dart';
 import 'tabled_metrics.dart';
 
-
 typedef ScrollBuilder = Widget Function(GlobalKey, DateTime);
-
 
 class TabledScroller extends StatefulWidget {
   const TabledScroller({
@@ -149,21 +146,18 @@ class _TabledScrollerState extends State<TabledScroller> {
         slivers: [
           SliverList(
             delegate: SliverChildBuilderDelegate(
-                  (context, i) => _build(-(i + 1)),
+              (context, i) => _build(-(i + 1)),
             ),
           ),
           SliverList(
             key: _centerKey,
-            delegate: SliverChildBuilderDelegate(
-                  (context, i) => _build(i),
-            ),
+            delegate: SliverChildBuilderDelegate((context, i) => _build(i)),
           ),
         ],
       ),
     );
   }
 }
-
 
 class SnapPhysics extends ScrollPhysics {
   const SnapPhysics({super.parent, required this.metrics});
@@ -174,10 +168,7 @@ class SnapPhysics extends ScrollPhysics {
 
   @override
   SnapPhysics applyTo(ScrollPhysics? ancestor) {
-    return SnapPhysics(
-      parent: buildParent(ancestor),
-      metrics: metrics,
-    );
+    return SnapPhysics(parent: buildParent(ancestor), metrics: metrics);
   }
 
   double _target(ScrollMetrics position, double velocity) {
@@ -188,7 +179,10 @@ class SnapPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(
+    ScrollMetrics position,
+    double velocity,
+  ) {
     if (position.outOfRange ||
         (velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
@@ -197,7 +191,10 @@ class SnapPhysics extends ScrollPhysics {
     final target = _target(position, velocity);
     if (target != position.pixels) {
       return ScrollSpringSimulation(
-        spring, position.pixels, target, velocity,
+        spring,
+        position.pixels,
+        target,
+        velocity,
         tolerance: toleranceFor(position),
       );
     }

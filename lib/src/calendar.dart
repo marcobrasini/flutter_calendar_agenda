@@ -6,7 +6,6 @@ import 'data/event.dart';
 import 'enums.dart';
 import 'base.dart';
 
-
 class Calendar<T extends Event> extends CalendarBase<T> {
   const Calendar({
     super.key,
@@ -52,10 +51,11 @@ class Calendar<T extends Event> extends CalendarBase<T> {
   });
 
   @override
-  Widget buildViewer(BuildContext context,
-      DateScheme dateScheme,
-      TimeScheme? timeScheme,
-      WeekScheme? weekScheme,
+  Widget buildViewer(
+    BuildContext context,
+    DateScheme dateScheme,
+    TimeScheme? timeScheme,
+    WeekScheme? weekScheme,
   ) {
     // return CustomScrollView(
     //   primary: false,

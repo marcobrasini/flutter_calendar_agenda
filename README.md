@@ -1,4 +1,7 @@
-# calendar
+# flutter_calendar_agenda
+
+[![pub package](https://img.shields.io/pub/v/flutter_calendar_agenda.svg)](https://pub.dev/packages/flutter_calendar_agenda)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A Flutter calendar package built from scratch, with infinite bidirectional scrolling, snap physics, pinch-to-zoom time grids, direct drag & resize editing, recurring events and multi-source event management.
 
@@ -30,17 +33,12 @@ A Flutter calendar package built from scratch, with infinite bidirectional scrol
 
 ## Installation
 
-<!-- TODO: replace with the real source (pub.dev, git or path) -->
-
-```yaml
-dependencies:
-  calendar:
-    git:
-      url: https://github.com/marcobrasini/flutter_calendar.git
+```bash
+flutter pub add nome_scelto
 ```
 
 ```dart
-import 'package:calendar/calendar.dart';
+import 'package:calendar/flutter_calendar_agenda.dart';
 ```
 
 If you work with recurring events stored in UTC, or import RRULEs, initialize time zones once at startup:
@@ -52,6 +50,16 @@ Future<void> main() async {
   // await TimeZones.initialize('Europe/Rome');
   runApp(const MyApp());
 }
+```
+
+
+### For developers
+
+```yaml
+dependencies:
+  calendar:
+    git:
+      url: https://github.com/marcobrasini/flutter_calendar_agenda.git
 ```
 
 ## Quick start

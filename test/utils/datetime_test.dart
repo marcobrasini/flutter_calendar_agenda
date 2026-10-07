@@ -1,12 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar/src/utils/datetime.dart';
-
+import 'package:flutter_calendar_agenda/flutter_calendar_agenda.dart';
 
 void main() {
   final now = DateTime.now();
 
   group('DateTime', () {
-
     test('toYear', () {
       final year = now.toYear;
       expect(year, isA<Year>());
@@ -46,16 +44,22 @@ void main() {
 
     test('toISOString local', () {
       final isoString = now.toString().split('.')[0].split(" ");
-      expect(now.toISOString(), ""
-          "${isoString[0].replaceAll('-', '')}T"
-          "${isoString[1].replaceAll(':', '')}");
+      expect(
+        now.toISOString(),
+        ""
+        "${isoString[0].replaceAll('-', '')}T"
+        "${isoString[1].replaceAll(':', '')}",
+      );
     });
 
     test('toISOString UTC', () {
       final isoString = now.toUtc().toString().split('.')[0].split(" ");
-      expect(now.toUtc().toISOString(), ""
-          "${isoString[0].replaceAll('-', '')}T"
-          "${isoString[1].replaceAll(':', '')}Z");
+      expect(
+        now.toUtc().toISOString(),
+        ""
+        "${isoString[0].replaceAll('-', '')}T"
+        "${isoString[1].replaceAll(':', '')}Z",
+      );
     });
 
     test('isLeapYear', () {
@@ -81,31 +85,31 @@ void main() {
     });
 
     test('dayNumber', () {
-      expect(DateTime(2000,  1,  1).dayNumber, 0);
-      expect(DateTime(2000,  1, 31).dayNumber, 31-1);
-      expect(DateTime(2000,  2,  1).dayNumber, 31+0);
-      expect(DateTime(2000,  2, 28).dayNumber, 31+28-1);
-      expect(DateTime(2000,  2, 29).dayNumber, 31+28);
-      expect(DateTime(2000,  3,  1).dayNumber, 31+28+1+0);
-      expect(DateTime(2000,  3, 31).dayNumber, 31+28+1+31-1);
-      expect(DateTime(2000,  4,  1).dayNumber, 31+28+1+31+0);
-      expect(DateTime(2000,  4, 30).dayNumber, 31+28+1+31+30-1);
-      expect(DateTime(2000,  5,  1).dayNumber, 31+28+1+31+30+0);
-      expect(DateTime(2000,  5, 31).dayNumber, 31+28+1+31+30+31-1);
-      expect(DateTime(2000,  6,  1).dayNumber, 31+28+1+31+30+31+0);
-      expect(DateTime(2000, 12, 31).dayNumber, 366-1);
-      expect(DateTime(2001,  1,  1).dayNumber, 0);
-      expect(DateTime(2001,  1, 31).dayNumber, 31-1);
-      expect(DateTime(2001,  2,  1).dayNumber, 31+0);
-      expect(DateTime(2001,  2, 28).dayNumber, 31+28-1);
-      expect(DateTime(2001,  3,  1).dayNumber, 31+28+0);
-      expect(DateTime(2001,  3, 31).dayNumber, 31+28+31-1);
-      expect(DateTime(2001,  4,  1).dayNumber, 31+28+31+0);
-      expect(DateTime(2001,  4, 30).dayNumber, 31+28+31+30-1);
-      expect(DateTime(2001,  5,  1).dayNumber, 31+28+31+30+0);
-      expect(DateTime(2001,  5, 31).dayNumber, 31+28+31+30+31-1);
-      expect(DateTime(2001,  6,  1).dayNumber, 31+28+31+30+31+0);
-      expect(DateTime(2001, 12, 31).dayNumber, 365-1);
+      expect(DateTime(2000, 1, 1).dayNumber, 0);
+      expect(DateTime(2000, 1, 31).dayNumber, 31 - 1);
+      expect(DateTime(2000, 2, 1).dayNumber, 31 + 0);
+      expect(DateTime(2000, 2, 28).dayNumber, 31 + 28 - 1);
+      expect(DateTime(2000, 2, 29).dayNumber, 31 + 28);
+      expect(DateTime(2000, 3, 1).dayNumber, 31 + 28 + 1 + 0);
+      expect(DateTime(2000, 3, 31).dayNumber, 31 + 28 + 1 + 31 - 1);
+      expect(DateTime(2000, 4, 1).dayNumber, 31 + 28 + 1 + 31 + 0);
+      expect(DateTime(2000, 4, 30).dayNumber, 31 + 28 + 1 + 31 + 30 - 1);
+      expect(DateTime(2000, 5, 1).dayNumber, 31 + 28 + 1 + 31 + 30 + 0);
+      expect(DateTime(2000, 5, 31).dayNumber, 31 + 28 + 1 + 31 + 30 + 31 - 1);
+      expect(DateTime(2000, 6, 1).dayNumber, 31 + 28 + 1 + 31 + 30 + 31 + 0);
+      expect(DateTime(2000, 12, 31).dayNumber, 366 - 1);
+      expect(DateTime(2001, 1, 1).dayNumber, 0);
+      expect(DateTime(2001, 1, 31).dayNumber, 31 - 1);
+      expect(DateTime(2001, 2, 1).dayNumber, 31 + 0);
+      expect(DateTime(2001, 2, 28).dayNumber, 31 + 28 - 1);
+      expect(DateTime(2001, 3, 1).dayNumber, 31 + 28 + 0);
+      expect(DateTime(2001, 3, 31).dayNumber, 31 + 28 + 31 - 1);
+      expect(DateTime(2001, 4, 1).dayNumber, 31 + 28 + 31 + 0);
+      expect(DateTime(2001, 4, 30).dayNumber, 31 + 28 + 31 + 30 - 1);
+      expect(DateTime(2001, 5, 1).dayNumber, 31 + 28 + 31 + 30 + 0);
+      expect(DateTime(2001, 5, 31).dayNumber, 31 + 28 + 31 + 30 + 31 - 1);
+      expect(DateTime(2001, 6, 1).dayNumber, 31 + 28 + 31 + 30 + 31 + 0);
+      expect(DateTime(2001, 12, 31).dayNumber, 365 - 1);
     });
 
     test('weekStart', () {
@@ -201,6 +205,5 @@ void main() {
       expect(yearEnd.minute, 0);
       expect(yearEnd.second, 0);
     });
-
   });
 }

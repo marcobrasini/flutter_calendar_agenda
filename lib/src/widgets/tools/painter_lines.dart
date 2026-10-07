@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../../enums.dart';
 import 'painter_point.dart';
 
-
 class LinesPainter extends CustomPainter {
-
   const LinesPainter({
     this.divisions = 0,
     this.positions = const <double>[],
@@ -49,12 +47,12 @@ class LinesPainter extends CustomPainter {
   }
 
   void paintSolid(
-      Paint paint,
-      Canvas canvas,
-      Size size,
-      double fix,
-      double beg,
-      double end
+    Paint paint,
+    Canvas canvas,
+    Size size,
+    double fix,
+    double beg,
+    double end,
   ) {
     (isHorizontal)
         ? canvas.drawLine(Offset(beg, fix), Offset(end, fix), paint)
@@ -62,18 +60,26 @@ class LinesPainter extends CustomPainter {
   }
 
   void paintDashed(
-      Paint paint,
-      Canvas canvas,
-      Size size,
-      double fix,
-      double beg,
-      double end
+    Paint paint,
+    Canvas canvas,
+    Size size,
+    double fix,
+    double beg,
+    double end,
   ) {
     var p = beg;
     while (p < end) {
       (isHorizontal)
-          ? canvas.drawLine(Offset(p, fix), Offset(p + dashedWidth!, fix), paint)
-          : canvas.drawLine(Offset(fix, p), Offset(fix, p + dashedWidth!), paint);
+          ? canvas.drawLine(
+              Offset(p, fix),
+              Offset(p + dashedWidth!, fix),
+              paint,
+            )
+          : canvas.drawLine(
+              Offset(fix, p),
+              Offset(fix, p + dashedWidth!),
+              paint,
+            );
       p += dashedWidth! + dashedSpace!;
     }
   }
@@ -105,14 +111,13 @@ class LinesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return oldDelegate is LinesPainter && (
-        divisions != oldDelegate.divisions ||
-        positions != oldDelegate.positions ||
-        lineStyle != oldDelegate.lineStyle ||
-        lineWidth != oldDelegate.lineWidth ||
-        lineColor != oldDelegate.lineColor ||
-        direction != oldDelegate.direction ||
-        offset != oldDelegate.offset
-    );
+    return oldDelegate is LinesPainter &&
+        (divisions != oldDelegate.divisions ||
+            positions != oldDelegate.positions ||
+            lineStyle != oldDelegate.lineStyle ||
+            lineWidth != oldDelegate.lineWidth ||
+            lineColor != oldDelegate.lineColor ||
+            direction != oldDelegate.direction ||
+            offset != oldDelegate.offset);
   }
 }

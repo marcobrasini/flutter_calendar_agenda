@@ -1,6 +1,5 @@
 import '../const.dart';
 
-
 class Callbacks {
   const Callbacks({
     this.onEventTap,

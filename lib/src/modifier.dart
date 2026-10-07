@@ -8,9 +8,7 @@ import 'viewer.dart';
 import 'enums.dart';
 import 'const.dart';
 
-
 class CalendarModifier extends ChangeNotifier {
-
   CalendarModifier({
     this.onEventDragged,
     this.onEventResized,
@@ -26,22 +24,22 @@ class CalendarModifier extends ChangeNotifier {
     required this.slidingDirection,
     this.swipeMargin = viewSwipeMargin,
     this.slideMargin = viewSlideMargin,
-  })  : _startCallbacks = {
-          SlotAction.dragging: onDragStart,
-          SlotAction.resizing: onResizeStart,
-        },
-        _moveCallbacks = {
-          SlotAction.dragging: onDragMove,
-          SlotAction.resizing: onResizeMove,
-        },
-        _endCallbacks = {
-          SlotAction.dragging: onDragEnd,
-          SlotAction.resizing: onResizeEnd,
-        },
-        _cancelCallbacks = {
-          SlotAction.dragging: onDragCancel,
-          SlotAction.resizing: onResizeCancel,
-        };
+  }) : _startCallbacks = {
+         SlotAction.dragging: onDragStart,
+         SlotAction.resizing: onResizeStart,
+       },
+       _moveCallbacks = {
+         SlotAction.dragging: onDragMove,
+         SlotAction.resizing: onResizeMove,
+       },
+       _endCallbacks = {
+         SlotAction.dragging: onDragEnd,
+         SlotAction.resizing: onResizeEnd,
+       },
+       _cancelCallbacks = {
+         SlotAction.dragging: onDragCancel,
+         SlotAction.resizing: onResizeCancel,
+       };
 
   final DropRegistry registry = DropRegistry();
   final ModifyCallback? onEventDragged;
@@ -52,9 +50,9 @@ class CalendarModifier extends ChangeNotifier {
   final Map<SlotAction, VoidCallback?> _cancelCallbacks;
 
   int? _pointer;
-  Offset? _initial;       // global position of the pointer at the start
-  Offset? _actual;        // global position of the pointer at each move
-  Offset? _local;         // local position of the pointer in the expanded box
+  Offset? _initial; // global position of the pointer at the start
+  Offset? _actual; // global position of the pointer at each move
+  Offset? _local; // local position of the pointer in the expanded box
   SlotLayout? _layout;
   SlotAction _action = SlotAction.none;
   ResizeSide _resize = ResizeSide.none;
@@ -71,7 +69,7 @@ class CalendarModifier extends ChangeNotifier {
   Offset? get initial => _initial;
   Offset? get actual => _actual;
   Offset? get local => _local;
-  bool get picked =>  _initial != null && _actual != null && _local != null;
+  bool get picked => _initial != null && _actual != null && _local != null;
   bool get editing => _editing && _layout != null;
   bool get tracking => picked && _pointer != null;
   bool get modifying => tracking && _action != SlotAction.none;
@@ -85,16 +83,14 @@ class CalendarModifier extends ChangeNotifier {
   RenderBox? get viewport =>
       _viewport?.currentContext?.findRenderObject() as RenderBox?;
   void attachViewport(GlobalKey viewport) => _viewport = viewport;
-  bool get hasViewport => (viewport != null)
-      ? (viewport!.attached && viewport!.hasSize)
-      : false;
+  bool get hasViewport =>
+      (viewport != null) ? (viewport!.attached && viewport!.hasSize) : false;
 
   RenderBox? _content;
   RenderBox? get content => _content;
   void attachContent(RenderBox? box) => _content = box;
-  bool get hasContent => (_content != null)
-      ? (_content!.attached && _content!.hasSize)
-      : false;
+  bool get hasContent =>
+      (_content != null) ? (_content!.attached && _content!.hasSize) : false;
   Offset get _origin => _content!.localToGlobal(_containerInitial.topLeft);
   Offset get _offset => _content!.globalToLocal(_initial!) - _local!;
 
@@ -131,8 +127,8 @@ class CalendarModifier extends ChangeNotifier {
   double get _slideDelta => (hasSlider) ? _slider!.offset - _slideStart : 0.0;
   Offset get slided => switch (slidingDirection) {
     Axis.horizontal => Offset(_slideDelta, 0.0),
-    Axis.vertical   => Offset(0.0, _slideDelta),
-    null            => Offset.zero,
+    Axis.vertical => Offset(0.0, _slideDelta),
+    null => Offset.zero,
   };
 
   // ── Modifier interface ────────────────────────────────────────────────────
@@ -143,7 +139,9 @@ class CalendarModifier extends ChangeNotifier {
     _local = local;
   }
 
-  void take(SlotLayout layout, SlotAction action, [
+  void take(
+    SlotLayout layout,
+    SlotAction action, [
     ResizeSide side = ResizeSide.none,
   ]) {
     _layout = layout;
@@ -253,9 +251,8 @@ class CalendarModifier extends ChangeNotifier {
   void _swipingStart() {
     if (_swipeTimer != null) return;
     _swipeTimer = Timer.periodic(viewSwipeDelay * 2, (_) {
-      _viewer!.swipe((_swipeStep < 0)
-          ? CalendarSwipe.backward
-          : CalendarSwipe.forward
+      _viewer!.swipe(
+        (_swipeStep < 0) ? CalendarSwipe.backward : CalendarSwipe.forward,
       );
     });
   }
@@ -295,9 +292,12 @@ class CalendarModifier extends ChangeNotifier {
     final fixture = dropped;
     if (_layout != null && fixture != null) {
       switch (_action) {
-        case SlotAction.dragging: onEventDragged?.call(_layout!.event, fixture);
-        case SlotAction.resizing: onEventResized?.call(_layout!.event, fixture);
-        case SlotAction.none: break;
+        case SlotAction.dragging:
+          onEventDragged?.call(_layout!.event, fixture);
+        case SlotAction.resizing:
+          onEventResized?.call(_layout!.event, fixture);
+        case SlotAction.none:
+          break;
       }
     }
     reset();
@@ -312,18 +312,26 @@ class CalendarModifier extends ChangeNotifier {
         final delta = dragged + slided;
         switch (_resize) {
           case ResizeSide.before:
-            final top = (_containerInitial.top + delta.dy)
-                .clamp(double.negativeInfinity, _containerInitial.bottom);
+            final top = (_containerInitial.top + delta.dy).clamp(
+              double.negativeInfinity,
+              _containerInitial.bottom,
+            );
             _container = Rect.fromLTRB(
-              _containerInitial.left, top,
-              _containerInitial.right, _containerInitial.bottom,
+              _containerInitial.left,
+              top,
+              _containerInitial.right,
+              _containerInitial.bottom,
             );
           case ResizeSide.after:
-            final bottom = (_containerInitial.bottom + delta.dy)
-                .clamp(_containerInitial.top, double.infinity);
+            final bottom = (_containerInitial.bottom + delta.dy).clamp(
+              _containerInitial.top,
+              double.infinity,
+            );
             _container = Rect.fromLTRB(
-              _containerInitial.left, _containerInitial.top,
-              _containerInitial.right, bottom,
+              _containerInitial.left,
+              _containerInitial.top,
+              _containerInitial.right,
+              bottom,
             );
           default:
             return;
@@ -353,9 +361,7 @@ class CalendarModifier extends ChangeNotifier {
     if (_editing && _action == SlotAction.dragging) return;
     _editing = true;
     if (_pointer != null) {
-      GestureBinding.instance.pointerRouter.addRoute(
-        _pointer!, _pointerRoutes,
-      );
+      GestureBinding.instance.pointerRouter.addRoute(_pointer!, _pointerRoutes);
     }
   }
 
@@ -363,7 +369,8 @@ class CalendarModifier extends ChangeNotifier {
     _editing = false;
     if (_pointer != null) {
       GestureBinding.instance.pointerRouter.removeRoute(
-        _pointer!, _pointerRoutes,
+        _pointer!,
+        _pointerRoutes,
       );
     }
   }

@@ -1,7 +1,5 @@
-import 'package:intl/intl.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar/src/utils/datetime.dart';
-
+import 'package:flutter_calendar_agenda/flutter_calendar_agenda.dart';
 
 void main() {
   final clock = Time.now();
@@ -193,12 +191,12 @@ void main() {
       expect(clock + -60 == beforeHour, true);
       final afterDay = now.add(Duration(days: 1));
       final beforeDay = now.add(Duration(days: -1));
-      expect(clock + 60*24 == afterDay, true);
-      expect(clock + -60*24 == beforeDay, true);
+      expect(clock + 60 * 24 == afterDay, true);
+      expect(clock + -60 * 24 == beforeDay, true);
       final after = now.add(Duration(days: 1, hours: 1, minutes: 1));
       final before = now.add(Duration(days: -1, hours: -1, minutes: -1));
-      expect(clock + (60*24 + 60 + 1) == after, true);
-      expect(clock + (-60*24 - 60 - 1) == before, true);
+      expect(clock + (60 * 24 + 60 + 1) == after, true);
+      expect(clock + (-60 * 24 - 60 - 1) == before, true);
       expect(Time.beg + 1, Time(0, 1));
       expect(Time.end + 1, Time(0, 1));
     });
@@ -214,12 +212,12 @@ void main() {
       expect(clock - 60 == beforeHour, true);
       final afterDay = now.add(Duration(days: 1));
       final beforeDay = now.add(Duration(days: -1));
-      expect(clock - -60*24 == afterDay, true);
-      expect(clock - 60*24 == beforeDay, true);
+      expect(clock - -60 * 24 == afterDay, true);
+      expect(clock - 60 * 24 == beforeDay, true);
       final after = now.add(Duration(days: 1, hours: 1, minutes: 1));
       final before = now.add(Duration(days: -1, hours: -1, minutes: -1));
-      expect(clock - (-60*24 - 60 - 1) == after, true);
-      expect(clock - (60*24 + 60 + 1) == before, true);
+      expect(clock - (-60 * 24 - 60 - 1) == after, true);
+      expect(clock - (60 * 24 + 60 + 1) == before, true);
       expect(Time.beg - 1, Time(23, 59));
       expect(Time.end - 1, Time(23, 59));
     });
@@ -238,15 +236,15 @@ void main() {
       final before = now.add(Duration(hours: -1, minutes: 1));
       expect(clock % after, -59);
       expect(clock % before, 59);
-      expect(Time.end % Time(0, 0), 24*60);
-      expect(Time.end % Time.beg, 24*60);
+      expect(Time.end % Time(0, 0), 24 * 60);
+      expect(Time.end % Time.beg, 24 * 60);
       expect(Time.end % Time.end, 0);
       expect(Time.beg % Time(0, 0), 0);
       expect(Time.beg % Time.beg, 0);
-      expect(Time.beg % Time.end, -24*60);
+      expect(Time.beg % Time.end, -24 * 60);
       expect(Time(0, 0) % Time(0, 0), 0);
       expect(Time(0, 0) % Time.beg, 0);
-      expect(Time(0, 0) % Time.end, -24*60);
+      expect(Time(0, 0) % Time.end, -24 * 60);
     });
   });
 }

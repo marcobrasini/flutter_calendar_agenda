@@ -13,7 +13,6 @@ import '../config.dart';
 import '../const.dart';
 import '../enums.dart';
 
-
 class TabledPaged extends StatelessWidget {
   const TabledPaged({
     super.key,
@@ -40,12 +39,14 @@ class TabledPaged extends StatelessWidget {
       final slotTop = _yOf(event) / timeScale;
       final slotHeight = event.duration.inMinutes / timeScale;
       final content = SlotString(string: event.subject, width: width);
-      containers.add(SlotLayout(
-        event: event,
-        container: Rect.fromLTWH(0.0, slotTop, width, slotHeight),
-        content: content.layout.height,
-        padding: padding,
-      ));
+      containers.add(
+        SlotLayout(
+          event: event,
+          container: Rect.fromLTWH(0.0, slotTop, width, slotHeight),
+          content: content.layout.height,
+          padding: padding,
+        ),
+      );
     }
     final results = SlotLayout.layouts(containers);
     return results;
@@ -70,11 +71,7 @@ class TabledPaged extends StatelessWidget {
               height: layout.height,
               child: Stack(
                 clipBehavior: Clip.none,
-                children: [
-                  PagedSlotEvent(
-                    layout: layout,
-                  ),
-                ],
+                children: [PagedSlotEvent(layout: layout)],
               ),
             ),
         ],
@@ -83,12 +80,8 @@ class TabledPaged extends StatelessWidget {
   }
 }
 
-
 class PagedSlotEvent extends StatelessWidget {
-  const PagedSlotEvent({
-    required this.layout,
-    super.key,
-  });
+  const PagedSlotEvent({required this.layout, super.key});
 
   final SlotLayout layout;
 
@@ -145,10 +138,10 @@ class PagedSlotEvent extends StatelessWidget {
         child: (slot.editing && slot.action == SlotAction.resizing)
             ? const SizedBox.shrink()
             : SlotEvent(
-              event: layout.event,
-              offset: Offset(layout.left, 0.0),
-              dragging: slot.editing && slot.action == SlotAction.dragging,
-            ),
+                event: layout.event,
+                offset: Offset(layout.left, 0.0),
+                dragging: slot.editing && slot.action == SlotAction.dragging,
+              ),
       ),
     );
   }

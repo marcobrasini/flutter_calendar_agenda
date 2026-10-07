@@ -8,7 +8,6 @@ import 'calendar_target.dart';
 import 'tabled_metrics.dart';
 import 'tabled_listed.dart';
 
-
 class TabledAllDay extends StatelessWidget {
   const TabledAllDay({
     super.key,
@@ -19,7 +18,8 @@ class TabledAllDay extends StatelessWidget {
   final TabledMetrics metrics;
   final CalendarScroller? scroller;
 
-  List<Date> dates(Date date) => List.generate(metrics.dateCount, (i) => date + i);
+  List<Date> dates(Date date) =>
+      List.generate(metrics.dateCount, (i) => date + i);
 
   Widget slots(BuildContext context, Date datetime) {
     final config = context.config;
@@ -32,9 +32,10 @@ class TabledAllDay extends StatelessWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => config.callbacks.onFrameTap?.call(date),
-              child:  DropWidget(
+              child: DropWidget(
                 registry: modifier.registry,
-                delegate: TileDropDelegate(date,
+                delegate: TileDropDelegate(
+                  date,
                   forceAllDay: config.allDayDragging,
                 ),
                 child: TabledListed(
@@ -47,9 +48,9 @@ class TabledAllDay extends StatelessWidget {
               ),
             ),
           ),
-        ]
-      );
-    }
+      ],
+    );
+  }
 
   // Widget _page(BuildContext context, Date? date) {
   //   final modifier = context.read<CalendarModifier>();
@@ -79,7 +80,9 @@ class TabledAllDay extends StatelessWidget {
       child: ListenableBuilder(
         listenable: metrics,
         builder: (context, _) {
-          if (scroller == null || !scroller!.hasClients) return SizedBox.shrink();
+          if (scroller == null || !scroller!.hasClients) {
+            return SizedBox.shrink();
+          }
           return AnimatedBuilder(
             animation: scroller!,
             builder: (context, _) {

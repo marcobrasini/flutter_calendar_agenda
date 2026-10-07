@@ -13,7 +13,6 @@ import 'config.dart';
 import 'enums.dart';
 import 'const.dart';
 
-
 class CalendarDefaults {
   const CalendarDefaults({
     required this.dateScheme,
@@ -61,18 +60,17 @@ class CalendarDefaults {
     dateScheme: DateScheme.weekly(),
     timeScheme: null,
     weekScheme: WeekScheme.general(),
-    );
+  );
 
-  static CalendarDefaults of(BuildContext context, CalendarView view) => switch (view) {
-    CalendarView.daily   => _daily,
-    CalendarView.weekly  => _weekly,
-    CalendarView.monthly => _monthly,
-  };
+  static CalendarDefaults of(BuildContext context, CalendarView view) =>
+      switch (view) {
+        CalendarView.daily => _daily,
+        CalendarView.weekly => _weekly,
+        CalendarView.monthly => _monthly,
+      };
 }
 
-
 abstract class CalendarBase<T extends Event> extends StatelessWidget {
-
   const CalendarBase({
     super.key,
     required this.source,
@@ -193,14 +191,11 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
   final WidgetBuilder? emptyBuilder;
   final List<Widget> appbar;
 
-
   Callbacks get callbacks => Callbacks(
     onFrameTap: onFrameTap,
     onFrameDoubleTap: onFrameDoubleTap,
     onFrameLongPress: onFrameLongPress,
-    onEventTap: onEventTap != null
-        ? (Event e) => onEventTap!(e as T)
-        : null,
+    onEventTap: onEventTap != null ? (Event e) => onEventTap!(e as T) : null,
     onEventDoubleTap: onEventDoubleTap != null
         ? (Event e) => onEventDoubleTap!(e as T)
         : null,
@@ -209,33 +204,32 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
         : null,
     onEventDragged: draggableEvent
         ? (onEventDragged != null
-            ? (Event e, Fixture f) => onEventDragged!(e as T, f)
-            : null
-        ) : null,
+              ? (Event e, Fixture f) => onEventDragged!(e as T, f)
+              : null)
+        : null,
     onEventResized: resizableEvent
         ? (onEventResized != null
-            ? (Event e, Fixture f) => onEventResized!(e as T, f)
-            : null
-        ) : null,
+              ? (Event e, Fixture f) => onEventResized!(e as T, f)
+              : null)
+        : null,
     onEventSwipedLeft: swipeableEvent
         ? (onEventSwipedLeft != null
-            ? (Event e, Fixture f) => onEventSwipedLeft!(e as T, f)
-            : null
-        ) : null,
+              ? (Event e, Fixture f) => onEventSwipedLeft!(e as T, f)
+              : null)
+        : null,
     onEventSwipedRight: swipeableEvent
         ? (onEventSwipedRight != null
-            ? (Event e, Fixture f) => onEventSwipedRight!(e as T, f)
-            : null
-        ) : null,
+              ? (Event e, Fixture f) => onEventSwipedRight!(e as T, f)
+              : null)
+        : null,
   );
 
-
   Widget buildViewer(
-      BuildContext context,
-      DateScheme dateScheme,
-      TimeScheme? timeScheme,
-      WeekScheme? weekScheme,
-    );
+    BuildContext context,
+    DateScheme dateScheme,
+    TimeScheme? timeScheme,
+    WeekScheme? weekScheme,
+  );
 
   @nonVirtual
   @override
@@ -273,7 +267,8 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
       rightSwipeBuilder: rightSwipeBuilder,
       lastAnchorBuilder: lastAnchorBuilder,
       nextAnchorBuilder: nextAnchorBuilder,
-      child: buildViewer(context,
+      child: buildViewer(
+        context,
         dateScheme ?? defaults.dateScheme,
         timeScheme ?? defaults.timeScheme,
         weekScheme ?? defaults.weekScheme,
@@ -282,28 +277,35 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CalendarEvents>.value(value: source),
-        ChangeNotifierProvider(create: (_) => CalendarViewer(
-          view: view,
-          scroll: scroll,
-        )),
-        ChangeNotifierProvider(create: (_) => CalendarPicker(
-          view: (weekScheme != null)
-              ? CalendarView.monthly
-              : (dateScheme != null)
-                  ? CalendarView.weekly
-                  : CalendarView.daily,
-          scroll: scroll,
-        )),
-        ChangeNotifierProvider(create: (_) => CalendarModifier(
-          onEventDragged: callbacks.onEventDragged,
-          onEventResized: callbacks.onEventResized,
-          swipingDirection: calendar.scrollDirection(view),
-          slidingDirection: calendar.slideDirection(view),
-        ))
+        ChangeNotifierProvider(
+          create: (_) => CalendarViewer(view: view, scroll: scroll),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CalendarPicker(
+            view: (weekScheme != null)
+                ? CalendarView.monthly
+                : (dateScheme != null)
+                ? CalendarView.weekly
+                : CalendarView.daily,
+            scroll: scroll,
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CalendarModifier(
+            onEventDragged: callbacks.onEventDragged,
+            onEventResized: callbacks.onEventResized,
+            swipingDirection: calendar.scrollDirection(view),
+            slidingDirection: calendar.slideDirection(view),
+          ),
+        ),
       ],
       builder: (context, _) {
-        context.read<CalendarPicker>().attachViewer(context.read<CalendarViewer>());
-        context.read<CalendarModifier>().attachSwiper(context.read<CalendarPicker>());
+        context.read<CalendarPicker>().attachViewer(
+          context.read<CalendarViewer>(),
+        );
+        context.read<CalendarModifier>().attachSwiper(
+          context.read<CalendarPicker>(),
+        );
         return calendar;
       },
     );

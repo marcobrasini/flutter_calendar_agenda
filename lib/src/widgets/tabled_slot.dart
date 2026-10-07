@@ -10,9 +10,7 @@ import 'tabled_listed.dart';
 import 'tabled_paged.dart';
 import 'tabled_frame.dart';
 
-
 class TabledSlot extends StatelessWidget {
-
   const TabledSlot({
     super.key,
     required this.date,
@@ -51,9 +49,12 @@ class TabledSlot extends StatelessWidget {
           offset: offset,
           timeScheme: timeScheme,
           dateScheme: dateScheme,
-          onTap: (local, [_]) => callbacks.onFrameTap?.call(delegate.at(local, size)),
-          onDoubleTap: (local, [_]) => callbacks.onFrameDoubleTap?.call(delegate.at(local, size)),
-          onLongPress: (local, [_]) => callbacks.onFrameLongPress?.call(delegate.at(local, size)),
+          onTap: (local, [_]) =>
+              callbacks.onFrameTap?.call(delegate.at(local, size)),
+          onDoubleTap: (local, [_]) =>
+              callbacks.onFrameDoubleTap?.call(delegate.at(local, size)),
+          onLongPress: (local, [_]) =>
+              callbacks.onFrameLongPress?.call(delegate.at(local, size)),
         ),
         for (int i = dateScheme.beg; i < dateScheme.end; i++)
           Positioned(
@@ -63,25 +64,26 @@ class TabledSlot extends StatelessWidget {
               children: [
                 (timeScheme != null)
                     ? DropWidget(
-                      registry: modifier.registry,
-                      delegate: SlotDropDelegate(date + i, timeScheme!),
-                      child: TabledPaged(
-                        key: ValueKey(date + i),
-                        date: date + i,
-                        width: space,
-                        height: height,
-                        timeScheme: timeScheme!,
+                        registry: modifier.registry,
+                        delegate: SlotDropDelegate(date + i, timeScheme!),
+                        child: TabledPaged(
+                          key: ValueKey(date + i),
+                          date: date + i,
+                          width: space,
+                          height: height,
+                          timeScheme: timeScheme!,
+                        ),
+                      )
+                    : DropWidget(
+                        registry: modifier.registry,
+                        delegate: TileDropDelegate(date + i),
+                        child: TabledListed(
+                          key: ValueKey(date + i),
+                          date: date + i,
+                          width: space,
+                          height: height,
+                        ),
                       ),
-                    ) : DropWidget(
-                      registry: modifier.registry,
-                      delegate: TileDropDelegate(date + i),
-                      child: TabledListed(
-                        key: ValueKey(date + i),
-                        date: date + i,
-                        width: space,
-                        height: height,
-                      ),
-                    )
               ],
             ),
           ),

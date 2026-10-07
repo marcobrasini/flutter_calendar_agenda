@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class PointPainter extends CustomPainter {
   const PointPainter({
     required this.offset,
@@ -22,10 +21,9 @@ class PointPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return oldDelegate is PointPainter && (
-        offset != oldDelegate.offset ||
+    return oldDelegate is PointPainter &&
+        (offset != oldDelegate.offset ||
             radius != oldDelegate.radius ||
-            color != oldDelegate.color
-    );
+            color != oldDelegate.color);
   }
 }

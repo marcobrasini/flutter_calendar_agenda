@@ -3,7 +3,6 @@ import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:flutter_timezone/flutter_timezone.dart';
 export 'package:timezone/timezone.dart' show TZDateTime;
 
-
 abstract final class TimeZones {
   static bool _initialized = false;
 

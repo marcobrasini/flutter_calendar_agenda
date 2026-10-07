@@ -2,31 +2,25 @@ import 'package:flutter/material.dart';
 import 'utils/datetime.dart';
 import 'data/event.dart';
 
-
 extension CalendarDate on Date {
   Date get start => this;
   Date get stop => this;
 }
-
 
 extension CalendarWeek on Week {
   Date get start => mon;
   Date get stop => sun;
 }
 
-
 extension CalendarMonth on Month {
   Date get start => first.weekStart.date;
   Date get stop => last.weekEnd.date;
 }
 
-
 class CalendarEvents extends ChangeNotifier {
-  CalendarEvents({
-    List<Event>? events,
-    this.cacheRange = 1,
-  }) :  _events = {for (final e in (events ?? const [])) e.id!: e},
-        _cache = {};
+  CalendarEvents({List<Event>? events, this.cacheRange = 1})
+    : _events = {for (final e in (events ?? const [])) e.id!: e},
+      _cache = {};
 
   final Map<String, Event> _events;
   final Map<Date, List<Event>> _cache;
@@ -60,16 +54,24 @@ class CalendarEvents extends ChangeNotifier {
 
   void set(Iterable<Event> events) {
     _cache.clear();
-    _events..clear()..addAll({for (final event in events) event.id!: event});
+    _events
+      ..clear()
+      ..addAll({for (final event in events) event.id!: event});
     cacheFrom = null;
     cacheTo = null;
   }
 
   bool sync(Iterable<Event> events) {
     final next = {for (final e in events) e.id!: e};
-    final removed = _del(_events.values.where((e) => !next.containsKey(e.id)).toList());
-    final modified = _put(next.values.where((e) => _events.containsKey(e.id)).toList());
-    final inserted = _add(next.values.where((e) => !_events.containsKey(e.id)).toList());
+    final removed = _del(
+      _events.values.where((e) => !next.containsKey(e.id)).toList(),
+    );
+    final modified = _put(
+      next.values.where((e) => _events.containsKey(e.id)).toList(),
+    );
+    final inserted = _add(
+      next.values.where((e) => !_events.containsKey(e.id)).toList(),
+    );
     return removed || modified || inserted;
   }
 
@@ -143,9 +145,12 @@ class CalendarEvents extends ChangeNotifier {
   void _fetch(Date from, Date to) {
     final instances = events.expand((e) => e.expand(from, to)).toList();
     for (var date = from; date < to; date += 1) {
-      _cache.putIfAbsent(date, () => List.unmodifiable(
-        sort(instances.where((e) => e.spans(date, date + 1)).toList()),
-      ));
+      _cache.putIfAbsent(
+        date,
+        () => List.unmodifiable(
+          sort(instances.where((e) => e.spans(date, date + 1)).toList()),
+        ),
+      );
     }
   }
 
@@ -169,7 +174,7 @@ class CalendarEvents extends ChangeNotifier {
     for (final entry in _cache.entries.toList()) {
       if (entry.value.any((e) => event.owns(e))) {
         _cache[entry.key] = List.unmodifiable(
-            entry.value.where((e) => !event.owns(e))
+          entry.value.where((e) => !event.owns(e)),
         );
       }
     }
@@ -209,7 +214,6 @@ class CalendarEvents extends ChangeNotifier {
   }
 }
 
-
 class CalendarSource<T extends Event> extends CalendarEvents {
   CalendarSource({
     List<T>? events,
@@ -236,7 +240,6 @@ class CalendarSource<T extends Event> extends CalendarEvents {
   @override
   T? find(String id) => super.find(id) as T?;
 }
-
 
 class CalendarSources<T extends Event> extends CalendarSource<T> {
   CalendarSources(this._sources) {
@@ -339,27 +342,28 @@ class CalendarSources<T extends Event> extends CalendarSource<T> {
   T? find(String id) => owner(id)?.find(id);
 
   @override
-  void set(Iterable<Event> events) => throw UnsupportedError(
-      'CalendarSources: usa source(label).set(events)'
-  );
+  void set(Iterable<Event> events) =>
+      throw UnsupportedError('CalendarSources: usa source(label).set(events)');
 
   @override
-  bool sync(Iterable<Event> events) => throw UnsupportedError(
-      'CalendarSources: usa source(label).sync(events)'
-  );
+  bool sync(Iterable<Event> events) =>
+      throw UnsupportedError('CalendarSources: usa source(label).sync(events)');
 
   @override
-  void insertEvents(Iterable<Event> events, [bool notify = true]) => throw UnsupportedError(
-      'CalendarSources: usa source(label).insertEvents(events)'
-  );
+  void insertEvents(Iterable<Event> events, [bool notify = true]) =>
+      throw UnsupportedError(
+        'CalendarSources: usa source(label).insertEvents(events)',
+      );
 
   @override
-  void modifyEvents(Iterable<Event> events, [bool notify = true]) => throw UnsupportedError(
-      'CalendarSources: usa source(label).modifyEvents(events)'
-  );
+  void modifyEvents(Iterable<Event> events, [bool notify = true]) =>
+      throw UnsupportedError(
+        'CalendarSources: usa source(label).modifyEvents(events)',
+      );
 
   @override
-  void removeEvents(Iterable<Event> events, [bool notify = true]) => throw UnsupportedError(
-      'CalendarSources: usa source(label).removeEvents(events)'
-  );
+  void removeEvents(Iterable<Event> events, [bool notify = true]) =>
+      throw UnsupportedError(
+        'CalendarSources: usa source(label).removeEvents(events)',
+      );
 }

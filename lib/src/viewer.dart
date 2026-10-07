@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'utils/datetime.dart';
 import 'scroller.dart';
 import 'parser.dart';
 import 'config.dart';
 import 'enums.dart';
 
-
 class CalendarViewer extends ChangeNotifier with CalendarParser {
-  @override final CalendarView view;
+  @override
+  final CalendarView view;
   final CalendarScroller scroller;
 
-  CalendarViewer({
-    required this.view,
-    required CalendarScroll scroll,
-  }) : scroller = CalendarScroller(scroll) {
+  CalendarViewer({required this.view, required CalendarScroll scroll})
+    : scroller = CalendarScroller(scroll) {
     datetime = DateTime.now();
     scroller.datetime = datetime;
   }

@@ -1,7 +1,5 @@
-import 'package:intl/intl.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar/src/utils/datetime.dart';
-
+import 'package:flutter_calendar_agenda/flutter_calendar_agenda.dart';
 
 void main() {
   final now = DateTime.now();
@@ -65,8 +63,8 @@ void main() {
     });
 
     test('Date operator ==', () {
-      final yesterday = DateTime(now.year, now.month, now.day-1);
-      final tomorrow = DateTime(now.year, now.month, now.day+1);
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
       expect(today == yesterday, isFalse);
       expect(today == today, isTrue);
       expect(today == now, isTrue);
@@ -74,8 +72,8 @@ void main() {
     });
 
     test('Date operator <', () {
-      final yesterday = DateTime(now.year, now.month, now.day-1);
-      final tomorrow = DateTime(now.year, now.month, now.day+1);
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
       expect(today < yesterday, isFalse);
       expect(today < today, isFalse);
       expect(today < now, isFalse);
@@ -83,8 +81,8 @@ void main() {
     });
 
     test('Date operator <=', () {
-      final yesterday = DateTime(now.year, now.month, now.day-1);
-      final tomorrow = DateTime(now.year, now.month, now.day+1);
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
       expect(today <= yesterday, isFalse);
       expect(today <= today, isTrue);
       expect(today <= now, isTrue);
@@ -92,8 +90,8 @@ void main() {
     });
 
     test('Date operator >', () {
-      final yesterday = DateTime(now.year, now.month, now.day-1);
-      final tomorrow = DateTime(now.year, now.month, now.day+1);
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
       expect(today > yesterday, isTrue);
       expect(today > today, isFalse);
       expect(today > now, isFalse);
@@ -101,8 +99,8 @@ void main() {
     });
 
     test('Date operator >=', () {
-      final yesterday = DateTime(now.year, now.month, now.day-1);
-      final tomorrow = DateTime(now.year, now.month, now.day+1);
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
       expect(today >= yesterday, isTrue);
       expect(today >= today, isTrue);
       expect(today >= now, isTrue);
@@ -110,14 +108,22 @@ void main() {
     });
 
     test('Date operator +', () {
-      final yesterday = DateTime(now.year, now.month, now.day-1);
-      final tomorrow = DateTime(now.year, now.month, now.day+1);
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
       expect(today + -1, yesterday);
       expect(today + 1, tomorrow);
-      final lastMonthDays = (now.toMonth-1).days;
-      final thisMonthDays = (now.toMonth+0).days;
-      final previousMonth = DateTime(now.year, now.month, now.day-lastMonthDays);
-      final followingMonth = DateTime(now.year, now.month, now.day+thisMonthDays);
+      final lastMonthDays = (now.toMonth - 1).days;
+      final thisMonthDays = (now.toMonth + 0).days;
+      final previousMonth = DateTime(
+        now.year,
+        now.month,
+        now.day - lastMonthDays,
+      );
+      final followingMonth = DateTime(
+        now.year,
+        now.month,
+        now.day + thisMonthDays,
+      );
       expect(today + -lastMonthDays, previousMonth);
       expect(today + thisMonthDays, followingMonth);
       expect(previousMonth.day, now.day);
@@ -125,8 +131,8 @@ void main() {
       expect(previousMonth.month, now.month - 1);
       expect(followingMonth.month, now.month + 1);
       final yearDays = now.toYear.days;
-      final previousYear = DateTime(now.year, now.month, now.day-yearDays);
-      final followingYear = DateTime(now.year, now.month, now.day+yearDays);
+      final previousYear = DateTime(now.year, now.month, now.day - yearDays);
+      final followingYear = DateTime(now.year, now.month, now.day + yearDays);
       expect(today + -yearDays, previousYear);
       expect(today + yearDays, followingYear);
       expect(previousYear.day, now.day);
@@ -138,24 +144,40 @@ void main() {
     });
 
     test('Date operator -', () {
-      final yesterday = DateTime(now.year, now.month, now.day-1);
-      final tomorrow = DateTime(now.year, now.month, now.day+1);
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
       expect(today - 1, yesterday);
       expect(today - -1, tomorrow);
-      final lastMonthDays = (now.toMonth-1).days;
-      final thisMonthDays = (now.toMonth+0).days;
-      final previousMonth = DateTime(now.year, now.month, now.day-lastMonthDays);
-      final followingMonth = DateTime(now.year, now.month, now.day+thisMonthDays);
+      final lastMonthDays = (now.toMonth - 1).days;
+      final thisMonthDays = (now.toMonth + 0).days;
+      final previousMonth = DateTime(
+        now.year,
+        now.month,
+        now.day - lastMonthDays,
+      );
+      final followingMonth = DateTime(
+        now.year,
+        now.month,
+        now.day + thisMonthDays,
+      );
       expect(today - lastMonthDays, previousMonth);
       expect(today - -thisMonthDays, followingMonth);
       expect(previousMonth.day, now.day);
       expect(followingMonth.day, now.day);
       expect(previousMonth.month, now.month - 1);
       expect(followingMonth.month, now.month + 1);
-      final lastYearDays = (now.toYear-1).days;
-      final thisYearDays = (now.toYear+0).days;
-      final previousYear = DateTime(now.year, now.month, now.day-lastYearDays);
-      final followingYear = DateTime(now.year, now.month, now.day+thisYearDays);
+      final lastYearDays = (now.toYear - 1).days;
+      final thisYearDays = (now.toYear + 0).days;
+      final previousYear = DateTime(
+        now.year,
+        now.month,
+        now.day - lastYearDays,
+      );
+      final followingYear = DateTime(
+        now.year,
+        now.month,
+        now.day + thisYearDays,
+      );
       expect(today - lastYearDays, previousYear);
       expect(today - -thisYearDays, followingYear);
       expect(previousYear.day, now.day);
@@ -167,8 +189,8 @@ void main() {
     });
 
     test('Date operator %', () {
-      final yesterday = DateTime(now.year, now.month, now.day-1);
-      final tomorrow = DateTime(now.year, now.month, now.day+1);
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      final tomorrow = DateTime(now.year, now.month, now.day + 1);
       expect(today % yesterday == 1, true);
       expect(today % tomorrow == -1, true);
     });

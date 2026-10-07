@@ -9,9 +9,7 @@ import '../enums.dart';
 import 'calendar_target.dart';
 import 'tabled_metrics.dart';
 
-
 class TabledHeader extends StatelessWidget {
-
   const TabledHeader({
     super.key,
     required this.width,
@@ -48,8 +46,8 @@ class TabledHeader extends StatelessWidget {
                     : context.config.weekConfig(view),
               ),
             ),
-          )
-      ]
+          ),
+      ],
     );
   }
 
@@ -60,34 +58,41 @@ class TabledHeader extends StatelessWidget {
         : context.config.weekConfig(view);
     return (scroller != null && scroller!.hasClients)
         ? ListenableBuilder(
-          listenable: Listenable.merge([metrics, scroller!]),
-          builder: (context, _) {
-            final date = scroller!.datetime.date;
-            return ClipRect(
-              child: Container(
-                width: width,
-                height: height,
-                color: dateConfig.background,
-                child: AnimatedBuilder(
-                  animation: scroller!,
-                  builder: (context, _) {
-                    final fraction = scroller!.offset / width;
-                    final base = fraction.floor();
-                    return Stack(
-                      children: [base, base + 1].map((i) => Positioned(
-                        left: (i - fraction) * width,
-                        top: 0,
-                        width: width,
-                        height: height,
-                        child: slots(context, date + i * metrics.dateStep),
-                      )).toList(),
-                    );
-                  },
+            listenable: Listenable.merge([metrics, scroller!]),
+            builder: (context, _) {
+              final date = scroller!.datetime.date;
+              return ClipRect(
+                child: Container(
+                  width: width,
+                  height: height,
+                  color: dateConfig.background,
+                  child: AnimatedBuilder(
+                    animation: scroller!,
+                    builder: (context, _) {
+                      final fraction = scroller!.offset / width;
+                      final base = fraction.floor();
+                      return Stack(
+                        children: [base, base + 1]
+                            .map(
+                              (i) => Positioned(
+                                left: (i - fraction) * width,
+                                top: 0,
+                                width: width,
+                                height: height,
+                                child: slots(
+                                  context,
+                                  date + i * metrics.dateStep,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            );
-          }
-        )
+              );
+            },
+          )
         : slots(context, null);
   }
 }

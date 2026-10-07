@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar/src/data/event.dart';
-import 'package:calendar/src/data/pattern.dart';
-import 'package:calendar/src/utils/datetime.dart';
-
+import 'package:flutter_calendar_agenda/src/data/event.dart';
+import 'package:flutter_calendar_agenda/src/data/pattern.dart';
+import 'package:flutter_calendar_agenda/src/utils/datetime.dart';
 
 void main() {
-
   final id = "eventId";
   final start = DateTime.now();
   final stop = start.add(Duration(hours: 1));
@@ -14,9 +12,7 @@ void main() {
   final subject = "event";
   final location = "location";
   final parentId = "parentId";
-  final pattern = Pattern(
-    type: PatternType.weekly,
-  );
+  final pattern = Pattern(type: PatternType.weekly);
 
   final data = {
     "subject": subject,
@@ -34,7 +30,7 @@ void main() {
     stop: stop,
     subject: "occurrence",
     location: location,
-    color: color
+    color: color,
   );
   final recurrence = Event(
     id: "recurrenceId",
@@ -53,25 +49,25 @@ void main() {
     location: location,
     color: color,
     pattern: pattern,
-    parentId: "recurrenceId"
+    parentId: "recurrenceId",
   );
   final exception = Event(
-      id: "exceptionId",
-      start: start,
-      stop: stop,
-      subject: "deviation",
-      location: location,
-      color: color,
-      parentId: "recurrenceId"
+    id: "exceptionId",
+    start: start,
+    stop: stop,
+    subject: "deviation",
+    location: location,
+    color: color,
+    parentId: "recurrenceId",
   );
   final instance = Event(
-      start: start,
-      stop: stop,
-      subject: "deviation",
-      location: location,
-      color: color,
-      pattern: pattern,
-      parentId: "recurrenceId"
+    start: start,
+    stop: stop,
+    subject: "deviation",
+    location: location,
+    color: color,
+    pattern: pattern,
+    parentId: "recurrenceId",
   );
   // final exemplar = Event(
   //     start: start,
@@ -80,7 +76,6 @@ void main() {
   //     location: location,
   //     color: color,
   // );
-
 
   group('Event', () {
     test('Event constructor default', () {
@@ -191,11 +186,7 @@ void main() {
     });
 
     test('extend Fixture (isAllDay)', () {
-      final allDay = Event(
-        subject: subject,
-        start: start.date,
-        color: color,
-      );
+      final allDay = Event(subject: subject, start: start.date, color: color);
       expect(allDay.start, start.date);
       expect(allDay.stop, start.tomorrow);
       expect(allDay.duration, Duration(days: 1));
@@ -219,9 +210,7 @@ void main() {
     });
   });
 
-
   group('Event Types', () {
-
     test('Event type', () {
       expect(occurrence.type, EventType.occurrence);
       expect(recurrence.type, EventType.recurrence);
@@ -269,7 +258,5 @@ void main() {
       expect(exception.isInstance, isFalse);
       expect(instance.isInstance, isTrue);
     });
-
   });
-
 }

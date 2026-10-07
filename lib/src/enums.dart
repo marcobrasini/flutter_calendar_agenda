@@ -1,60 +1,24 @@
 // ── Calendar enums ────────────────────────────────────────────────────────
-enum CalendarStyle {
-  tabled,
-  agenda,
-}
+enum CalendarStyle { tabled, agenda }
 
-enum CalendarView {
-  daily,
-  weekly,
-  monthly,
-}
+enum CalendarView { daily, weekly, monthly }
 
-enum CalendarSwipe {
-  forward,
-  backward,
-}
+enum CalendarSwipe { forward, backward }
 
-enum CalendarScroll {
-  continuous,
-  sequential,
-  individual,
-  snapping,
-}
+enum CalendarScroll { continuous, sequential, individual, snapping }
 
 // ── Other enums ───────────────────────────────────────────────────────────
-enum LineStyle {
-  solid,
-  dashed,
-}
+enum LineStyle { solid, dashed }
 
-enum LineDirection {
-  horizontal,
-  vertical,
-}
+enum LineDirection { horizontal, vertical }
 
-enum SlotDirection {
-  horizontal,
-  vertical,
-}
+enum SlotDirection { horizontal, vertical }
 
-enum SlotAction {
-  none,
-  dragging,
-  resizing,
-}
+enum SlotAction { none, dragging, resizing }
 
-enum ResizeSide {
-  before,
-  after,
-  none,
-}
+enum ResizeSide { before, after, none }
 
-enum GestureType {
-  tap,
-  doubleTap,
-  longPress,
-}
+enum GestureType { tap, doubleTap, longPress }
 
 enum TimeStep {
   minutes60(60),

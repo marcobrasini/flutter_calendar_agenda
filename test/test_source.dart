@@ -1,14 +1,9 @@
-import 'package:calendar/calendar.dart';
+import 'package:flutter_calendar_agenda/flutter_calendar_agenda.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar/src/source.dart';
-import 'package:calendar/src/data/event.dart';
-import 'package:calendar/src/data/pattern.dart';
-import 'package:calendar/src/utils/datetime.dart';
-
+import 'package:flutter_calendar_agenda/src/source.dart';
 
 void main() {
-
   group('CalendarSource tests', () {
     final today = Date.now();
     final yesterday = today - 1;
@@ -36,7 +31,7 @@ void main() {
         color: color,
         subject: 'Recurrence1',
         pattern: Pattern(type: PatternType.daily),
-      )
+      ),
     ];
 
     test('CalendarSource constructor', () {
@@ -44,27 +39,27 @@ void main() {
       expect(source, isA<CalendarEvents>());
       expect(source.events, events);
       expect(source.built, isFalse);
-    },);
+    });
 
     test('CalendarSource append', () {
       final source = CalendarEvents();
       source.set(events);
       expect(source.events, events);
       expect(source.built, isFalse);
-    },);
+    });
 
     test('CalendarSource find', () {
       final source = CalendarEvents(events: events);
       for (int i = 0; i < events.length; i++) {
         expect(source.find(events[i].id!), events[i]);
       }
-    },);
+    });
 
     test('CalendarSource dates empty', () {
       final source = CalendarEvents(events: events);
       expect(source.dates.isEmpty, isTrue);
       expect(source.built, isFalse);
-    },);
+    });
   });
 
   group('CalendarSource build tests', () {
@@ -94,34 +89,42 @@ void main() {
         color: color,
         subject: 'Recurrence1',
         pattern: Pattern(type: PatternType.daily),
-      )
+      ),
     ];
     final cached = {
       yesterday: [
-        events[2].instance(Fixture(
-          start: yesterday & events[2].start.time,
-          stop: yesterday & events[2].stop.time,
-        )),
+        events[2].instance(
+          Fixture(
+            start: yesterday & events[2].start.time,
+            stop: yesterday & events[2].stop.time,
+          ),
+        ),
       ],
       today: [
         events[0],
-        events[2].instance(Fixture(
-          start: today & events[2].start.time,
-          stop: today & events[2].stop.time,
-        )),
+        events[2].instance(
+          Fixture(
+            start: today & events[2].start.time,
+            stop: today & events[2].stop.time,
+          ),
+        ),
       ],
       tomorrow: [
-        events[2].instance(Fixture(
-          start: tomorrow & events[2].start.time,
-          stop: tomorrow & events[2].stop.time,
-        )),
+        events[2].instance(
+          Fixture(
+            start: tomorrow & events[2].start.time,
+            stop: tomorrow & events[2].stop.time,
+          ),
+        ),
         events[1],
       ],
       tomorrow + 1: [
-        events[2].instance(Fixture(
-          start: tomorrow + 1 & events[2].start.time,
-          stop: tomorrow + 1 & events[2].stop.time,
-        )),
+        events[2].instance(
+          Fixture(
+            start: tomorrow + 1 & events[2].start.time,
+            stop: tomorrow + 1 & events[2].stop.time,
+          ),
+        ),
       ],
     };
 
@@ -130,7 +133,7 @@ void main() {
       source.load(yesterday, tomorrow + 1);
       expect(source.built, isTrue);
       expect(source.dates, [yesterday, today, tomorrow]);
-    },);
+    });
 
     test('CalendarSource forDate', () {
       final source = CalendarEvents(events: events);
@@ -138,8 +141,7 @@ void main() {
       for (var date in source.dates) {
         expect(source.forDate(date), cached[date]);
       }
-    },);
-
+    });
 
     test('CalendarSource shift', () {
       final source = CalendarEvents(events: events);
@@ -148,12 +150,12 @@ void main() {
       for (var date in source.dates) {
         expect(source.forDate(date), cached[date]);
       }
-      source.load(yesterday+1, tomorrow + 2);
+      source.load(yesterday + 1, tomorrow + 2);
       expect(source.dates, [today, tomorrow, tomorrow + 1]);
       for (var date in source.dates) {
         expect(source.forDate(date), cached[date]);
       }
-    },);
+    });
   });
 
   // group('CalendarSource.forDate — days overlap', () {

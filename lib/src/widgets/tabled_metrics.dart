@@ -5,17 +5,15 @@ import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../enums.dart';
 
-
 typedef OffsetConverter = DateTime Function(DateTime, Offset);
 typedef IndexConverter = DateTime Function(DateTime, int);
 typedef SnapConverter = bool Function(DateTime);
 
-
 Map<CalendarView, IndexConverter> indexerView(DateScheme dateScheme) => {
-  CalendarView.daily:   (datetime, index) {
+  CalendarView.daily: (datetime, index) {
     return datetime.date + index;
   },
-  CalendarView.weekly:  (datetime, index) {
+  CalendarView.weekly: (datetime, index) {
     final start = datetime.weekStart.date + dateScheme.beg;
     return start + index * dateScheme.step;
   },
@@ -33,9 +31,7 @@ Map<CalendarView, SnapConverter> snapperView(DateScheme dateScheme) => {
   },
 };
 
-
 class TabledMetrics extends ChangeNotifier {
-
   TabledMetrics({
     required this.view,
     required this.timeScheme,
@@ -74,9 +70,9 @@ class TabledMetrics extends ChangeNotifier {
 
   IndexConverter get indexer => indexerView(dateScheme!)[view]!;
   SnapConverter? get snapper => snapperView(dateScheme!)[view];
-  double get caching => switch(direction) {
+  double get caching => switch (direction) {
     Axis.horizontal => _width,
-    Axis.vertical   => _height,
+    Axis.vertical => _height,
   };
 
   void reset() {
@@ -102,7 +98,7 @@ class TabledMetrics extends ChangeNotifier {
     if (_width == width && _height == height) return;
     final axisChanged = switch (direction) {
       Axis.horizontal => _width != width,
-      Axis.vertical   => _height != height,
+      Axis.vertical => _height != height,
     };
     _width = width;
     _height = height;
@@ -112,7 +108,7 @@ class TabledMetrics extends ChangeNotifier {
 
   void _measureForward() {
     double cursor = 0.0;
-    for (var i = 0;; i++) {
+    for (var i = 0; ; i++) {
       final m = _metrics[i];
       if (m?.extent == null) break;
       m!.offset = cursor;
@@ -122,7 +118,7 @@ class TabledMetrics extends ChangeNotifier {
 
   void _measureBackward() {
     double cursor = 0.0;
-    for (var i = -1;; i--) {
+    for (var i = -1; ; i--) {
       final m = _metrics[i];
       if (m?.extent == null) break;
       cursor -= m!.extent!;
@@ -154,11 +150,11 @@ class TabledMetrics extends ChangeNotifier {
     }
   }
 
-  Map<int, double?> get sizes => _metrics
-      .map((key, val) => MapEntry(key, val.extent));
+  Map<int, double?> get sizes =>
+      _metrics.map((key, val) => MapEntry(key, val.extent));
 
-  Map<int, double> get offsets => _metrics
-      .map((key, val) => MapEntry(key, val.offset));
+  Map<int, double> get offsets =>
+      _metrics.map((key, val) => MapEntry(key, val.offset));
 
   Iterable<int> get snaps => _metrics.entries
       .where((entry) => entry.value.snap && entry.value.extent != null)
@@ -189,15 +185,23 @@ class TabledMetrics extends ChangeNotifier {
       v.offset -= variation;
       if (v.offset.abs() <= caching) shifted[k - delta] = v;
     });
-    _metrics..clear()..addAll(shifted);
+    _metrics
+      ..clear()
+      ..addAll(shifted);
     _measure();
   }
 
-  int get next => snaps.where((i) => i > 0)
-      .fold<int?>(null, (a, b) => (a == null || b < a) ? b : a) ?? 0;
+  int get next =>
+      snaps
+          .where((i) => i > 0)
+          .fold<int?>(null, (a, b) => (a == null || b < a) ? b : a) ??
+      0;
 
-  int get last => snaps.where((i) => i < 0)
-      .fold<int?>(null, (a, b) => (a == null || b > a) ? b : a) ?? 0;
+  int get last =>
+      snaps
+          .where((i) => i < 0)
+          .fold<int?>(null, (a, b) => (a == null || b > a) ? b : a) ??
+      0;
 
   int swipe(CalendarSwipe s) => switch (s) {
     CalendarSwipe.forward => next,

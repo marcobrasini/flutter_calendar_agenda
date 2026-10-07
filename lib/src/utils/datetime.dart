@@ -1,7 +1,6 @@
-import 'package:calendar/src/utils/schemes.dart';
 import 'package:intl/intl.dart';
 import 'timezone.dart';
-
+import 'schemes.dart';
 
 class Time extends DateTime {
   Time._(super.year, super.month, super.day, super.hour, super.minute);
@@ -28,7 +27,8 @@ class Time extends DateTime {
     return Time(hour, minute);
   }
 
-  factory Time.fromISOFormat(String dateString) => DateTime.parse(dateString).time;
+  factory Time.fromISOFormat(String dateString) =>
+      DateTime.parse(dateString).time;
 
   @override
   int get hashCode => Object.hash(hour, minute);
@@ -61,9 +61,9 @@ class Time extends DateTime {
 
   Time operator -(int minutes) => Time(hour, minute - minutes);
 
-  int operator %(DateTime dateTime) => toUtc().difference(
-      ((dateTime is TimeEnd) ? Time.end : dateTime.time).toUtc()
-  ).inMinutes;
+  int operator %(DateTime dateTime) => toUtc()
+      .difference(((dateTime is TimeEnd) ? Time.end : dateTime.time).toUtc())
+      .inMinutes;
 
   Time round(int step) {
     final totalMinutes = hour * 60 + minute;
@@ -72,7 +72,6 @@ class Time extends DateTime {
     return Time(finalMinutes ~/ 60, finalMinutes % 60);
   }
 }
-
 
 class TimeEnd extends Time {
   TimeEnd._() : super._(1, 1, 2, 0, 0);
@@ -87,7 +86,6 @@ class TimeEnd extends Time {
   int get hashCode => Object.hash(super.hashCode, 'TimeEnd');
 }
 
-
 class TimeBeg extends Time {
   TimeBeg._() : super._(1, 1, 1, 0, 0);
 
@@ -101,18 +99,16 @@ class TimeBeg extends Time {
   int get hashCode => Object.hash(super.hashCode, 'TimeBeg');
 }
 
-
 mixin DateRange {
   Date get first;
   Date get last;
   int get days;
 
   List<Date> iterate([DateScheme? dateScheme]) => List<Date>.generate(
-      dateScheme?.count ?? days, (i) => first.date + (dateScheme?.beg ?? 0) + i
+    dateScheme?.count ?? days,
+    (i) => first.date + (dateScheme?.beg ?? 0) + i,
   );
-
 }
-
 
 class Date extends DateTime with DateRange {
   Date(super.year, super.month, super.day);
@@ -138,7 +134,8 @@ class Date extends DateTime with DateRange {
     return Date(year, month, day);
   }
 
-  factory Date.fromISOFormat(String dateString) => DateTime.parse(dateString).date;
+  factory Date.fromISOFormat(String dateString) =>
+      DateTime.parse(dateString).date;
 
   String format(String? fmt) => DateAndTime(this).format(fmt);
 
@@ -164,16 +161,17 @@ class Date extends DateTime with DateRange {
 
   Date operator -(int days) => Date(year, month, day - days);
 
-  int operator %(DateTime dateTime) => toUtc().difference(
-      dateTime.date.toUtc()
-  ).inDays;
+  int operator %(DateTime dateTime) =>
+      toUtc().difference(dateTime.date.toUtc()).inDays;
 
   DateTime get end => DateTime(year, month, day + 1);
-  @override Date get first => this;
-  @override Date get last => this;
-  @override int get days => 1;
+  @override
+  Date get first => this;
+  @override
+  Date get last => this;
+  @override
+  int get days => 1;
 }
-
 
 class Week extends DateTime with DateRange {
   static final weekDays = Week(2024, 0);
@@ -229,18 +227,20 @@ class Week extends DateTime with DateRange {
   Week operator -(int weeks) => (date - (7 * weeks)).toWeek;
 
   int operator %(DateTime dateTime) => (date % dateTime) ~/ 7;
-  
+
   DateTime newMonth(int month) => this;
   DateTime endMonth(int month) => this;
-  
+
   DateTime newYear() => DateTime(year).weekStart;
-  DateTime endYear() => DateTime(year+1, 1, 0).weekEnd.add(Duration(days:7));
+  DateTime endYear() => DateTime(year + 1, 1, 0).weekEnd.add(Duration(days: 7));
 
-  @override Date get first => mon;
-  @override Date get last => sun;
-  @override int get days => 7;
+  @override
+  Date get first => mon;
+  @override
+  Date get last => sun;
+  @override
+  int get days => 7;
 }
-
 
 class Month extends DateTime with DateRange {
   Month(int year, int month) : super(year, month, 1);
@@ -284,13 +284,16 @@ class Month extends DateTime with DateRange {
 
   Month operator -(int months) => Month(year, month - months);
 
-  int operator %(DateTime dateTime) => (year - dateTime.year)*12 + (month - dateTime.month);
+  int operator %(DateTime dateTime) =>
+      (year - dateTime.year) * 12 + (month - dateTime.month);
 
-  @override Date get first => DateTime(year, month, 1).date;
-  @override Date get last => DateTime(year, month + 1, 0).date;
-  @override int get days => last.day;
+  @override
+  Date get first => DateTime(year, month, 1).date;
+  @override
+  Date get last => DateTime(year, month + 1, 0).date;
+  @override
+  int get days => last.day;
 }
-
 
 class Year extends DateTime with DateRange {
   Year(int year) : super(year, 1, 1);
@@ -329,24 +332,27 @@ class Year extends DateTime with DateRange {
 
   int operator %(DateTime dateTime) => year - dateTime.year;
 
-  @override Date get first => DateTime(year, 1, 1).date;
-  @override Date get last => DateTime(year + 1, 1, 0).date;
-  @override int get days => isLeapYear ? 366 : 365;
+  @override
+  Date get first => DateTime(year, 1, 1).date;
+  @override
+  Date get last => DateTime(year + 1, 1, 0).date;
+  @override
+  int get days => isLeapYear ? 366 : 365;
 }
 
-
 extension DateAndTime on DateTime {
-
   Time get time => Time(hour, minute);
   Date get date => Date(year, month, day);
   Week get toWeek {
     final days = weekStart.date % DateTime(year).weekStart.date;
     return Week(year, days ~/ 7);
   }
+
   Month get toMonth => Month(year, month);
   Year get toYear => Year(year);
 
-  String toISOString() => ""
+  String toISOString() =>
+      ""
       "${year.toString().padLeft(4, '0')}"
       "${month.toString().padLeft(2, '0')}"
       "${day.toString().padLeft(2, '0')}T"
@@ -370,12 +376,16 @@ extension DateAndTime on DateTime {
     TimeZones.ensureInitialized();
     final loc = TimeZones.location(location);
     final t = TZDateTime(loc, year, month, day, hour, minute, second);
-    return DateTime.fromMillisecondsSinceEpoch(t.millisecondsSinceEpoch, isUtc: true);
+    return DateTime.fromMillisecondsSinceEpoch(
+      t.millisecondsSinceEpoch,
+      isUtc: true,
+    );
   }
 
   Date get tomorrow => date + 1;
   Date get yesterday => date - 1;
-  bool get isLeapYear => (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
+  bool get isLeapYear =>
+      (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
   int get dayNumber => date % Year(year);
 
   DateTime get weekStart => DateTime(year, month, day - (weekday - 1));
@@ -386,14 +396,18 @@ extension DateAndTime on DateTime {
   DateTime get yearEnd => DateTime(year + 1, 1);
 
   DateTime operator &(DateTime datetime) => DateTime(
-      year, month, day,
-      datetime.hour, datetime.minute, datetime.second
+    year,
+    month,
+    day,
+    datetime.hour,
+    datetime.minute,
+    datetime.second,
   );
 }
 
 extension on String {
   String get capitalized => replaceAllMapped(
     RegExp(r'(^|[\s.,])(\p{Ll})', unicode: true),
-        (m) => '${m[1]}${m[2]!.toUpperCase()}',
+    (m) => '${m[1]}${m[2]!.toUpperCase()}',
   );
 }

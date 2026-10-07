@@ -8,9 +8,7 @@ import '../config.dart';
 import '../enums.dart';
 import 'tabled_frame.dart';
 
-
 class HeaderSlot extends StatelessWidget {
-
   const HeaderSlot({
     super.key,
     required this.date,
@@ -30,10 +28,11 @@ class HeaderSlot extends StatelessWidget {
   double get space => frameWidth / dateScheme.count;
   Size get size => Size(width, height);
 
-  static int _daysBetween(DateTime from, DateTime to) =>
-      DateTime.utc(to.year, to.month, to.day)
-          .difference(DateTime.utc(from.year, from.month, from.day))
-          .inDays;
+  static int _daysBetween(DateTime from, DateTime to) => DateTime.utc(
+    to.year,
+    to.month,
+    to.day,
+  ).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +41,8 @@ class HeaderSlot extends StatelessWidget {
     final config = CalendarConfig.of(context);
     final picked = picker.viewer?.datetime;
     final column = (picked is DateTime) ? _daysBetween(date, picked) : null;
-    final visible = column != null
-        && column >= dateScheme.beg
-        && column < dateScheme.end;
+    final visible =
+        column != null && column >= dateScheme.beg && column < dateScheme.end;
     final eventConfig = config.eventConfig();
     final dateConfig = config.dateConfig(picker.view);
     return Stack(
@@ -82,25 +80,24 @@ class HeaderSlot extends StatelessWidget {
           AnimatedPositioned(
             key: const ValueKey('Picked'),
             duration: eventConfig.eventDuration,
-            top: (picker.viewer?.view == CalendarView.daily)
-                ? offset.dy
-                : 0,
+            top: (picker.viewer?.view == CalendarView.daily) ? offset.dy : 0,
             left: (picker.viewer?.view == CalendarView.daily)
                 ? offset.dx + (column - dateScheme.beg) * space
                 : 0,
-            width: (picker.viewer?.view == CalendarView.daily)
-                ? space
-                : width,
+            width: (picker.viewer?.view == CalendarView.daily) ? space : width,
             height: height,
             child: IgnorePointer(
               child: TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
                 duration: eventConfig.eventDuration,
-                builder: (context, t, child) => Opacity(opacity: t, child: child),
+                builder: (context, t, child) =>
+                    Opacity(opacity: t, child: child),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border.all(color: scheme.primary, width: 2.0),
-                    borderRadius: BorderRadius.circular(config.event.eventRounded),
+                    borderRadius: BorderRadius.circular(
+                      config.event.eventRounded,
+                    ),
                   ),
                 ),
               ),

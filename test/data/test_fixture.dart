@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:calendar/src/data/fixture.dart';
-import 'package:calendar/src/utils/datetime.dart';
-
+import 'package:flutter_calendar_agenda/flutter_calendar_agenda.dart';
 
 void main() {
   final start = DateTime.now();
@@ -128,21 +126,33 @@ void main() {
     });
 
     test('isAllDay true', () {
-      expect(Fixture(start: start.date, stop: afterMinute.tomorrow).isAllDay, true);
-      expect(Fixture(start: start.date, stop: afterHour.tomorrow).isAllDay, true);
-      expect(Fixture(start: start.date, stop: afterDay.tomorrow).isAllDay, true);
-      expect(Fixture(start: start.date, stop: afterWeek.tomorrow).isAllDay, true);
+      expect(
+        Fixture(start: start.date, stop: afterMinute.tomorrow).isAllDay,
+        true,
+      );
+      expect(
+        Fixture(start: start.date, stop: afterHour.tomorrow).isAllDay,
+        true,
+      );
+      expect(
+        Fixture(start: start.date, stop: afterDay.tomorrow).isAllDay,
+        true,
+      );
+      expect(
+        Fixture(start: start.date, stop: afterWeek.tomorrow).isAllDay,
+        true,
+      );
     });
 
     test('hashCode', () {
-        final copyMinute = Fixture(start: fixMinute.start, stop: fixMinute.stop);
-        final copyHour = Fixture(start: fixHour.start, stop: fixHour.stop);
-        final copyDay = Fixture(start: fixDay.start, stop: fixDay.stop);
-        final copyWeek = Fixture(start: fixWeek.start, stop: fixWeek.stop);
-        expect(fixMinute.hashCode, equals(copyMinute.hashCode));
-        expect(fixHour.hashCode, equals(copyHour.hashCode));
-        expect(fixDay.hashCode, equals(copyDay.hashCode));
-        expect(fixWeek.hashCode, equals(copyWeek.hashCode));
+      final copyMinute = Fixture(start: fixMinute.start, stop: fixMinute.stop);
+      final copyHour = Fixture(start: fixHour.start, stop: fixHour.stop);
+      final copyDay = Fixture(start: fixDay.start, stop: fixDay.stop);
+      final copyWeek = Fixture(start: fixWeek.start, stop: fixWeek.stop);
+      expect(fixMinute.hashCode, equals(copyMinute.hashCode));
+      expect(fixHour.hashCode, equals(copyHour.hashCode));
+      expect(fixDay.hashCode, equals(copyDay.hashCode));
+      expect(fixWeek.hashCode, equals(copyWeek.hashCode));
     });
 
     test('operator ==', () {

@@ -1,19 +1,12 @@
-import 'package:calendar/src/const.dart';
 import 'package:flutter/material.dart';
 import '../../utils/datetime.dart';
 import '../../utils/schemes.dart';
-import '../../config.dart';
 import '../../context.dart';
-
+import '../../config.dart';
+import '../../const.dart';
 
 class TimeHeader extends StatelessWidget {
-
-  const TimeHeader({
-    super.key,
-    this.width,
-    this.height,
-    required this.scheme,
-  });
+  const TimeHeader({super.key, this.width, this.height, required this.scheme});
 
   final double? width;
   final double? height;
@@ -45,9 +38,7 @@ class TimeHeader extends StatelessWidget {
         children: [
           for (Time time in times)
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: config.textPadding,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: config.textPadding),
               child: FittedBox(
                 child: Text(
                   time.format(format),

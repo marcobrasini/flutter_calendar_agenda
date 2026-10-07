@@ -7,7 +7,6 @@ import '../tabled_metrics.dart';
 import 'pointer_date.dart';
 import 'pointer_time.dart';
 
-
 class TimeIndicator extends StatelessWidget {
   const TimeIndicator({
     super.key,
@@ -58,29 +57,29 @@ class TimeIndicator extends StatelessWidget {
             final space = context.dateOffset(metrics.view);
             final length = metrics.dateSpace;
             final offset = getOffset();
-            return (offset != null) ? SizedBox(
-              width: metrics.width,
-              height: metrics.height,
-              child: Stack(
-                children: [
-                  Positioned(
-                    left: offset.dx,
-                    top: offset.dy,
-                    width: length,
-                    child: (metrics.timeScheme != null)
-                        ? TimePointer(
-                          size: Size(length, 0.0),
-                        )
-                        : DatePointer(
-                          view: metrics.view,
-                          date: Date.now(),
+            return (offset != null)
+                ? SizedBox(
+                    width: metrics.width,
+                    height: metrics.height,
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          left: offset.dx,
+                          top: offset.dy,
                           width: length,
-                          height: space,
+                          child: (metrics.timeScheme != null)
+                              ? TimePointer(size: Size(length, 0.0))
+                              : DatePointer(
+                                  view: metrics.view,
+                                  date: Date.now(),
+                                  width: length,
+                                  height: space,
+                                ),
                         ),
-                  ),
-                ],
-              ),
-            ) : SizedBox.shrink();
+                      ],
+                    ),
+                  )
+                : SizedBox.shrink();
           },
         );
       },

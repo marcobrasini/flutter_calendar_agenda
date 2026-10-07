@@ -1,5 +1,5 @@
-import 'package:calendar/src/data/fixture.dart';
 import 'package:flutter/material.dart';
+import 'data/fixture.dart';
 
 import 'data/event.dart';
 import 'enums.dart';
@@ -18,7 +18,6 @@ typedef DeleteCallback<T extends Event> = void Function(T);
 //
 typedef EventBuilder<T extends Event> = Widget Function(BuildContext, T);
 typedef HeaderBuilder = Widget Function(BuildContext, DateTime, DateTime);
-
 
 const initialHour = 0;
 const finalHour = Duration.hoursPerDay;

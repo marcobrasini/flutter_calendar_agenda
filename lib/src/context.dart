@@ -3,7 +3,6 @@ import 'utils/datetime.dart';
 import 'config.dart';
 import 'enums.dart';
 
-
 extension CalendarDimensions on BuildContext {
   ColorScheme get colors => Theme.of(this).colorScheme;
   CalendarConfig get config => CalendarConfig.of(this);
@@ -25,24 +24,24 @@ extension CalendarDimensions on BuildContext {
   double tileHeight() {
     final eventConfig = config.event;
     final height = _measure("", eventConfig.textStyle).height;
-    return height * 1.25 + (eventConfig.eventMargin + eventConfig.eventPadding) * 2;
+    return height * 1.25 +
+        (eventConfig.eventMargin + eventConfig.eventPadding) * 2;
   }
-
 
   double timeMargin() {
     final timeConfig = config.timeConfig();
     final style = _style(timeConfig.textStyle);
-    final fontSize = MediaQuery.textScalerOf(this).scale(style.fontSize ?? 14.0);
+    final fontSize = MediaQuery.textScalerOf(
+      this,
+    ).scale(style.fontSize ?? 14.0);
     return fontSize * (style.height ?? 1.5);
   }
-
 
   double timeOffset() {
     final timeConfig = config.timeConfig();
     final width = _measure("All day", timeConfig.textStyle).width;
     return width + timeConfig.textPadding * 2;
   }
-
 
   double dateMargin() {
     return 0.0;

@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import '../scaler.dart';
 
-
 class TabledScaler extends StatelessWidget {
   const TabledScaler({
     super.key,

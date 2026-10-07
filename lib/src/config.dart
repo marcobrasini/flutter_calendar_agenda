@@ -4,9 +4,7 @@ import 'data/event.dart';
 import 'enums.dart';
 import 'const.dart';
 
-
 class LineConfig {
-
   const LineConfig({
     this.style,
     this.width,
@@ -33,31 +31,31 @@ class LineConfig {
   double get lineWidth => width ?? 1.0;
   Color? get lineColor => color;
 
-  LineConfig merge(LineConfig? other) => other == null ? this : LineConfig(
-    style:        other.style       ?? style,
-    color:        other.color       ?? color,
-    width:        other.width       ?? width,
-    offsetX:      other.offsetX     ?? offsetX,
-    offsetY:      other.offsetY     ?? offsetY,
-    length:       other.length      ?? length,
-    dashedWidth:  other.dashedWidth ?? dashedWidth,
-    dashedSpace:  other.dashedSpace ?? dashedSpace,
-  );
+  LineConfig merge(LineConfig? other) => other == null
+      ? this
+      : LineConfig(
+          style: other.style ?? style,
+          color: other.color ?? color,
+          width: other.width ?? width,
+          offsetX: other.offsetX ?? offsetX,
+          offsetY: other.offsetY ?? offsetY,
+          length: other.length ?? length,
+          dashedWidth: other.dashedWidth ?? dashedWidth,
+          dashedSpace: other.dashedSpace ?? dashedSpace,
+        );
 
   LineConfig resolve(BuildContext context) {
     if (color != null) return this;
-    return merge(LineConfig(
-      color: Theme.of(context).colorScheme.outlineVariant,
-    ));
+    return merge(
+      LineConfig(color: Theme.of(context).colorScheme.outlineVariant),
+    );
   }
 
-  factory LineConfig.of(BuildContext context) => LineConfig(
-    color: Theme.of(context).colorScheme.outlineVariant,
-  );
+  factory LineConfig.of(BuildContext context) =>
+      LineConfig(color: Theme.of(context).colorScheme.outlineVariant);
 }
 
-
-class TextConfig{
+class TextConfig {
   const TextConfig({
     this.format,
     this.padding,
@@ -74,14 +72,15 @@ class TextConfig{
   double get textPadding => padding ?? 0.0;
   Color? get textBackground => background;
 
-  TextConfig merge(TextConfig? other) => other == null ? this : TextConfig(
-    format:     other.format     ?? format,
-    padding:    other.padding    ?? padding,
-    textStyle:  other.textStyle  ?? textStyle,
-    background: other.background ?? background,
-  );
+  TextConfig merge(TextConfig? other) => other == null
+      ? this
+      : TextConfig(
+          format: other.format ?? format,
+          padding: other.padding ?? padding,
+          textStyle: other.textStyle ?? textStyle,
+          background: other.background ?? background,
+        );
 }
-
 
 class HeaderConfig extends TextConfig {
   const HeaderConfig({
@@ -95,23 +94,19 @@ class HeaderConfig extends TextConfig {
   final HeaderBuilder? builder;
 
   @override
-  HeaderConfig merge(covariant HeaderConfig? other) => other == null ? this : HeaderConfig(
-    builder:    other.builder    ?? builder,
-    format:     other.format     ?? format,
-    padding:    other.padding    ?? padding,
-    textStyle:  other.textStyle  ?? textStyle,
-    background: other.background ?? background,
-  );
+  HeaderConfig merge(covariant HeaderConfig? other) => other == null
+      ? this
+      : HeaderConfig(
+          builder: other.builder ?? builder,
+          format: other.format ?? format,
+          padding: other.padding ?? padding,
+          textStyle: other.textStyle ?? textStyle,
+          background: other.background ?? background,
+        );
 }
 
-
-class ClockConfig{
-  const ClockConfig({
-    this.period,
-    this.radius,
-    this.width,
-    this.color,
-  });
+class ClockConfig {
+  const ClockConfig({this.period, this.radius, this.width, this.color});
 
   final Duration? period;
   final double? radius;
@@ -123,20 +118,20 @@ class ClockConfig{
   double get clockWidth => width ?? 1.0;
   Color? get clockColor => color;
 
-  ClockConfig merge(ClockConfig? other) => other == null ? this : ClockConfig(
-    period:  other.period ?? period,
-    radius:  other.radius ?? radius,
-    width:   other.width  ?? width,
-    color:   other.color  ?? color,
-  );
+  ClockConfig merge(ClockConfig? other) => other == null
+      ? this
+      : ClockConfig(
+          period: other.period ?? period,
+          radius: other.radius ?? radius,
+          width: other.width ?? width,
+          color: other.color ?? color,
+        );
 
-  factory ClockConfig.of(BuildContext context) => ClockConfig(
-    color: Theme.of(context).colorScheme.primary,
-  );
+  factory ClockConfig.of(BuildContext context) =>
+      ClockConfig(color: Theme.of(context).colorScheme.primary);
 }
 
-
-class EventConfig{
+class EventConfig {
   const EventConfig({
     this.duration,
     this.padding,
@@ -174,22 +169,23 @@ class EventConfig{
   double get eventExtent => extent ?? 0.0;
   double get eventMargin => margin ?? 0.0;
 
-  EventConfig merge(EventConfig? other) => other == null ? this : EventConfig(
-    duration:           other.duration ?? duration,
-    padding:            other.padding ?? padding,
-    rounded:            other.rounded ?? rounded,
-    extent:             other.extent ?? extent,
-    margin:             other.margin ?? margin,
-    textStyle:          other.textStyle ?? textStyle,
-    textStyleOf:        other.textStyleOf ?? textStyleOf,
-    maxLines:           other.maxLines ?? maxLines,
-    overflow:           other.overflow ?? overflow,
-    draggable:          other.draggable ?? draggable,
-    resizable:          other.draggable ?? resizable,
-    swipeable:          other.draggable ?? swipeable,
-  );
+  EventConfig merge(EventConfig? other) => other == null
+      ? this
+      : EventConfig(
+          duration: other.duration ?? duration,
+          padding: other.padding ?? padding,
+          rounded: other.rounded ?? rounded,
+          extent: other.extent ?? extent,
+          margin: other.margin ?? margin,
+          textStyle: other.textStyle ?? textStyle,
+          textStyleOf: other.textStyleOf ?? textStyleOf,
+          maxLines: other.maxLines ?? maxLines,
+          overflow: other.overflow ?? overflow,
+          draggable: other.draggable ?? draggable,
+          resizable: other.draggable ?? resizable,
+          swipeable: other.draggable ?? swipeable,
+        );
 }
-
 
 class CalendarConfig extends InheritedWidget {
   const CalendarConfig({
@@ -259,11 +255,11 @@ class CalendarConfig extends InheritedWidget {
   final WidgetBuilder? emptyBuilder;
 
   TextConfig timeConfig() => TextConfig(
-      format: timeHeaderFormat,
-      padding: timeHeaderPadding
+    format: timeHeaderFormat,
+    padding: timeHeaderPadding,
   ).merge(time);
 
-  TextConfig dateConfig(CalendarView view) => switch(view) {
+  TextConfig dateConfig(CalendarView view) => switch (view) {
     CalendarView.daily => TextConfig(
       format: dailyDateFormat,
       padding: dailyDatePadding,
@@ -278,22 +274,22 @@ class CalendarConfig extends InheritedWidget {
     ),
   }.merge(date);
 
-  TextConfig weekConfig(CalendarView view) => switch(view) {
+  TextConfig weekConfig(CalendarView view) => switch (view) {
     CalendarView.daily => TextConfig(
-        format: monthlyWeekFormat,
+      format: monthlyWeekFormat,
       padding: monthlyWeekPadding,
     ),
     CalendarView.weekly => TextConfig(
-        format: monthlyWeekFormat,
+      format: monthlyWeekFormat,
       padding: monthlyWeekPadding,
     ),
     CalendarView.monthly => TextConfig(
-        format: monthlyWeekFormat,
+      format: monthlyWeekFormat,
       padding: monthlyWeekPadding,
     ),
   }.merge(week);
 
-  HeaderConfig headerConfig(CalendarView view) => switch(view) {
+  HeaderConfig headerConfig(CalendarView view) => switch (view) {
     CalendarView.daily => HeaderConfig(
       format: dailyHeaderFormat,
       padding: dailyHeaderPadding,
@@ -310,16 +306,16 @@ class CalendarConfig extends InheritedWidget {
 
   EventConfig eventConfig() => event;
 
-  Axis scrollDirection(CalendarView view) => switch(view) {
-    CalendarView.daily    => Axis.horizontal,
-    CalendarView.weekly   => Axis.horizontal,
-    CalendarView.monthly  => Axis.vertical,
+  Axis scrollDirection(CalendarView view) => switch (view) {
+    CalendarView.daily => Axis.horizontal,
+    CalendarView.weekly => Axis.horizontal,
+    CalendarView.monthly => Axis.vertical,
   };
 
-  Axis slideDirection(CalendarView view) => switch(view) {
-    CalendarView.daily    => Axis.vertical,
-    CalendarView.weekly   => Axis.vertical,
-    CalendarView.monthly  => Axis.horizontal,
+  Axis slideDirection(CalendarView view) => switch (view) {
+    CalendarView.daily => Axis.vertical,
+    CalendarView.weekly => Axis.vertical,
+    CalendarView.monthly => Axis.horizontal,
   };
 
   static CalendarConfig? maybeOf(BuildContext context) {
@@ -334,13 +330,13 @@ class CalendarConfig extends InheritedWidget {
 
   @override
   bool updateShouldNotify(CalendarConfig oldWidget) {
-    return callbacks != oldWidget.callbacks
-        || line != oldWidget.line
-        || event != oldWidget.event
-        || clock != oldWidget.clock
-        || header != oldWidget.header
-        || time != oldWidget.time
-        || date != oldWidget.date
-        || week != oldWidget.week;
+    return callbacks != oldWidget.callbacks ||
+        line != oldWidget.line ||
+        event != oldWidget.event ||
+        clock != oldWidget.clock ||
+        header != oldWidget.header ||
+        time != oldWidget.time ||
+        date != oldWidget.date ||
+        week != oldWidget.week;
   }
 }
