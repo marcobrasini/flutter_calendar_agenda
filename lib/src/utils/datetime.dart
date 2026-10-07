@@ -110,6 +110,7 @@ mixin DateRange {
   List<Date> iterate([DateScheme? dateScheme]) => List<Date>.generate(
       dateScheme?.count ?? days, (i) => first.date + (dateScheme?.beg ?? 0) + i
   );
+
 }
 
 
@@ -138,6 +139,8 @@ class Date extends DateTime with DateRange {
   }
 
   factory Date.fromISOFormat(String dateString) => DateTime.parse(dateString).date;
+
+  String format(String? fmt) => DateAndTime(this).format(fmt);
 
   @override
   int get hashCode => Object.hash(year, month, day);
@@ -197,7 +200,10 @@ class Week extends DateTime with DateRange {
   static Week now() => DateTime.now().toWeek;
 
   @override
-  String toString() => "$mon,$sun";
+  String toString([String? fmt]) => "$mon,$sun";
+
+  String format(String? fmt) =>
+      "${DateAndTime(mon).format(fmt)},${DateAndTime(mon).format(fmt)}";
 
   @override
   int get hashCode => Object.hash(year, month, day, week, weekYear);
@@ -247,6 +253,8 @@ class Month extends DateTime with DateRange {
   @override
   String toString([String fmt = "yyyy-MM"]) => format(fmt);
 
+  String format(String? fmt) => DateAndTime(this).format(fmt);
+
   factory Month.fromString(String dateString) {
     List<String> list = dateString.split("-");
     final int year = int.parse(list[0]);
@@ -294,6 +302,8 @@ class Year extends DateTime with DateRange {
 
   @override
   String toString([String fmt = "yyyy"]) => format(fmt);
+
+  String format(String? fmt) => DateAndTime(this).format(fmt);
 
   @override
   int get hashCode => year;

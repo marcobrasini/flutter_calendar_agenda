@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import '../scroller.dart';
 import '../viewer.dart';
 import '../enums.dart';
@@ -179,14 +180,21 @@ class SnapPhysics extends ScrollPhysics {
     );
   }
 
+  double _target(ScrollMetrics position, double velocity) {
+    if (velocity.abs() < minFlingVelocity) {
+      return metrics.offset(metrics.snap(position.pixels));
+    }
+    return metrics.offset((velocity > 0) ? 1 : -1);
+  }
+
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
-    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
+    if (position.outOfRange ||
+        (velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent)) {
       return super.createBallisticSimulation(position, velocity);
     }
-    final index = metrics.snap(position.pixels);
-    final target = metrics.offset(index);
+    final target = _target(position, velocity);
     if (target != position.pixels) {
       return ScrollSpringSimulation(
         spring, position.pixels, target, velocity,

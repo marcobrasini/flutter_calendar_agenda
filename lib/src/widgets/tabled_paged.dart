@@ -118,7 +118,7 @@ class PagedSlotEvent extends StatelessWidget {
       duration: eventSlotDuration,
       top: 0.0,
       bottom: 0.0,
-      left: (container?.left ?? layout.left),
+      left: container?.left ?? layout.left,
       width: container?.width ?? layout.width,
       onEnd: (draggable(config) || resizable(config))
           ? () => modifier.start()

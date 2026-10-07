@@ -54,7 +54,7 @@ class HeaderSlot extends StatelessWidget {
           width: width,
           height: height,
           offset: offset,
-          // visible: false,
+          visible: false,
           dateScheme: dateScheme,
         ),
         for (int i = dateScheme.beg; i < dateScheme.end; i++)

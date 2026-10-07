@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../modifier.dart';
 import '../context.dart';
@@ -10,12 +11,12 @@ import 'tabled_metrics.dart';
 
 class CalendarTabledHeader extends StatefulWidget {
   const CalendarTabledHeader({
-    required this.dateScheme,
+    this.dateScheme,
     this.weekScheme,
     super.key,
   });
 
-  final DateScheme dateScheme;
+  final DateScheme? dateScheme;
   final WeekScheme? weekScheme;
 
   @override
@@ -68,6 +69,7 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
     );
     return LayoutBuilder(
       builder: (context, constraints) {
+        final config = context.config;
         final pickWidth = constraints.maxWidth;
         final slotHeight = context.dateOffset(_picker.view);
         final pageHeight = slotHeight * (widget.weekScheme?.count ?? 1);
@@ -78,7 +80,7 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
             children: [
               Row(
                 children: [
-                  if (context.config.showHeaderButton) IconButton(
+                  if (config.showHeaderButton) IconButton(
                     onPressed: (modifier.isResizing) ? null : () {
                       _picker.last(true);
                     },
@@ -90,9 +92,9 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
                   Expanded(
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTap: context.config.showHeaderPicker ? _toggle : null,
+                      onTap: config.showHeaderPicker ? _toggle : null,
                       child: Center(
-                        child: context.config.headerBuilder?.call(
+                        child: config.headerBuilder?.call(
                           context,
                           _picker.datetime.first,
                           _picker.datetime.last,
@@ -103,7 +105,7 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
                       ),
                     ),
                   ),
-                  if (context.config.showHeaderButton) IconButton(
+                  if (config.showHeaderButton) IconButton(
                     onPressed: (modifier.isResizing) ? null : () {
                       _picker.next(true);
                     },
@@ -114,14 +116,15 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
                   ),
                 ],
               ),
-              if (context.config.showHeaderPicker) SizeTransition(
-                axisAlignment: -1.0,
-                sizeFactor: CurvedAnimation(
-                  curve: Curves.easeInOut,
-                  parent: _expand,
+              if (!_picker.negligible && context.config.showHeaderPicker)
+                SizeTransition(
+                  axisAlignment: -1.0,
+                  sizeFactor: CurvedAnimation(
+                    curve: Curves.easeInOut,
+                    parent: _expand,
+                  ),
+                  child: HeaderPicker(metrics: metrics),
                 ),
-                child: HeaderPicker(metrics: metrics),
-              ),
             ],
           ),
         );

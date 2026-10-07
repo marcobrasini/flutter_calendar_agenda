@@ -18,19 +18,19 @@ class MyApp extends StatelessWidget {
         id: "allDay1",
         start: now.date,
         color:  Colors.blue,
-        subject: "allDay",
+        subject: "allDay1",
       ),
       Event(
         id: "allDay2",
         start: now.date - 1,
         color:  Colors.blue.shade200,
-        subject: "allDay",
+        subject: "allDay2",
       ),
       Event(
         id: "allDay3",
         start: now.date + 2,
         color:  Colors.blue.shade600,
-        subject: "allDay",
+        subject: "allDay3",
       ),
       Event(
         id: "event1",
@@ -99,26 +99,22 @@ class MyApp extends StatelessWidget {
             dateScheme: DateScheme.weekly(),
             // weekScheme: WeekScheme.general(),
             timeScheme: TimeScheme(0, 24, round: 5),
-            // dateConfig: TextConfig(padding: 12.0),
             onEventDragged: (event, fixture) {
               source.modifyEvents([event.set({
                 "start": fixture.start,
                 "stop": fixture.stop
               })]);
-              print("dragged $event -> $fixture");
-              print('fixture: ${fixture.start} → ${fixture.stop}');
-              print('nuovo giorno: ${source.forDate(fixture.start.date)}');
-              print('vecchio giorno: ${source.forDate(event.start.date)}');
+              debugPrint("dragged $event -> $fixture");
             },
             onEventResized:  (event, fixture) {
               source.modifyEvents([event.set({
                 "start": fixture.start,
                 "stop": fixture.stop
               })]);
-              print("resized $event -> $fixture");
+              debugPrint("resized $event -> $fixture");
             },
             onEventTap: (event) {
-              print("tap $event");
+              debugPrint("tap $event");
             },
           ),
         )

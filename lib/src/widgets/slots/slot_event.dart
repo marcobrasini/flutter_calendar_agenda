@@ -33,12 +33,14 @@ class SlotEvent extends StatelessWidget {
     final dimmer = (context.colors.brightness == Brightness.light)
         ?  eventSlotLineDimmed
         : -eventSlotLineDimmed;
-    final eventConfig = context.config.eventConfig();
+    final config = context.config;
+    final eventConfig = config.eventConfig();
     final eventStyle = eventConfig.styleFor(event);
     final padding = eventConfig.eventPadding;
     final alpha = dragging ? eventDraggableSlotAlpha : 255;
     return Listener(
       onPointerDown: (pointerEvent) {
+        if (event.isAllDay && !config.allDayDragging) return;
         final box = context.findRenderObject() as RenderBox;
         final local = box.globalToLocal(pointerEvent.position);
         modifier.enter(
@@ -59,7 +61,7 @@ class SlotEvent extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            context.config.eventBuilder?.call(context, event) ?? Container(
+            config.eventBuilder?.call(context, event) ?? Container(
               padding: EdgeInsets.only(
                 bottom: (event.parentId != null) ? 4 * padding : 0.0,
               ),

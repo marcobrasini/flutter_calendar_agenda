@@ -215,11 +215,13 @@ class CalendarSource<T extends Event> extends CalendarEvents {
     List<T>? events,
     super.cacheRange,
     this.label,
+    this.color,
     bool visible = true,
   }) : _visible = visible,
        super(events: events);
 
   final String? label;
+  Color? color;
   bool _visible;
   bool get visible => _visible;
   set visible(bool value) {

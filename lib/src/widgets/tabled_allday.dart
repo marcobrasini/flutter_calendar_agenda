@@ -22,6 +22,7 @@ class TabledAllDay extends StatelessWidget {
   List<Date> dates(Date date) => List.generate(metrics.dateCount, (i) => date + i);
 
   Widget slots(BuildContext context, Date datetime) {
+    final config = context.config;
     final modifier = context.read<CalendarModifier>();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -30,10 +31,12 @@ class TabledAllDay extends StatelessWidget {
           Expanded(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => context.config.callbacks.onFrameTap?.call(date),
+              onTap: () => config.callbacks.onFrameTap?.call(date),
               child:  DropWidget(
                 registry: modifier.registry,
-                delegate: TileDropDelegate(date, forceAllDay: true),
+                delegate: TileDropDelegate(date,
+                  forceAllDay: config.allDayDragging,
+                ),
                 child: TabledListed(
                   key: ValueKey(date),
                   date: date,

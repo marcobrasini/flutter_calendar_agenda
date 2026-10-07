@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'tools/indicator_time.dart';
 import 'tools/header_time.dart';
 import 'slots/slot_editor.dart';
+import 'slots/slot_event.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../modifier.dart';
@@ -45,6 +46,7 @@ class CalendarTabled extends StatefulWidget {
 }
 
 class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStateMixin {
+  final GlobalKey _overlay = GlobalKey();
   final GlobalKey _viewport = GlobalKey();
   final ValueNotifier<Date?> _paged = ValueNotifier(null);
   late final ScrollController _slider;
@@ -250,17 +252,18 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
       builder: (context, _) => LayoutBuilder(
         builder: (context, constraints) {
           final tileHeight = context.tileHeight();
-          final timeMargin = context.timeMargin() * 2;
+          final timeMargin = context.timeMargin();
           final timeOffset = context.timeOffset();
           final dateOffset = context.dateOffset(_view);
           final pageHeight = (widget.timeScheme == null || !_scaler.zoomable)
-              ? constraints.maxHeight - timeMargin - dateOffset
+              ? constraints.maxHeight - timeMargin * 2 - dateOffset
               : widget.timeScheme!.minutes * _scaler.ratio;
           final pageWidth = constraints.maxWidth -
               (widget.timeScheme != null ? timeOffset : 0.0);
           metrics.resize(pageWidth, pageHeight);
 
           return Stack(
+            key: _overlay,
             clipBehavior: Clip.hardEdge,
             children: [
               TabledScaler(
@@ -323,6 +326,29 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
                 builder: (context) {
                   final modifier = context.watch<CalendarModifier>();
                   if (!modifier.editing) return const SizedBox.shrink();
+
+                  if (modifier.isDragging) {
+                    final box = _overlay.currentContext?.findRenderObject() as RenderBox?;
+                    if (box == null || !box.hasSize) return const SizedBox.shrink();
+                    final topLeft = box.globalToLocal(modifier.screen.topLeft);
+                    return Positioned.fill(
+                      child: IgnorePointer(
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Positioned.fromRect(
+                              rect: topLeft & modifier.screen.size,
+                              child: SlotEvent(
+                                event: modifier.layout!.event,
+                                selected: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
                   return Positioned.fill(
                     child: Stack(
                       children: [
@@ -335,15 +361,17 @@ class _CalendarTabledState extends State<CalendarTabled> with TickerProviderStat
                         Positioned.fill(
                           child: ClipRect(
                             child: Stack(
+                              clipBehavior: Clip.none,
                               children: [
-                                CompositedTransformFollower(
-                                  link: _link,
-                                  showWhenUnlinked: false,
-                                  child: SizedBox(
-                                    width: pageWidth,
-                                    height: pageHeight,
-                                    child: SlotEditor(
-                                        layout: modifier.layout!),
+                                Positioned(
+                                  left: 0,
+                                  top: 0,
+                                  width: pageWidth,
+                                  height: pageHeight,
+                                  child: CompositedTransformFollower(
+                                    link: _link,
+                                    showWhenUnlinked: false,
+                                    child: SlotEditor(layout: modifier.layout!),
                                   ),
                                 ),
                               ],

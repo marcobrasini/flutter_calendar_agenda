@@ -289,7 +289,9 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CalendarPicker(
           view: (weekScheme != null)
               ? CalendarView.monthly
-              : CalendarView.weekly,
+              : (dateScheme != null)
+                  ? CalendarView.weekly
+                  : CalendarView.daily,
           scroll: scroll,
         )),
         ChangeNotifierProvider(create: (_) => CalendarModifier(

@@ -217,8 +217,9 @@ class CalendarConfig extends InheritedWidget {
     this.eventSwipeable = false,
     this.shrinkableAgenda = false,
     this.negligibleAgenda = false,
-    this.headerBuilder,
+    this.allDayDragging = false,
     this.eventBuilder,
+    this.headerBuilder,
     this.leftSwipeBuilder,
     this.rightSwipeBuilder,
     this.lastAnchorBuilder,
@@ -248,8 +249,9 @@ class CalendarConfig extends InheritedWidget {
   final bool eventSwipeable;
   final bool shrinkableAgenda;
   final bool negligibleAgenda;
-  final HeaderBuilder? headerBuilder;
+  final bool allDayDragging;
   final EventBuilder? eventBuilder;
+  final HeaderBuilder? headerBuilder;
   final WidgetBuilder? leftSwipeBuilder;
   final WidgetBuilder? rightSwipeBuilder;
   final WidgetBuilder? lastAnchorBuilder;
