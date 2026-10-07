@@ -2,7 +2,12 @@
 
 A Flutter calendar package built from scratch, with infinite bidirectional scrolling, snap physics, pinch-to-zoom time grids, direct drag & resize editing, recurring events and multi-source event management.
 
-<!-- TODO: screenshots / GIFs of the daily, weekly, monthly and agenda views -->
+<p align="center">
+  <img src="doc/images/daily.gif" width="250" alt="Daily view">
+  <img src="doc/images/weekly.gif" width="250" alt="Weekly view">
+  <img src="doc/images/agenda.gif" width="250" alt="Agenda view">
+</p>
+
 
 ## Features
 
@@ -91,7 +96,7 @@ final slot = Fixture(start: DateTime(2026, 10, 5, 9), stop: DateTime(2026, 10, 5
 
 slot.duration;                              // 1:00:00
 slot.isAllDay;                              // false
-slot.dates;                                 // [2026-10-07]
+slot.dates;                                 // [2026-10-05]
 slot.spans(Date(2026, 10), Date(2026, 11)); // true
 slot.spans(Date(2026, 9), Date(2026, 10));  // false
 ```
@@ -132,11 +137,11 @@ final map   = event.get();   // {'id': ..., 'start': ..., 'stop': ..., 'color': 
 | `start`, `stop` | `DateTime` | `stop` defaults to the next midnight (all-day). |
 | `color` | `Color` | Slot background.                                |
 | `subject` | `String` | Displayed text.                                 |
-| `location` | `String?` | Information on the event location               |
+| `location` | `String?` | Information on the event location.              |
 | `parentId` | `String?` | Links an occurrence to its recurring series.    |
 | `pattern` | `Pattern?` | Recurrence rule.                                |
 
-Events compare by value (`Equatable`), so comparisons skips events that did not actually change.
+Events compare by value (`Equatable`), so `modifyEvents` skips events that did not actually change.
 
 ### Event types
 
@@ -254,7 +259,7 @@ Mutations update the cache in place: an inserted or modified event is expanded o
 #### Visibility
 
 ```dart
-work.visible = false;   // notifies; hidden in any CalendarSources that contains it
+work.visible = false;   // notifies; hidden in any CalendarSources that contain it
 ```
 
 ### `CalendarSources`
@@ -309,7 +314,7 @@ Calendar<Event>(
 
 Scrollable list of events, organized by dates and weeks like a to-do list.
 
-Because of this structure, events usually come with swipe actions for dismiss-style operations (i.e. complete, archive, delete). The widget also supports a dedicated scroll mode, `CalendarScroll.sequential`, which loads only limited chunks of days that contain events instead of every day in the range.
+Because of this structure, events usually come with swipe actions for dismiss-style operations (e.g. complete, archive, delete). The widget also supports a dedicated scroll mode, `CalendarScroll.sequential`, which loads only limited chunks of days that contain events instead of every day in the range.
 
 ```dart
 Agenda<Event>(
@@ -342,17 +347,19 @@ Agenda<Event>(
 | `resizableEvent` | ✓ | | Enables resize.                                                                                                             |
 | `swipeableEvent` | | ✓ | Enables swipe actions.                                                                                                      |
 | `showFrame`, `showHeader`, `showHeaderWidget`, `showHeaderButton`, `showIndicator` | ✓ | ✓ | Toggle grid lines, header, all-day row, arrows and the current-time indicator.                                              |
-| `fixLastAnchor`, `fixNextAnchor`, `lastAnchorBuilder`, `nextAnchorBuilder` | | ✓ | Set the visibility and the form of the anchor widgets used for loading events in the `sequential` scrolling of the `Agenda` |
-| `shrinkableAgenda`, `negligibleAgenda`, `centredView` | | ✓ | Configure the visibility of the widgets in the `Agenda`                                                                     |
+| `fixLastAnchor`, `fixNextAnchor`, `lastAnchorBuilder`, `nextAnchorBuilder` | | ✓ | Set the visibility and the form of the anchor widgets used for loading events in the `sequential` scrolling of the `Agenda`. |
+| `shrinkableAgenda`, `negligibleAgenda`, `centredView` | | ✓ | Configure the visibility of the widgets in the `Agenda`.                                                                    |
 | `emptyBuilder` | | ✓ | Shown when there are no events.                                                                                             |
 
 ---
 
 ## Editing events
 
+![Dragging and resizing an event](doc/images/editing.gif)
+
 A calendar widget is most useful when it lets users manage and edit events. This package supports that through basic gestures: each gesture fires a callback, and drag, resize, and swipe operations report their result when they end.
 
-#### Gestures
+### Gestures
 
 | Gesture | Effect |
 |---|---|
@@ -365,7 +372,7 @@ A calendar widget is most useful when it lets users manage and edit events. This
 
 While dragging, the event stays under the finger regardless of what the layout beneath it does, whether it scrolls, changes page, or the all-day header changes height. The drop is resolved against the layout at the moment the finger lifts. Holding the pointer near an edge scrolls the time axis or pages to the previous or next dates.
 
-#### Callbacks
+### Callbacks
 
 | Callback | Signature | When |
 |---|---|---|
@@ -383,9 +390,11 @@ For recurring events, the `event` you receive is usually a generated **instance*
 
 ### Editing an occurrence
 
+Plain occurrences and exceptions have their own `id`, so you can write the new `fixture` straight back to the source:
+
 ```dart
 onEventDragged: (event, fixture) {
-  if (event.isOccurrence) {
+  if (event.isOccurrence || event.isException) {
     source.modifyEvents([event.set(fixture.get())]);
   }
 },
@@ -393,45 +402,50 @@ onEventDragged: (event, fixture) {
 
 ### Editing a recurrence
 
-When you edit a recurring event through the calendar, you only work with its instances. To change the series, retrieve the original recurrence from the source using the instance's `parentId`:
+When you edit a recurring event through the calendar, you only work with its instances. To change the series, retrieve the original recurrence from the source using the instance's `parentId`, then operate on the recurrence itself. When an instance is dragged or resized, you can either move the whole series or move only that occurrence (see [Moving an instance](#moving-an-instance)).
+
+#### Moving the whole series
+
+Changing the recurrence's start or end affects every occurrence. Don't copy the instance's new times onto the recurrence: that would move the start of the series itself. Shift it by the same offset instead:
 
 ```dart
 onEventDragged: (event, fixture) {
   if (event.isInstance) {
-    final recurrence = source.find(event.parentId!);
-    // This would set the whole recurrence.start to the fixture.start, generally wrong!
-    // source.modifyEvents([recurrence.set({start: fixture.start, stop: fixture.stop})]);  
-    final variation = fixture.start.difference(event.start);
-    source.modifyEvents([recurrence.shift(variation, fixture.duration)]);
+    final recurrence = source.find(event.parentId!)!;
+    // Don't do this: it would move the series start to this instance's new start.
+    // source.modifyEvents([recurrence.set({'start': fixture.start, 'stop': fixture.stop})]);
+    final offset = fixture.start.difference(event.start);
+    source.modifyEvents([recurrence.shift(offset, fixture.duration)]);
   }
 },
 ```
-Then operate on the recurrence itself. Keep in mind that changing its start or end affects the whole series. 
-All event helpers return a new event rather than modifying the original, so write the result back to the source:
 
+#### Other changes to the series
+
+All event helpers return a new event rather than modifying the original, so write the result back to the source:
 
 ```dart
 source.modifyEvents([recurrence.addException(DateTime(2026, 10, 12, 9, 30))]);  // skip one
 source.modifyEvents([recurrence.delException(DateTime(2026, 10, 12, 9, 30))]);  // restore it
 source.modifyEvents([recurrence.addRecurrence(Date(2026, 10, 8))]);             // add Thursdays
-source.modifyEvents([recurrence.setPattern(standup.pattern!.setCount(20))]);    // limit the series
+source.modifyEvents([recurrence.setPattern(recurrence.pattern!.setCount(20))]); // limit the series
 ```
 
 #### Moving an instance
 
-Generated instances have no `id`, so they cannot be stored as they are. To move one occurrence, skip it in the series and store an exception in its place:
+Generated instances have no `id`, so they cannot be stored as they are. To move only one occurrence, skip it in the series and store an exception in its place:
 
 ```dart
 onEventDragged: (event, fixture) {
-  if (event.isInstance) {
-    final recurrence = source.find(event.parentId!);
-    final exception = Event.make(
-      id: newId(), // your id generator
-      data: event.exception(fixture).get(),
-    );
-    source.modifyEvents([series.addException(event.start)]);
-    source.insertEvents([moved]);
-  }
+if (event.isInstance) {
+final recurrence = source.find(event.parentId!)!;
+final exception = Event.make(
+id: newId(), // your id generator
+data: event.exception(fixture).get(),
+);
+source.modifyEvents([recurrence.addException(event.start)], false);
+source.insertEvents([exception]);   // single rebuild
+}
 },
 ```
 
@@ -443,12 +457,12 @@ The global flags can be refined per event:
 
 ```dart
 Calendar<Event>(
-  source: source,
-  view: CalendarView.weekly,
-  eventConfig: EventConfig(
-    draggable: (event) => !event.isInstance,       // series occurrences stay put
-    resizable: (event) => !event.isAllDay,
-  ),
+source: source,
+view: CalendarView.weekly,
+eventConfig: EventConfig(
+draggable: (event) => !event.isInstance,       // series occurrences stay put
+resizable: (event) => !event.isAllDay,
+),
 );
 ```
 
@@ -488,19 +502,19 @@ All config objects are immutable, have nullable fields, and are merged over the 
 
 ```dart
 EventConfig(
-  padding: 4.0,
-  margin: 1.0,
-  rounded: 6.0,
-  maxLines: 2,
-  overflow: TextOverflow.ellipsis,
-  textStyle: const TextStyle(fontSize: 12),
-  textStyleOf: (event) => TextStyle(
-    color: event.color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
-  ),
-  duration: const Duration(milliseconds: 200),   // slot animations
-  draggable: (event) => true,
-  resizable: (event) => true,
-  swipeable: (event) => true,
+padding: 4.0,
+margin: 1.0,
+rounded: 6.0,
+maxLines: 2,
+overflow: TextOverflow.ellipsis,
+textStyle: const TextStyle(fontSize: 12),
+textStyleOf: (event) => TextStyle(
+color: event.color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+),
+duration: const Duration(milliseconds: 200),   // slot animations
+draggable: (event) => true,
+resizable: (event) => true,
+swipeable: (event) => true,
 );
 ```
 
@@ -512,14 +526,14 @@ Replaces the default slot content (subject and recurrence icon):
 
 ```dart
 eventBuilder: (context, event) => Padding(
-  padding: const EdgeInsets.all(4),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(event.subject, style: const TextStyle(fontWeight: FontWeight.w600)),
-      if (event.location != null) Text(event.location!),
-    ],
-  ),
+padding: const EdgeInsets.all(4),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text(event.subject, style: const TextStyle(fontWeight: FontWeight.w600)),
+if (event.location != null) Text(event.location!),
+],
+),
 ),
 ```
 
@@ -527,8 +541,8 @@ eventBuilder: (context, event) => Padding(
 
 ```dart
 headerConfig: HeaderConfig(
-  textStyle: Theme.of(context).textTheme.titleMedium,
-  background: Theme.of(context).colorScheme.surfaceContainer,
+textStyle: Theme.of(context).textTheme.titleMedium,
+background: Theme.of(context).colorScheme.surfaceContainer,
 ),
 headerBuilder: (context, first, last) => Text('$first – $last'),
 ```

@@ -90,15 +90,14 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: Scaffold(
-        appBar: AppBar(title: Text("Weekly view")),
+        appBar: AppBar(title: Text("Agenda view")),
         body: Padding(
           padding: EdgeInsets.all(16.0),
           child: Calendar(
             source: source,
             view: CalendarView.daily,
             dateScheme: DateScheme.weekly(),
-            // weekScheme: WeekScheme.general(),
-            timeScheme: TimeScheme(0, 24, round: 5),
+            timeScheme: TimeScheme(0, 24, round: 15),
             onEventDragged: (event, fixture) {
               source.modifyEvents([event.set({
                 "start": fixture.start,

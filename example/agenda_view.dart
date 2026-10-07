@@ -1,6 +1,3 @@
-import 'package:calendar/src/agenda.dart';
-import 'package:calendar/src/config.dart';
-import 'package:calendar/src/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar/calendar.dart';
 
@@ -113,7 +110,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Weekly view"),
+          title: Text("Agenda view"),
           actions: [
             IconButton(
                 onPressed: () => setState(() {}),
@@ -129,6 +126,7 @@ class _MyAppState extends State<MyApp> {
                 view: CalendarView.weekly,
                 source: source,
                 scroll: CalendarScroll.sequential,
+                negligibleAgenda: true,
                 headerBuilder: (context, start, stop) => Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
