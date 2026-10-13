@@ -422,8 +422,8 @@ onEventDragged: (event, fixture) {
     final recurrence = source.find(event.parentId!)!;
     // Don't do this: it would move the series start to this instance's new start.
     // source.modifyEvents([recurrence.set({'start': fixture.start, 'stop': fixture.stop})]);
-    final offset = fixture.start.difference(event.start);
-    source.modifyEvents([recurrence.shift(offset, fixture.duration)]);
+    final variation = fixture.start.difference(event.start);
+    source.modifyEvents([recurrence.shift(variation, fixture.duration)]);
   }
 },
 ```
@@ -445,15 +445,15 @@ Generated instances have no `id`, so they cannot be stored as they are. To move 
 
 ```dart
 onEventDragged: (event, fixture) {
-if (event.isInstance) {
-final recurrence = source.find(event.parentId!)!;
-final exception = Event.make(
-id: newId(), // your id generator
-data: event.exception(fixture).get(),
-);
-source.modifyEvents([recurrence.addException(event.start)], false);
-source.insertEvents([exception]);   // single rebuild
-}
+  if (event.isInstance) {
+    final recurrence = source.find(event.parentId!)!;
+    final exception = Event.make(
+      id: newId(), // your id generator
+      data: event.exception(fixture).get(),
+    );
+    source.modifyEvents([recurrence.addException(event.start)], false);
+    source.insertEvents([exception]);   // single rebuild
+  }
 },
 ```
 

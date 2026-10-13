@@ -33,6 +33,7 @@ class Calendar<T extends Event> extends CalendarBase<T> {
     //
     super.draggableEvent = true,
     super.resizableEvent = true,
+    super.allDayDragging = false,
     //
     super.showFrame = true,
     super.showHeader = true,

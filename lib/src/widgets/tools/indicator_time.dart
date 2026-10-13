@@ -19,30 +19,27 @@ class TimeIndicator extends StatelessWidget {
   final CalendarScroller scroller;
   final Axis direction;
 
+  double get _pageExtent => switch (direction) {
+    Axis.horizontal => metrics.width,
+    Axis.vertical =>
+      (metrics.weekScheme != null) ? metrics.weekSpace : metrics.height,
+  };
+
   Offset? getOffset() {
     if (!scroller.hasClients) return null;
     final now = DateTime.now();
-    final date = scroller.datetime.date;
-    final days = now.date % date;
-    final weeks = (days / metrics.dateStep).floor();
-    final tiles = days - weeks * metrics.dateStep;
-    final length = metrics.dateSpace;
-    final dx = (direction == Axis.horizontal)
-        ? tiles * length + scroller.distance - scroller.offset
-        : tiles * length;
-    final double dy;
-    if (metrics.timeScheme != null) {
-      final time = now.time % Time.fromHour(metrics.timeBeg);
-      dy = (direction == Axis.vertical)
-          ? time / metrics.timeScale + scroller.distance - scroller.offset
-          : time / metrics.timeScale;
-      return Offset(dx, dy);
-    }
-    if (metrics.weekScheme == null) return Offset(dx, 0.0);
-    dy = (direction == Axis.vertical)
-        ? weeks / metrics.weekScale - scroller.offset
-        : weeks / metrics.weekScale;
-    return Offset(dx, dy);
+    final days = now.date % scroller.datetime.date;
+    final page = (days / metrics.dateStep).floor();
+    final tile = days - page * metrics.dateStep;
+    final main = page * _pageExtent - scroller.offset;
+    final cross = tile * metrics.dateSpace;
+    final time = (metrics.timeScheme != null)
+        ? (now.time % Time.fromHour(metrics.timeBeg)) / metrics.timeScale
+        : 0.0;
+    return switch (direction) {
+      Axis.horizontal => Offset(main + cross, time),
+      Axis.vertical => Offset(cross, main + time),
+    };
   }
 
   @override

@@ -119,7 +119,8 @@ class _CalendarTabledHeaderState extends State<CalendarTabledHeader>
               ),
               if (!_picker.negligible && context.config.showHeaderPicker)
                 SizeTransition(
-                  axisAlignment: -1.0,
+                  axis: Axis.vertical,
+                  alignment: AlignmentGeometry.topCenter,
                   sizeFactor: CurvedAnimation(
                     curve: Curves.easeInOut,
                     parent: _expand,

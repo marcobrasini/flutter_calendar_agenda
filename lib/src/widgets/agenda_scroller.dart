@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../scroller.dart';
@@ -152,7 +153,7 @@ class _AgendaScrollerState extends State<AgendaScroller> {
       child: CustomScrollView(
         controller: _viewer.scroller,
         scrollDirection: widget.direction,
-        cacheExtent: widget.registry.caching,
+        scrollCacheExtent: ScrollCacheExtent.pixels(widget.registry.caching),
         center: (config.centred) ? _centerKey : null,
         slivers: [
           if (!_continuous && showLastAnchor)

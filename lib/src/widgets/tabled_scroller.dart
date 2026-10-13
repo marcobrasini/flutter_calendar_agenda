@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../scroller.dart';
 import '../viewer.dart';
 import '../enums.dart';
@@ -140,7 +141,7 @@ class _TabledScrollerState extends State<TabledScroller> {
       child: CustomScrollView(
         controller: _scroller,
         scrollDirection: widget.metrics.direction,
-        cacheExtent: widget.metrics.caching,
+        scrollCacheExtent: ScrollCacheExtent.pixels(widget.metrics.caching),
         center: _centerKey,
         physics: _physics,
         slivers: [
@@ -175,7 +176,8 @@ class SnapPhysics extends ScrollPhysics {
     if (velocity.abs() < minFlingVelocity) {
       return metrics.offset(metrics.snap(position.pixels));
     }
-    return metrics.offset((velocity > 0) ? 1 : -1);
+    final index = (velocity > 0) ? metrics.next : metrics.last;
+    return (index == 0) ? position.pixels : metrics.offset(index);
   }
 
   @override

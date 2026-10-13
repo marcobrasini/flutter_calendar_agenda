@@ -97,6 +97,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
     this.draggableEvent = false,
     this.resizableEvent = false,
     this.swipeableEvent = false,
+    this.allDayDragging = false,
     //
     this.showFrame = true,
     this.showHeader = true,
@@ -161,6 +162,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
   final bool draggableEvent;
   final bool resizableEvent;
   final bool swipeableEvent;
+  final bool allDayDragging;
   //
   final SlotCallback<T>? onEventTap;
   final SlotCallback<T>? onEventDoubleTap;
@@ -231,6 +233,18 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
     WeekScheme? weekScheme,
   );
 
+  CalendarView get pick => switch (view) {
+    CalendarView.monthly => CalendarView.monthly,
+    CalendarView.weekly =>
+      (weekScheme == null) ? CalendarView.weekly : CalendarView.monthly,
+    CalendarView.daily =>
+      (dateScheme != null)
+          ? (weekScheme == null)
+                ? CalendarView.weekly
+                : CalendarView.monthly
+          : CalendarView.daily,
+  };
+
   @nonVirtual
   @override
   Widget build(BuildContext context) {
@@ -251,6 +265,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
       showHeaderButton: showHeaderButton,
       showHeaderPicker: showHeaderPicker,
       showIndicator: showIndicator,
+      allDayDragging: allDayDragging,
       eventDraggable: draggableEvent,
       eventResizable: resizableEvent,
       eventSwipeable: swipeableEvent,
@@ -281,14 +296,7 @@ abstract class CalendarBase<T extends Event> extends StatelessWidget {
           create: (_) => CalendarViewer(view: view, scroll: scroll),
         ),
         ChangeNotifierProvider(
-          create: (_) => CalendarPicker(
-            view: (weekScheme != null)
-                ? CalendarView.monthly
-                : (dateScheme != null)
-                ? CalendarView.weekly
-                : CalendarView.daily,
-            scroll: scroll,
-          ),
+          create: (_) => CalendarPicker(view: pick, scroll: scroll),
         ),
         ChangeNotifierProvider(
           create: (_) => CalendarModifier(

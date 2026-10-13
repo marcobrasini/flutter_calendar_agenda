@@ -41,10 +41,12 @@ class _WeeklyViewExampleState extends State<WeeklyViewExample> {
           dateScheme: DateScheme.weekly(),
           weekScheme: WeekScheme.general(),
           eventConfig: EventConfig(maxLines: 1),
+          allDayDragging: true,
           onEventDragged: _move,
           onEventResized: _move,
           onEventTap: (event) => debugPrint('tap ${event.subject}'),
-          onFrameTap: (datetime) => debugPrint('tap on empty slot at $datetime'),
+          onFrameTap: (datetime) =>
+              debugPrint('tap on empty slot at $datetime'),
         ),
       ),
     );

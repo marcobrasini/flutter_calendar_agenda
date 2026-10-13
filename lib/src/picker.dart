@@ -6,9 +6,11 @@ class CalendarPicker extends CalendarViewer {
 
   CalendarViewer? _viewer;
   CalendarViewer? get viewer => _viewer;
-  bool get negligible => view == _viewer?.view;
+  bool get negligible =>
+      view == _viewer?.view || _viewer?.view == CalendarView.monthly;
   bool _stepping = false; // picker-activated flag: calling for super-methods
   bool _leading = false; // activating-viewer flag: no sync callback
+  bool _syncing = false;
 
   void attachViewer(CalendarViewer? viewer) {
     if (identical(viewer, _viewer)) return;
@@ -20,16 +22,21 @@ class CalendarPicker extends CalendarViewer {
     if (_leading) return;
     final target = _viewer?.datetime;
     if (target == null) return;
-    if (normalize(target) != datetime) {
-      jump(target);
-    } else if (!negligible) {
-      notifyListeners();
+    _syncing = true;
+    try {
+      if (normalize(target) != datetime) {
+        jump(target, animate: !negligible);
+      } else if (!negligible) {
+        notifyListeners();
+      }
+    } finally {
+      _syncing = false;
     }
   }
 
   void _lead(void Function(CalendarViewer viewer) step) {
     final viewer = _viewer;
-    if (viewer == null || !negligible) return;
+    if (viewer == null || !negligible || _syncing) return;
     _leading = true;
     try {
       step(viewer);

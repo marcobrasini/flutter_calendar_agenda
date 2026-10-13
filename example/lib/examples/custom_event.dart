@@ -86,7 +86,9 @@ class _CustomEventExampleState extends State<CustomEventExample> {
 
   void _showNotes(Appointment appointment) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(appointment.notes ?? 'No notes for "${appointment.subject}"')),
+      SnackBar(
+          content: Text(
+              appointment.notes ?? 'No notes for "${appointment.subject}"')),
     );
   }
 

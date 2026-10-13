@@ -219,7 +219,9 @@ class _CalendarTabledState extends State<CalendarTabled>
                     key: key,
                     date: datetime.date,
                     width: pageWidth,
-                    height: pageHeight,
+                    height: (widget.weekScheme != null)
+                        ? metrics.weekSpace
+                        : pageHeight,
                     timeScheme: widget.timeScheme,
                     dateScheme: widget.dateScheme,
                   ),
@@ -250,7 +252,6 @@ class _CalendarTabledState extends State<CalendarTabled>
       weekScheme: widget.weekScheme,
       direction: config.scrollDirection(_view),
     );
-
     return ListenableBuilder(
       listenable: _scaler,
       builder: (context, _) => LayoutBuilder(
@@ -266,7 +267,6 @@ class _CalendarTabledState extends State<CalendarTabled>
               constraints.maxWidth -
               (widget.timeScheme != null ? timeOffset : 0.0);
           metrics.resize(pageWidth, pageHeight);
-
           return Stack(
             key: _overlay,
             clipBehavior: Clip.hardEdge,

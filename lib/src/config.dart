@@ -205,6 +205,7 @@ class CalendarConfig extends InheritedWidget {
     this.showHeaderWidget = true,
     this.showHeaderButton = true,
     this.showHeaderPicker = true,
+    this.allDayDragging = false,
     this.fixLastAnchor = true,
     this.fixNextAnchor = true,
     this.showIndicator = true,
@@ -213,7 +214,6 @@ class CalendarConfig extends InheritedWidget {
     this.eventSwipeable = false,
     this.shrinkableAgenda = false,
     this.negligibleAgenda = false,
-    this.allDayDragging = false,
     this.eventBuilder,
     this.headerBuilder,
     this.leftSwipeBuilder,
@@ -237,6 +237,7 @@ class CalendarConfig extends InheritedWidget {
   final bool showHeaderWidget;
   final bool showHeaderButton;
   final bool showHeaderPicker;
+  final bool allDayDragging;
   final bool fixLastAnchor;
   final bool fixNextAnchor;
   final bool showIndicator;
@@ -245,7 +246,6 @@ class CalendarConfig extends InheritedWidget {
   final bool eventSwipeable;
   final bool shrinkableAgenda;
   final bool negligibleAgenda;
-  final bool allDayDragging;
   final EventBuilder? eventBuilder;
   final HeaderBuilder? headerBuilder;
   final WidgetBuilder? leftSwipeBuilder;
@@ -315,7 +315,7 @@ class CalendarConfig extends InheritedWidget {
   Axis slideDirection(CalendarView view) => switch (view) {
     CalendarView.daily => Axis.vertical,
     CalendarView.weekly => Axis.vertical,
-    CalendarView.monthly => Axis.horizontal,
+    CalendarView.monthly => Axis.vertical,
   };
 
   static CalendarConfig? maybeOf(BuildContext context) {

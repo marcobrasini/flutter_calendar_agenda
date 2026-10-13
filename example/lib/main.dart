@@ -26,12 +26,36 @@ class ExampleList extends StatelessWidget {
   const ExampleList({super.key});
 
   static final _examples = <(String, String, WidgetBuilder)>[
-    ('Agenda', 'Sequential scrolling and swipe actions.', (_) => const AgendaViewExample()),
-    ('Daily view', 'All-day events, drag and resize.', (_) => const DailyViewExample()),
-    ('Weekly view', 'Time grid with frame taps.', (_) => const WeeklyViewExample()),
-    ('Monthly view', 'Month grid with a recurring event.', (_) => const MonthlyViewExample()),
-    ('Recurring events', 'Patterns, RRULE and dragging a series.', (_) => const RecurrencesExample()),
-    ('Custom event type', 'Subclassing Event with extra fields.', (_) => const CustomEventExample()),
+    (
+      'Agenda',
+      'Sequential scrolling and swipe actions.',
+      (_) => const AgendaViewExample()
+    ),
+    (
+      'Daily view',
+      'All-day events, drag and resize.',
+      (_) => const DailyViewExample()
+    ),
+    (
+      'Weekly view',
+      'Time grid with frame taps.',
+      (_) => const WeeklyViewExample()
+    ),
+    (
+      'Monthly view',
+      'Month grid with a recurring event.',
+      (_) => const MonthlyViewExample()
+    ),
+    (
+      'Recurring events',
+      'Patterns, RRULE and dragging a series.',
+      (_) => const RecurrencesExample()
+    ),
+    (
+      'Custom event type',
+      'Subclassing Event with extra fields.',
+      (_) => const CustomEventExample()
+    ),
   ];
 
   @override
@@ -45,7 +69,8 @@ class ExampleList extends StatelessWidget {
               title: Text(title),
               subtitle: Text(subtitle),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: builder)),
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: builder)),
             ),
         ],
       ),

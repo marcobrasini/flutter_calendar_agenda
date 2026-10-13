@@ -24,8 +24,7 @@ extension CalendarDimensions on BuildContext {
   double tileHeight() {
     final eventConfig = config.event;
     final height = _measure("", eventConfig.textStyle).height;
-    return height * 1.25 +
-        (eventConfig.eventMargin + eventConfig.eventPadding) * 2;
+    return height + (eventConfig.eventMargin + eventConfig.eventPadding) * 2;
   }
 
   double timeMargin() {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_calendar_agenda/src/viewer.dart';
+import 'package:flutter_calendar_agenda/src/widgets/tools/slot_date.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
@@ -39,6 +41,7 @@ class TabledSlot extends StatelessWidget {
     final delegate = (timeScheme != null)
         ? SlotDropDelegate(date, timeScheme!, dateScheme)
         : TileDropDelegate(date, dateScheme: dateScheme);
+    final view = context.read<CalendarViewer>().view;
     final space = frameWidth / dateScheme.count;
     return Stack(
       children: [
@@ -60,32 +63,43 @@ class TabledSlot extends StatelessWidget {
           Positioned(
             top: offset.dy,
             left: offset.dx + (i - dateScheme.beg) * space,
-            child: Column(
-              children: [
-                (timeScheme != null)
-                    ? DropWidget(
-                        registry: modifier.registry,
-                        delegate: SlotDropDelegate(date + i, timeScheme!),
-                        child: TabledPaged(
-                          key: ValueKey(date + i),
+            width: space,
+            height: frameHeight,
+            child: (timeScheme != null)
+                ? DropWidget(
+                    registry: modifier.registry,
+                    delegate: SlotDropDelegate(date + i, timeScheme!),
+                    child: TabledPaged(
+                      key: ValueKey(date + i),
+                      date: date + i,
+                      width: space,
+                      height: frameHeight,
+                      timeScheme: timeScheme!,
+                    ),
+                  )
+                : DropWidget(
+                    registry: modifier.registry,
+                    delegate: TileDropDelegate(date + i),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        DateSlot(
                           date: date + i,
-                          width: space,
-                          height: height,
-                          timeScheme: timeScheme!,
+                          config: context.config.dateConfig(view),
                         ),
-                      )
-                    : DropWidget(
-                        registry: modifier.registry,
-                        delegate: TileDropDelegate(date + i),
-                        child: TabledListed(
-                          key: ValueKey(date + i),
-                          date: date + i,
-                          width: space,
-                          height: height,
+                        Expanded(
+                          child: ClipRect(
+                            child: TabledListed(
+                              key: ValueKey(date + i),
+                              date: date + i,
+                              width: space,
+                              height: null, // prende l'altezza dall'Expanded
+                            ),
+                          ),
                         ),
-                      ),
-              ],
-            ),
+                      ],
+                    ),
+                  ),
           ),
       ],
     );

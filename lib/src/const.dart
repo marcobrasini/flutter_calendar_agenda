@@ -73,8 +73,8 @@ const viewSwipeMargin = 60.0;
 const viewSlideMargin = 60.0;
 
 const timeIndicatorPeriod = Duration(minutes: 1);
-const timeIndicatorLineWidth = 1.5;
-const timeIndicatorPointRadius = 4.5;
+const timeIndicatorLineWidth = 2.5;
+const timeIndicatorPointRadius = 5.0;
 
 const eventSlotOffset = 20.0;
 const eventSlotOffsetRatio = 8;

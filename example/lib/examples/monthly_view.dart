@@ -60,6 +60,7 @@ class _MonthlyViewExampleState extends State<MonthlyViewExample> {
         child: Calendar<Event>(
           source: source,
           view: CalendarView.monthly,
+          weekScheme: WeekScheme.general(),
           onEventDragged: _onDragged,
           onEventTap: (event) => debugPrint('tap ${event.subject}'),
           onFrameTap: (date) => debugPrint('tap on $date'),

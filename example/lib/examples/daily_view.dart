@@ -39,9 +39,12 @@ class _DailyViewExampleState extends State<DailyViewExample> {
           view: CalendarView.daily,
           timeScheme: const TimeScheme(0, 24, round: 15),
           dateScheme: const DateScheme.weekly(),
+          allDayDragging: true,
           onEventDragged: _move,
           onEventResized: _move,
           onEventTap: (event) => debugPrint('tap ${event.subject}'),
+          onFrameTap: (datetime) =>
+              debugPrint('tap on empty slot at $datetime'),
         ),
       ),
     );
