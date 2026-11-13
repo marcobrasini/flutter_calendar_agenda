@@ -111,11 +111,11 @@ void main() {
       expect(fixAllDay.duration, Duration(days: 1));
     });
 
-    test('isSpanned', () {
-      expect(fixMinute.isSpanned, false);
-      expect(fixHour.isSpanned, false);
-      expect(fixDay.isSpanned, true);
-      expect(fixWeek.isSpanned, true);
+    test('isMultiDay', () {
+      expect(fixMinute.isMultiDay, false);
+      expect(fixHour.isMultiDay, false);
+      expect(fixDay.isMultiDay, true);
+      expect(fixWeek.isMultiDay, true);
     });
 
     test('isAllDay false', () {

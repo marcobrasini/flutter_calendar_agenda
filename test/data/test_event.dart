@@ -191,7 +191,7 @@ void main() {
       expect(allDay.stop, start.tomorrow);
       expect(allDay.duration, Duration(days: 1));
       expect(allDay.isAllDay, true);
-      expect(allDay.isSpanned, false);
+      expect(allDay.isMultiDay, false);
     });
 
     test('extend Fixture (isSpanned)', () {
@@ -206,7 +206,7 @@ void main() {
       expect(spanDay.stop, start.date + days);
       expect(spanDay.duration, Duration(days: days));
       expect(spanDay.isAllDay, true);
-      expect(spanDay.isSpanned, true);
+      expect(spanDay.isMultiDay, true);
     });
   });
 
