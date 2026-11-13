@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_calendar_agenda/src/source.dart';
-import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../scroller.dart';
-import '../modifier.dart';
-import '../context.dart';
-import 'calendar_target.dart';
 import 'tabled_metrics.dart';
 import 'tabled_listed.dart';
 
@@ -18,62 +13,6 @@ class TabledAllDay extends StatelessWidget {
 
   final TabledMetrics metrics;
   final CalendarScroller? scroller;
-
-  List<Date> dates(Date date) =>
-      List.generate(metrics.dateCount, (i) => date + i);
-
-  Widget slots(BuildContext context, Date datetime) {
-    final config = context.config;
-    final modifier = context.read<CalendarModifier>();
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (final date in dates(datetime.date))
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => config.callbacks.onFrameTap?.call(date),
-              child: DropWidget(
-                registry: modifier.registry,
-                delegate: TileDropDelegate(
-                  date,
-                  forceAllDay: config.allDayDragging,
-                ),
-                child: TabledListed(
-                  key: ValueKey(date),
-                  date: date,
-                  width: metrics.width / metrics.dateCount,
-                  height: null,
-                  filter: (e) => e.isAllDay || e.eclipse(date, date.end),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  // Widget _page(BuildContext context, Date? date) {
-  //   final modifier = context.read<CalendarModifier>();
-  //   final width = metrics.width / metrics.dateCount;
-  //   return Row(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       for (final d in dates(date))
-  //         DropWidget(
-  //           registry: modifier.registry,
-  //           delegate: TileDropDelegate(d),
-  //           child: TabledListed(
-  //             key: ValueKey(d),
-  //             date: d,
-  //             width: width,
-  //             height: null,
-  //             filter: (e) => e.isAllDay,
-  //           ),
-  //         ),
-  //     ],
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +37,12 @@ class TabledAllDay extends StatelessWidget {
                       top: 0,
                       bottom: 0,
                       width: metrics.width,
-                      child: slots(context, date + i * metrics.dateStep),
+                      child: TabledListed(
+                        date: date + i * metrics.dateStep,
+                        metrics: metrics,
+                        filter: (e) => e.isMultiDay,
+                        header: false,
+                      ),
                     ),
                 ],
               );

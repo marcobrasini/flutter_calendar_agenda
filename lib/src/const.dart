@@ -4,6 +4,8 @@ import 'data/fixture.dart';
 import 'data/event.dart';
 import 'enums.dart';
 
+typedef DateFilter = bool Function(DateTime);
+typedef MultiFilter<T extends Fixture> = bool Function(T);
 //
 typedef EditEvent<T extends Event> = bool Function(T);
 //
@@ -83,7 +85,7 @@ const eventSlotLineWidth = 2.5;
 const eventSlotTabledExtent = 24.0;
 const eventSlotAgendaExtent = 60.0;
 const eventDraggableSlotAlpha = 127;
-const eventSlotMargin = 2.0;
-const eventSlotPadding = 4.0;
+const eventSlotMargin = 1.0;
+const eventSlotPadding = 2.0;
 const eventSlotRounded = 8.0;
 const eventSlotDuration = Duration(milliseconds: 200);

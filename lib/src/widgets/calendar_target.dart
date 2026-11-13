@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_calendar_agenda/src/context.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../data/fixture.dart';
@@ -28,9 +29,37 @@ class DropRegistry {
   void dispose() => hovered.dispose();
 }
 
-class DropWidget extends SingleChildRenderObjectWidget {
+class DropWidget extends StatelessWidget {
   const DropWidget({
     super.key,
+    required this.child,
+    required this.registry,
+    required this.delegate,
+  });
+
+  final Widget child;
+  final DropRegistry registry;
+  final DropDelegate delegate;
+
+  @override
+  Widget build(BuildContext context) {
+    DateTime resolve(Offset local) {
+      final box = context.findRenderObject() as RenderBox;
+      return delegate.at(local, box.size);
+    }
+    final callbacks = context.config.callbacks;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapUp: (d) => callbacks.onFrameTap?.call(resolve(d.localPosition)),
+      onDoubleTapDown: (d) => callbacks.onFrameDoubleTap?.call(resolve(d.localPosition)),
+      onLongPressStart: (d) => callbacks.onFrameLongPress?.call(resolve(d.localPosition)),
+      child: _DropZone(registry: registry, delegate: delegate, child: child),
+    );
+  }
+}
+
+class _DropZone extends SingleChildRenderObjectWidget {
+  const _DropZone({
     required super.child,
     required this.registry,
     required this.delegate,
@@ -129,10 +158,17 @@ class TileDropDelegate extends DropDelegate {
 
   @override
   Fixture resolve(Rect local, Size size, Fixture fixture) {
-    final days = date % fixture.start.date;
+    final shift = (dateScheme == null && size.width > 0)
+        ? (local.left / size.width).round()
+        : 0;
+    final days = (date + shift) % fixture.start.date;
     if (forceAllDay) {
+      final stopDay = fixture.stop.isAfter(fixture.start) &&
+          fixture.stop.isAtSameMomentAs(fixture.stop.date)
+          ? fixture.stop.date - 1
+          : fixture.stop.date;
       final start = fixture.start.date.start;
-      final stop = fixture.stop.date.end;
+      final stop = stopDay.end;
       return Fixture(
         start: start.add(Duration(days: days)),
         stop: stop.add(Duration(days: days)),

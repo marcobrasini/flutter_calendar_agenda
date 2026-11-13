@@ -12,6 +12,7 @@ import '../source.dart';
 import '../config.dart';
 import '../const.dart';
 import '../enums.dart';
+import 'calendar_target.dart';
 
 class TabledPaged extends StatelessWidget {
   const TabledPaged({
@@ -54,27 +55,32 @@ class TabledPaged extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final modifier = context.read<CalendarModifier>();
     final config = CalendarConfig.of(context).event;
     final source = context.read<CalendarEvents>();
-    final events = source.forDate(date).where((e) => !e.isAllDay).toList();
-    return SizedBox(
-      width: width,
-      height: height,
-      child: Stack(
-        children: [
-          for (final layout in layouts(events, config.eventPadding))
-            Positioned(
-              key: ValueKey(layout.event.hashCode),
-              left: 0.0,
-              right: 0.0,
-              top: layout.top,
-              height: layout.height,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [PagedSlotEvent(layout: layout)],
+    final events = source.forDate(date).where((e) => !e.isMultiDay).toList();
+    return DropWidget(
+      registry: modifier.registry,
+      delegate: SlotDropDelegate(date, timeScheme),
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: Stack(
+          children: [
+            for (final layout in layouts(events, config.eventPadding))
+              Positioned(
+                key: ValueKey(layout.event.hashCode),
+                left: 0.0,
+                right: 0.0,
+                top: layout.top,
+                height: layout.height,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [PagedSlotEvent(layout: layout)],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -357,22 +357,32 @@ class CalendarModifier extends ChangeNotifier {
     }
   }
 
+  int? _routed;
+
   void _attachPointerRoutes() {
     if (_editing && _action == SlotAction.dragging) return;
     _editing = true;
-    if (_pointer != null) {
-      GestureBinding.instance.pointerRouter.addRoute(_pointer!, _pointerRoutes);
-    }
+    _attachRoute();
   }
 
   void _removePointerRoutes() {
     _editing = false;
-    if (_pointer != null) {
-      GestureBinding.instance.pointerRouter.removeRoute(
-        _pointer!,
-        _pointerRoutes,
-      );
-    }
+    _detachRoute();
+  }
+
+  void _attachRoute() {
+    final pointer = _pointer;
+    if (pointer == null || pointer == _routed) return;
+    _detachRoute();
+    GestureBinding.instance.pointerRouter.addRoute(pointer, _pointerRoutes);
+    _routed = pointer;
+  }
+
+  void _detachRoute() {
+    final pointer = _routed;
+    if (pointer == null) return;
+    GestureBinding.instance.pointerRouter.removeRoute(pointer, _pointerRoutes);
+    _routed = null;
   }
 
   // ── dispose ───────────────────────────────────────────────────────────────

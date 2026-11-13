@@ -1,52 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_calendar_agenda/src/viewer.dart';
-import 'package:flutter_calendar_agenda/src/widgets/tools/slot_date.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
 import '../modifier.dart';
-import '../context.dart';
 import '../source.dart';
-import 'calendar_target.dart';
-import 'tabled_listed.dart';
-import 'tabled_paged.dart';
+import '../const.dart';
 import 'tabled_frame.dart';
-
-typedef ActiveDate = bool Function(Date);
+import 'tabled_paged.dart';
+import 'tabled_listed.dart';
+import 'tabled_metrics.dart';
 
 class TabledSlot extends StatelessWidget {
   const TabledSlot({
     super.key,
     required this.date,
-    required this.width,
-    required this.height,
-    required this.timeScheme,
-    required this.dateScheme,
+    required this.metrics,
     this.offset = Offset.zero,
     this.active,
   });
 
   final Date date;
-  final double width;
-  final double height;
-  final DateScheme dateScheme;
-  final TimeScheme? timeScheme;
+  final TabledMetrics metrics;
+  final DateFilter? active;
   final Offset offset;
-  final ActiveDate? active;
-  double get frameWidth => width - offset.dx;
-  double get frameHeight => height - offset.dy;
+  TimeScheme? get timeScheme => metrics.timeScheme;
+  DateScheme? get dateScheme => metrics.dateScheme;
+  double get width => metrics.frameWidth - offset.dx;
+  double get height => metrics.frameHeight - offset.dy;
   Size get size => Size(width, height);
 
   @override
   Widget build(BuildContext context) {
     context.watch<CalendarEvents>();
-    final callbacks = context.config.callbacks;
     final modifier = context.read<CalendarModifier>();
-    final delegate = (timeScheme != null)
-        ? SlotDropDelegate(date, timeScheme!, dateScheme)
-        : TileDropDelegate(date, dateScheme: dateScheme);
-    final view = context.read<CalendarViewer>().view;
-    final space = frameWidth / dateScheme.count;
+    final space = width / metrics.dateCount;
     return Stack(
       children: [
         TabledFrame(
@@ -56,55 +43,32 @@ class TabledSlot extends StatelessWidget {
           offset: offset,
           timeScheme: timeScheme,
           dateScheme: dateScheme,
-          onTap: (local, [_]) =>
-              callbacks.onFrameTap?.call(delegate.at(local, size)),
-          onDoubleTap: (local, [_]) =>
-              callbacks.onFrameDoubleTap?.call(delegate.at(local, size)),
-          onLongPress: (local, [_]) =>
-              callbacks.onFrameLongPress?.call(delegate.at(local, size)),
         ),
-        for (int i = dateScheme.beg; i < dateScheme.end; i++)
+        if (timeScheme != null)
+          for (int i = metrics.dateBeg; i < metrics.dateEnd; i++)
+            Positioned(
+              top: offset.dy,
+              left: offset.dx + (i - metrics.dateBeg) * space,
+              width: space,
+              height: height,
+              child: TabledPaged(
+                key: ValueKey(date + i),
+                date: date + i,
+                width: space,
+                height: height,
+                timeScheme: timeScheme!,
+              ),
+            )
+        else
           Positioned(
             top: offset.dy,
-            left: offset.dx + (i - dateScheme.beg) * space,
-            width: space,
-            height: frameHeight,
-            child: (timeScheme != null)
-                ? DropWidget(
-                    registry: modifier.registry,
-                    delegate: SlotDropDelegate(date + i, timeScheme!),
-                    child: TabledPaged(
-                      key: ValueKey(date + i),
-                      date: date + i,
-                      width: space,
-                      height: frameHeight,
-                      timeScheme: timeScheme!,
-                    ),
-                  )
-                : DropWidget(
-                    registry: modifier.registry,
-                    delegate: TileDropDelegate(date + i),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        DateSlot(
-                          date: date + i,
-                          config: context.config.dateConfig(view),
-                          active: active?.call(date + i) ?? true,
-                        ),
-                        Expanded(
-                          child: ClipRect(
-                            child: TabledListed(
-                              key: ValueKey(date + i),
-                              date: date + i,
-                              width: space,
-                              height: null, // prende l'altezza dall'Expanded
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            left: offset.dx,
+            width: width,
+            height: height,
+            child: TabledListed(
+              date: date,
+              metrics: metrics,
+            ),
           ),
       ],
     );

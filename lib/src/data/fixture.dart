@@ -16,30 +16,26 @@ class Fixture extends Equatable {
       Fixture(start: data['start'] ?? start, stop: data['stop'] ?? stop);
 
   @useResult
-  Fixture copy() => Fixture(start: start, stop: stop);
+  Fixture copyWith({DateTime? start, DateTime? stop}) =>
+      Fixture(start: start ?? this.start, stop: stop ?? this.stop);
 
   Duration get duration => stop.difference(start);
   bool get isAllDay => start == start.date && stop == stop.date;
-  bool get isSpanned => duration.inDays >= 1 && stop != start.date + 1;
+  bool get isMoreDay => last != first;
+  bool get isMultiDay => isAllDay || isMoreDay;
 
-  // List<Date> get dates => [
-  //   for (var date = start.date; date < stop.date + ((isAllDay) ? 1 : 0); date += 1)
-  //     date,
-  // ];
+  Date get first => start.date;
+  Date get last => stop.isAfter(start) && stop == stop.date
+      ? stop.date - 1
+      : stop.date;
 
-  List<Date> get dates {
-    if (!stop.isAfter(start)) return [start.date];
-    final last = stop.date + ((stop == stop.date) ? 0 : 1);
-    return [for (var date = start.date; date < last; date += 1) date];
-  }
+  List<Date> get dates => [
+    for (var d = first; d <= last; d += 1) d,
+  ];
 
   bool spans(DateTime? from, DateTime? to) =>
       (to == null || start.isBefore(to)) &&
       (from == null || stop.isAfter(from));
-
-  bool eclipse(DateTime? from, DateTime? to) =>
-      (from == null || start.isBefore(from)) ||
-      (to == null || stop.isAfter(to));
 
   @override
   bool get stringify => true;

@@ -52,10 +52,17 @@ class TabledMetrics extends ChangeNotifier {
 
   double get width => _width;
   double get height => _height;
+  double get frameWidth => width;
+  double get frameHeight => height / (weekScheme?.count ?? 1);
+  double get slotWidth => frameWidth / (dateScheme?.count ?? 1);
+  double get slotHeight => frameHeight;
 
   int get dateBeg => dateScheme?.beg ?? 0;
   int get timeBeg => timeScheme?.beg ?? 0;
   int get weekBeg => weekScheme?.beg ?? 0;
+  int get dateEnd => dateScheme?.end ?? 0;
+  int get timeEnd => timeScheme?.end ?? 0;
+  int get weekEnd => weekScheme?.end ?? 0;
   int get dateCount => dateScheme?.count ?? 0;
   int get timeCount => timeScheme?.count ?? 0;
   int get weekCount => weekScheme?.count ?? 0;

@@ -22,6 +22,7 @@ import 'tabled_allday.dart';
 import 'tabled_slider.dart';
 import 'tabled_scaler.dart';
 import 'tabled_slot.dart';
+import 'tabled_span.dart';
 
 class CalendarTabled extends StatefulWidget {
   const CalendarTabled({
@@ -137,12 +138,12 @@ class _CalendarTabledState extends State<CalendarTabled>
 
   int _rows(CalendarEvents source, TabledMetrics metrics, Date? page) {
     final start = (page ?? Week.weekDays.mon) + metrics.dateBeg;
-    int rows = 0;
-    for (int i = 0; i < metrics.dateCount; i++) {
-      final n = source.forDate(start + i).where((e) => e.isAllDay).length;
-      if (n > rows) rows = n;
-    }
-    return rows;
+    return spanLanes(
+      source,
+      start,
+      metrics.dateCount,
+      filter: (e) => e.isMultiDay,
+    );
   }
 
   double _allDayExtent(
@@ -218,14 +219,9 @@ class _CalendarTabledState extends State<CalendarTabled>
                   builder: (key, datetime) => TabledSlot(
                     key: key,
                     date: datetime.date,
-                    width: pageWidth,
-                    height: (widget.weekScheme != null)
-                        ? metrics.weekSpace
-                        : pageHeight,
-                    timeScheme: widget.timeScheme,
-                    dateScheme: widget.dateScheme,
+                    metrics: metrics,
                     active: _view == CalendarView.monthly
-                        ? (Date date) => date.month == _viewer.datetime.month
+                        ? (DateTime date) => date.month == _viewer.datetime.month
                         : null,
                   ),
                 ),
