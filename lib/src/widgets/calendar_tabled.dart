@@ -224,6 +224,9 @@ class _CalendarTabledState extends State<CalendarTabled>
                         : pageHeight,
                     timeScheme: widget.timeScheme,
                     dateScheme: widget.dateScheme,
+                    active: _view == CalendarView.monthly
+                        ? (Date date) => date.month == _viewer.datetime.month
+                        : null,
                   ),
                 ),
                 if (context.config.showIndicator)

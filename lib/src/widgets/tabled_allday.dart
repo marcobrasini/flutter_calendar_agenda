@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_calendar_agenda/src/source.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../scroller.dart';
@@ -43,7 +44,7 @@ class TabledAllDay extends StatelessWidget {
                   date: date,
                   width: metrics.width / metrics.dateCount,
                   height: null,
-                  filter: (e) => e.isAllDay,
+                  filter: (e) => e.isAllDay || e.eclipse(date, date.end),
                 ),
               ),
             ),

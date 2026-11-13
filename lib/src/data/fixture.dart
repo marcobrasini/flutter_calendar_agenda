@@ -37,6 +37,10 @@ class Fixture extends Equatable {
       (to == null || start.isBefore(to)) &&
       (from == null || stop.isAfter(from));
 
+  bool eclipse(DateTime? from, DateTime? to) =>
+      (from == null || start.isBefore(from)) ||
+      (to == null || stop.isAfter(to));
+
   @override
   bool get stringify => true;
 

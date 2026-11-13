@@ -12,6 +12,8 @@ import 'tabled_listed.dart';
 import 'tabled_paged.dart';
 import 'tabled_frame.dart';
 
+typedef ActiveDate = bool Function(Date);
+
 class TabledSlot extends StatelessWidget {
   const TabledSlot({
     super.key,
@@ -21,6 +23,7 @@ class TabledSlot extends StatelessWidget {
     required this.timeScheme,
     required this.dateScheme,
     this.offset = Offset.zero,
+    this.active,
   });
 
   final Date date;
@@ -29,6 +32,7 @@ class TabledSlot extends StatelessWidget {
   final DateScheme dateScheme;
   final TimeScheme? timeScheme;
   final Offset offset;
+  final ActiveDate? active;
   double get frameWidth => width - offset.dx;
   double get frameHeight => height - offset.dy;
   Size get size => Size(width, height);
@@ -86,6 +90,7 @@ class TabledSlot extends StatelessWidget {
                         DateSlot(
                           date: date + i,
                           config: context.config.dateConfig(view),
+                          active: active?.call(date + i) ?? true,
                         ),
                         Expanded(
                           child: ClipRect(

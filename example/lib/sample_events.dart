@@ -9,6 +9,12 @@ List<Event> sampleEvents() {
   final now = sampleNow;
   return [
     Event(
+        id: 'multidays',
+        start: now.add(const Duration(days: -1)),
+        stop: now.add(const Duration(hours: 36)),
+        color: Colors.blue,
+        subject: 'Multi'),
+    Event(
         id: 'now',
         start: now,
         stop: now.add(const Duration(hours: 1)),

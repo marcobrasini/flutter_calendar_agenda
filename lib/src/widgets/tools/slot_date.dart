@@ -12,6 +12,7 @@ class DateSlot extends StatelessWidget {
     required this.date,
     required this.config,
     this.dateWidget,
+    this.active,
   });
 
   final Date date;
@@ -19,6 +20,7 @@ class DateSlot extends StatelessWidget {
   final double? height;
   final TextConfig config;
   final Widget? dateWidget;
+  final bool? active;
 
   double get size => min(width ?? double.infinity, height ?? double.infinity);
 
@@ -42,7 +44,9 @@ class DateSlot extends StatelessWidget {
               child: Text(
                 date.format(config.textFormat),
                 textAlign: TextAlign.center,
-                style: config.textStyle,
+                style: (config.textStyle ?? const TextStyle()).copyWith(
+                  color: (active ?? true) ? null : context.colors.outline,
+                ),
               ),
             ),
             ?dateWidget,
