@@ -52,7 +52,6 @@ class Event extends Fixture {
   Event set(Map<String, dynamic> data) =>
       Event.make(id: id, data: {...get(), ...data});
 
-  @override
   @useResult
   Event copy() => Event.make(id: id, data: get());
 

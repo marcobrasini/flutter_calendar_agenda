@@ -25,13 +25,10 @@ class Fixture extends Equatable {
   bool get isMultiDay => isAllDay || isMoreDay;
 
   Date get first => start.date;
-  Date get last => stop.isAfter(start) && stop == stop.date
-      ? stop.date - 1
-      : stop.date;
+  Date get last =>
+      stop.isAfter(start) && stop == stop.date ? stop.date - 1 : stop.date;
 
-  List<Date> get dates => [
-    for (var d = first; d <= last; d += 1) d,
-  ];
+  List<Date> get dates => [for (var d = first; d <= last; d += 1) d];
 
   bool spans(DateTime? from, DateTime? to) =>
       (to == null || start.isBefore(to)) &&

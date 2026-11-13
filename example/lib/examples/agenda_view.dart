@@ -103,7 +103,7 @@ class _AgendaViewExampleState extends State<AgendaViewExample> {
               Text(stop.format('dd MMMM yyyy')),
             ],
           ),
-          eventConfig: EventConfig(extent: 60),
+          eventConfig: EventConfig(extent: 48),
           eventBuilder: (context, event) => Center(
             child: Text(event.subject, style: const TextStyle(fontSize: 16)),
           ),

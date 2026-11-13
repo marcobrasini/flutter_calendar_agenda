@@ -55,18 +55,19 @@ class TabledListed extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (header) Row(
-              children: [
-                for (int i = metrics.dateBeg; i < metrics.dateEnd; i++)
-                  Expanded(
-                    child: DateSlot(
-                      date: date + i,
-                      config: context.config.dateConfig(metrics.view),
-                      active: active?.call(date + i) ?? true,
+            if (header)
+              Row(
+                children: [
+                  for (int i = metrics.dateBeg; i < metrics.dateEnd; i++)
+                    Expanded(
+                      child: DateSlot(
+                        date: date + i,
+                        config: context.config.dateConfig(metrics.view),
+                        active: active?.call(date + i) ?? true,
+                      ),
                     ),
-                  ),
-              ],
-            ),
+                ],
+              ),
             Expanded(
               child: TabledSpan(
                 date: date + metrics.dateBeg,

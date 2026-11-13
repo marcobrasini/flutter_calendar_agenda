@@ -16,9 +16,8 @@ List<SlotSpan> layoutSpans(
   CalendarEvents source,
   Date date,
   int count, {
-      MultiFilter? filter,
-  })
-{
+  MultiFilter? filter,
+}) {
   final spans = <Object, SlotSpan>{};
   for (int i = 0; i < count; i++) {
     for (final e in source.forDate(date + i)) {
@@ -53,11 +52,11 @@ List<SlotSpan> layoutSpans(
 }
 
 int spanLanes(
-    CalendarEvents source,
-    Date first,
-    int count, {
-      MultiFilter? filter,
-    }) {
+  CalendarEvents source,
+  Date first,
+  int count, {
+  MultiFilter? filter,
+}) {
   int lanes = 0;
   for (final s in layoutSpans(source, first, count, filter: filter)) {
     if (s.lane >= lanes) lanes = s.lane + 1;
@@ -79,7 +78,7 @@ class TabledSpan extends StatelessWidget {
 
   int get count => metrics.dateCount;
   double get width => metrics.width;
-  double get space => width/count;
+  double get space => width / count;
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +86,7 @@ class TabledSpan extends StatelessWidget {
     final source = context.watch<CalendarEvents>();
     final spans = layoutSpans(source, date, count, filter: filter);
     if (spans.isEmpty) return const SizedBox.shrink();
-    final lanes = spans.fold<int>(
-      0, (m, s) => s.lane >= m ? s.lane + 1 : m,
-    );
+    final lanes = spans.fold<int>(0, (m, s) => s.lane >= m ? s.lane + 1 : m);
     return LayoutBuilder(
       builder: (context, constraints) {
         final fit = constraints.maxHeight.isFinite
@@ -133,9 +130,7 @@ class TabledSpan extends StatelessWidget {
                 width: space,
                 top: limit * tileHeight,
                 height: tileHeight,
-                child: Center(
-                  child: Text('+${hidden[i]}'),
-                ),
+                child: Center(child: Text('+${hidden[i]}')),
               ),
             );
           }

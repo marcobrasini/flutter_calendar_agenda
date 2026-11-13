@@ -35,38 +35,36 @@ class TabledFrame extends StatelessWidget {
       width: width,
       child: (visible)
           ? Stack(
-            children: [
-              if (timeScheme != null || height != null)
-                CustomPaint(
-                  size: Size.infinite,
-                  painter: LinesPainter(
-                    divisions: timeScheme?.count ?? 1,
-                    lineStyle: config.line.lineStyle,
-                    lineWidth: config.line.lineWidth,
-                    lineColor:
-                        config.line.lineColor ?? colors.outlineVariant,
-                    offset: offset + Offset(config.line.lineOffsetX, 0.0),
-                    dashedSpace: config.line.dashedSpace,
-                    dashedWidth: config.line.dashedWidth,
-                    direction: LineDirection.horizontal,
+              children: [
+                if (timeScheme != null || height != null)
+                  CustomPaint(
+                    size: Size.infinite,
+                    painter: LinesPainter(
+                      divisions: timeScheme?.count ?? 1,
+                      lineStyle: config.line.lineStyle,
+                      lineWidth: config.line.lineWidth,
+                      lineColor: config.line.lineColor ?? colors.outlineVariant,
+                      offset: offset + Offset(config.line.lineOffsetX, 0.0),
+                      dashedSpace: config.line.dashedSpace,
+                      dashedWidth: config.line.dashedWidth,
+                      direction: LineDirection.horizontal,
+                    ),
                   ),
-                ),
-              if (dateScheme != null || width != null)
-                CustomPaint(
-                  size: Size.infinite,
-                  painter: LinesPainter(
-                    divisions: dateScheme?.count ?? 1,
-                    lineStyle: config.line.lineStyle,
-                    lineWidth: config.line.lineWidth,
-                    lineColor:
-                        config.line.lineColor ?? colors.outlineVariant,
-                    offset: offset + Offset(0.0, config.line.lineOffsetY),
-                    dashedSpace: config.line.dashedSpace,
-                    dashedWidth: config.line.dashedWidth,
-                    direction: LineDirection.vertical,
+                if (dateScheme != null || width != null)
+                  CustomPaint(
+                    size: Size.infinite,
+                    painter: LinesPainter(
+                      divisions: dateScheme?.count ?? 1,
+                      lineStyle: config.line.lineStyle,
+                      lineWidth: config.line.lineWidth,
+                      lineColor: config.line.lineColor ?? colors.outlineVariant,
+                      offset: offset + Offset(0.0, config.line.lineOffsetY),
+                      dashedSpace: config.line.dashedSpace,
+                      dashedWidth: config.line.dashedWidth,
+                      direction: LineDirection.vertical,
+                    ),
                   ),
-                ),
-            ],
+              ],
             )
           : null,
     );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/datetime.dart';
 import '../utils/schemes.dart';
-import '../modifier.dart';
 import '../source.dart';
 import '../const.dart';
 import 'tabled_frame.dart';
@@ -32,7 +31,6 @@ class TabledSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.watch<CalendarEvents>();
-    final modifier = context.read<CalendarModifier>();
     final space = width / metrics.dateCount;
     return Stack(
       children: [
@@ -65,10 +63,7 @@ class TabledSlot extends StatelessWidget {
             left: offset.dx,
             width: width,
             height: height,
-            child: TabledListed(
-              date: date,
-              metrics: metrics,
-            ),
+            child: TabledListed(date: date, metrics: metrics),
           ),
       ],
     );

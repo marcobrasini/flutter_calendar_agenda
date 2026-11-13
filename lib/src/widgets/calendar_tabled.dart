@@ -221,7 +221,8 @@ class _CalendarTabledState extends State<CalendarTabled>
                     date: datetime.date,
                     metrics: metrics,
                     active: _view == CalendarView.monthly
-                        ? (DateTime date) => date.month == _viewer.datetime.month
+                        ? (DateTime date) =>
+                              date.month == _viewer.datetime.month
                         : null,
                   ),
                 ),
