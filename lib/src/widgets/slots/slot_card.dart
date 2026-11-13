@@ -41,45 +41,43 @@ class SlotCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final modifier = context.read<CalendarModifier>();
     final config = CalendarConfig.of(context).event;
-    final scheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: EdgeInsets.all(config.eventPadding),
-      child: Material(
-        elevation: 1.0,
-        borderRadius: BorderRadius.all(Radius.circular(config.eventRounded)),
-        clipBehavior: Clip.antiAlias,
-        color: scheme.surfaceContainerLow,
-        child: Dismissible(
-          key: ValueKey(event.hashCode),
-          direction: swipe,
-          background: right ? rightCard : leftCard,
-          secondaryBackground: left ? leftCard : rightCard,
-          dismissThresholds: const {
-            DismissDirection.startToEnd: 0.70,
-            DismissDirection.endToStart: 0.70,
-          },
-          movementDuration: config.eventDuration,
-          confirmDismiss: (direction) async {
-            switch (direction) {
-              case DismissDirection.startToEnd:
-                onEventSwipedRight?.call(event, fixture);
-                modifier.reset();
-              case DismissDirection.endToStart:
-                onEventSwipedLeft?.call(event, fixture);
-                modifier.reset();
-              default:
-                break;
-            }
-            return false;
-          },
-          child: Container(
-            width: width,
-            height: height,
-            color: scheme.surfaceContainerLow,
-            child: AnimatedContainer(
-              duration: config.eventDuration,
-              curve: Curves.easeOutCubic,
-              child: SlotEvent(event: event),
+    final radius = BorderRadius.circular(config.eventRounded);
+    return ClipRRect(
+      borderRadius: radius,
+      child: Padding(
+        padding: EdgeInsets.all(config.eventPadding),
+        child: Material(
+          elevation: eventCardElevation,
+          borderRadius: radius,
+          clipBehavior: Clip.antiAlias,
+          color: Colors.transparent,
+          child: Dismissible(
+            key: ValueKey(event.hashCode),
+            direction: swipe,
+            background: right ? rightCard : leftCard,
+            secondaryBackground: left ? leftCard : rightCard,
+            dismissThresholds: const {
+              DismissDirection.startToEnd: eventCardSwipeLimit,
+              DismissDirection.endToStart: eventCardSwipeLimit,
+            },
+            movementDuration: config.eventDuration,
+            confirmDismiss: (direction) async {
+              switch (direction) {
+                case DismissDirection.startToEnd:
+                  onEventSwipedRight?.call(event, fixture);
+                  modifier.reset();
+                case DismissDirection.endToStart:
+                  onEventSwipedLeft?.call(event, fixture);
+                  modifier.reset();
+                default:
+                  break;
+              }
+              return false;
+            },
+            child: SizedBox(
+              width: width,
+              height: height,
+              child: SlotEvent(event: event, margin: 0.0, rounded: 0.0),
             ),
           ),
         ),

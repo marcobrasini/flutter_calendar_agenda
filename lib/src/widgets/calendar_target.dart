@@ -47,12 +47,15 @@ class DropWidget extends StatelessWidget {
       final box = context.findRenderObject() as RenderBox;
       return delegate.at(local, box.size);
     }
+
     final callbacks = context.config.callbacks;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapUp: (d) => callbacks.onFrameTap?.call(resolve(d.localPosition)),
-      onDoubleTapDown: (d) => callbacks.onFrameDoubleTap?.call(resolve(d.localPosition)),
-      onLongPressStart: (d) => callbacks.onFrameLongPress?.call(resolve(d.localPosition)),
+      onDoubleTapDown: (d) =>
+          callbacks.onFrameDoubleTap?.call(resolve(d.localPosition)),
+      onLongPressStart: (d) =>
+          callbacks.onFrameLongPress?.call(resolve(d.localPosition)),
       child: _DropZone(registry: registry, delegate: delegate, child: child),
     );
   }
@@ -163,8 +166,9 @@ class TileDropDelegate extends DropDelegate {
         : 0;
     final days = (date + shift) % fixture.start.date;
     if (forceAllDay) {
-      final stopDay = fixture.stop.isAfter(fixture.start) &&
-          fixture.stop.isAtSameMomentAs(fixture.stop.date)
+      final stopDay =
+          fixture.stop.isAfter(fixture.start) &&
+              fixture.stop.isAtSameMomentAs(fixture.stop.date)
           ? fixture.stop.date - 1
           : fixture.stop.date;
       final start = fixture.start.date.start;

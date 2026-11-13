@@ -16,6 +16,8 @@ class SlotEvent extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.margin,
+    this.rounded,
   });
 
   final Event event;
@@ -25,6 +27,8 @@ class SlotEvent extends StatelessWidget {
   final SlotCallback? onTap;
   final SlotCallback? onDoubleTap;
   final SlotCallback? onLongPress;
+  final double? margin;
+  final double? rounded;
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +53,11 @@ class SlotEvent extends StatelessWidget {
         );
       },
       child: Container(
-        margin: EdgeInsetsGeometry.all(eventConfig.eventMargin),
+        margin: EdgeInsetsGeometry.all(margin ?? eventConfig.eventMargin),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(eventConfig.eventRounded),
+          borderRadius: BorderRadius.circular(
+            rounded ?? eventConfig.eventRounded,
+          ),
           border: (selected)
               ? Border.all(
                   color: event.color.dimmer(dimmer),
